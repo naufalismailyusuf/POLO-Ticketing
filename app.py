@@ -12,6 +12,7 @@ import re
 import secrets
 import shutil
 import sqlite3
+import stat
 import time
 import threading
 import tempfile
@@ -4901,7 +4902,7 @@ def _serve_file_download(file_id):
             if isinstance(primary_error, FileNotFoundError) and isinstance(secondary_error, FileNotFoundError):
                 abort(404)
             abort(503)
-    if not os.path.isfile(path):
+    if not stat.S_ISREG(file_stat.st_mode):
         abort(404)
 
     # The ETag does not depend on which of the QNAP NIC addresses is used.
@@ -5498,10 +5499,27 @@ _QNAP_CAPACITY_LOCK = threading.Lock()
 @app.get("/api/files/capacity")
 def api_file_capacity():
     now = time.monotonic()
-    with _QNAP_CAPACITY_LOCK:
+    cached = _QNAP_CAPACITY_CACHE["result"]
+    refresh = request.args.get("refresh") == "1"
+    if cached is not None and not refresh and now < _QNAP_CAPACITY_CACHE["expires"]:
+        return jsonify(cached)
+
+    # A slow SMB disk_usage() must not queue every new capacity request on
+    # this mutex (and unnecessarily consume more Waitress worker threads).
+    if not _QNAP_CAPACITY_LOCK.acquire(blocking=False):
+        if cached is not None and cached.get("ok"):
+            return jsonify({**cached, "stale": True})
+        response = jsonify(ok=False, error="QNAP capacity check in progress.", scope="smb_share")
+        response.status_code = 503
+        response.headers["Retry-After"] = "3"
+        return response
+
+    started = time.perf_counter()
+    try:
+        # Re-check cache after acquiring the lock, in case another request
+        # finished just before this caller acquired it.
         cached = _QNAP_CAPACITY_CACHE["result"]
-        refresh = request.args.get("refresh") == "1"
-        if cached is not None and not refresh and now < _QNAP_CAPACITY_CACHE["expires"]:
+        if cached is not None and not refresh and time.monotonic() < _QNAP_CAPACITY_CACHE["expires"]:
             return jsonify(cached)
         try:
             status = qnap_storage_status()
@@ -5524,7 +5542,12 @@ def api_file_capacity():
                       "scope": "smb_share"}
             ttl = 20
         _QNAP_CAPACITY_CACHE.update(expires=time.monotonic() + ttl, result=result)
-    return jsonify(result)
+        return jsonify(result)
+    finally:
+        duration_ms = (time.perf_counter()-started)*1000
+        if duration_ms >= 750:
+            app.logger.warning("QNAP capacity query slow duration_ms=%.1f", duration_ms)
+        _QNAP_CAPACITY_LOCK.release()
 
 
 @app.get("/api/files/storage-status")
