@@ -4850,6 +4850,9 @@ def _qnap_read_fallback_path(primary_path):
     secondary = QNAP_READ_SECONDARY_SHARE
     if not secondary or ntpath.normcase(ntpath.normpath(secondary)) == ntpath.normcase(ntpath.normpath(QNAP_SHARE)):
         return None
+    # Reject traversal *before* normpath collapses dot-dot components.
+    if ".." in ntpath.normcase(primary_path).split("\\"):
+        return None
     root = ntpath.normpath(QNAP_SHARE).rstrip("\\/")
     full = ntpath.normpath(primary_path)
     prefix = ntpath.normcase(root) + "\\"
