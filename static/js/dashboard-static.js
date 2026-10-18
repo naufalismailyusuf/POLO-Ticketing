@@ -162,13 +162,15 @@
         <span class="queue-main">
           <span class="queue-summary">
             <span class="queue-identity"><span class="ticket-no">${esc(r.no_tiket)}</span>${r.category ? `<span class="queue-category">${esc(r.category)}</span>` : ''}${priorityHint}</span>
-            <span class="queue-status ${statusKey}">${esc(status)}</span>
           </span>
           <span class="queue-title" title="${esc(issue)}">${esc(issue)}</span>
           <span class="queue-context">
             <span class="queue-people"><span class="queue-person"><span class="queue-detail-label">Reporter</span><span class="queue-detail-value" title="${esc(reporter)}">${esc(reporter)}</span></span><span class="queue-person"><span class="queue-detail-label">Support</span><span class="queue-detail-value" title="${esc(support)}">${esc(support)}</span></span></span>
-            <span class="queue-sla queue-sla-${slaKey}" title="SLA: ${esc(slaText)}"><span class="queue-sla-label">SLA</span><span class="queue-sla-value">${esc(slaText)}</span></span>
           </span>
+        </span>
+        <span class="queue-side">
+            <span class="queue-status ${statusKey}">${esc(status)}</span>
+            <span class="queue-sla queue-sla-${slaKey}" title="SLA: ${esc(slaText)}"><span class="queue-sla-label">SLA</span><span class="queue-sla-value">${esc(slaText)}</span></span>
         </span>
       </a>${claim}</div>`;
   }
