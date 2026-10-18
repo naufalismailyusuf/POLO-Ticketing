@@ -116,240 +116,166 @@
   :is(.queue-card, .modal-content) .queue-item{transition:none!important}
 }
 
-/* R73 — Balanced compact queue. Desktop cards share the same grid-row height.
-   A small queue distributes available height; long queues scroll internally. */
-@media (min-width:901px) {
-  .dashboard-layout > .queue-card {
-    align-self:stretch!important;
-    height:100%!important;
-    max-height:none!important;
-    min-height:0!important;
-  }
-  .dashboard-layout > .create-card {align-self:stretch!important;}
-  .dashboard-layout > .queue-card .queue-list {
-    flex:1 1 0!important;
-    height:0!important;
-    min-height:0!important;
-    max-height:none!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-    justify-content:flex-start;
-  }
-  .dashboard-layout > .queue-card .queue-list .queue-row-wrap {
-    flex:0 0 auto!important;
-    min-height:106px!important;
-    align-content:center!important;
-    padding:16px 0!important;
-  }
-  .dashboard-layout > .queue-card .queue-list .empty {flex:1;}
-}
-.queue-card .queue-scroll-hint[hidden] {display:none!important;}
-.queue-card .queue-title {font-size:14.5px!important;line-height:1.45!important;}
-.queue-card .ticket-no,
-.queue-card .queue-category,
-.queue-card .queue-priority,
-.queue-card .queue-status,
-.queue-card .queue-person,
-.queue-card .queue-sla {font-size:11.5px!important;}
-.queue-card .queue-context {margin-top:7px;}
-@media (max-width:900px) {
-  .dashboard-layout > .queue-card {
-    align-self:start!important;
-    height:auto!important;
-    max-height:520px!important;
-  }
-  .dashboard-layout > .queue-card .queue-list {
-    flex:0 1 auto!important;
-    height:auto!important;
-    max-height:none!important;
-    overflow-y:auto!important;
-  }
-}
-
-/* R74 — Consistent three-line ticket information hierarchy. */
-.queue-card .queue-row-wrap {align-content:center!important;row-gap:0!important;}
-.queue-card .queue-main {min-width:0;}
-.queue-card .queue-summary {align-items:center;min-height:18px;}
-.queue-card .queue-title {margin:9px 0 0!important;line-height:1.45!important;}
-.queue-card .queue-context {margin-top:10px!important;align-items:baseline;gap:8px 18px;}
-.queue-card .queue-people {gap:6px 18px;}
-.queue-card .queue-person {max-width:48%;}
-.queue-card .queue-sla {margin-left:auto;}
-@media(max-width:1100px) {
-  .queue-card .queue-context {flex-wrap:wrap;}
-  .queue-card .queue-people {flex:1 1 auto;width:auto;}
-}
-@media(max-width:700px) {
-  .queue-card .queue-title {margin-top:7px!important;}
-  .queue-card .queue-context {margin-top:7px!important;gap:5px 10px;}
-  .queue-card .queue-people {width:100%;flex:1 1 100%;}
-  .queue-card .queue-sla {margin-left:auto;}
-}
-
-/* R75 — clear and consistent dashboard queue typography, without changing global 75% zoom. */
-.queue-card .queue-title{font-size:16px!important;font-weight:600!important;line-height:1.48!important;letter-spacing:0!important;}
-.queue-card .ticket-no,.queue-card .queue-category,.queue-card .queue-priority,
-.queue-card .queue-status,.queue-card .queue-person,.queue-card .queue-sla{
-  font-size:12.5px!important;line-height:1.5!important;letter-spacing:0!important;
-}
-.queue-card .queue-detail-label,.queue-card .queue-sla-label{color:var(--muted);}
-.queue-card .queue-detail-value{font-weight:600!important;}
-.queue-card .queue-summary{gap:12px;}
-.queue-card .queue-context{margin-top:8px!important;}
-.queue-card .queue-list .queue-row-wrap{min-height:110px!important;}
-@media(max-width:700px){
-  .queue-card .queue-title{font-size:14px!important;}
-  .queue-card .ticket-no,.queue-card .queue-category,.queue-card .queue-priority,
-  .queue-card .queue-status,.queue-card .queue-person,.queue-card .queue-sla{font-size:11px!important;}
-  .queue-card .queue-list .queue-row-wrap{min-height:0!important;}
-}
-
-/* R76 — Project-inspired compact elevated cards in Open Ticket Queue only.
-   Keep each ticket's checkbox, link, status, SLA and claim actions intact. */
-.queue-card .queue-list {
+/* R79 — Queue component rewrite. The selectors below intentionally win over
+   legacy dashboard.css queue rules without touching other page layouts. */
+.queue-card #open-queue-list {
+  display:flex!important;
+  flex-direction:column!important;
   gap:12px!important;
-  padding:7px 18px 18px!important;
+  padding:8px 18px 20px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
   scrollbar-width:none!important;
+  min-height:0!important;
+  overscroll-behavior-y:contain;
 }
-.queue-card .queue-list .queue-row-wrap {
+.queue-card #open-queue-list::-webkit-scrollbar{display:none!important;}
+.queue-card #open-queue-list>.queue-row-wrap {
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  align-items:center!important;
+  align-content:normal!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:118px!important;
+  padding:18px 24px!important;
+  margin:0!important;
+  gap:0!important;
   border:1px solid var(--border)!important;
   border-radius:13px!important;
   background:var(--surface)!important;
   box-shadow:0 2px 5px rgba(20,33,49,.04),0 8px 20px rgba(20,33,49,.065)!important;
-  padding:15px 16px!important;
-  min-height:116px!important;
-  flex:0 0 auto!important;
-  align-content:center!important;
-  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease!important;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important;
 }
-@media (hover:hover) and (pointer:fine) {
-  .queue-card .queue-list .queue-row-wrap:hover {
-    transform:translateY(-2px);
+.queue-card #open-queue-list>.queue-row-wrap:has(>.queue-check){
+  grid-template-columns:20px minmax(0,1fr)!important;
+  column-gap:16px!important;
+}
+.queue-card #open-queue-list>.queue-row-wrap>.queue-check {
+  position:static!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  justify-self:center!important;
+  align-self:center!important;
+  width:20px!important;
+  height:20px!important;
+  padding:0!important;
+  margin:0!important;
+}
+.queue-card #open-queue-list>.queue-row-wrap>.queue-check input {
+  margin:0!important;
+  width:17px!important;
+  height:17px!important;
+  min-width:17px!important;
+  flex:0 0 17px!important;
+}
+.queue-card #open-queue-list>.queue-row-wrap>.queue-item {
+  display:grid!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  grid-template-columns:minmax(0,1fr) 155px!important;
+  align-items:stretch!important;
+  column-gap:24px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0 16px 0 0!important;
+  box-sizing:border-box!important;
+  text-decoration:none;
+}
+.queue-card #open-queue-list>.queue-row-wrap:has(>.queue-check)>.queue-item{grid-column:2!important;}
+.queue-card #open-queue-list .queue-main{display:block!important;min-width:0!important;}
+.queue-card #open-queue-list .queue-summary{display:flex;align-items:center;min-width:0;gap:8px;}
+.queue-card #open-queue-list .queue-identity{display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden;white-space:nowrap;}
+.queue-card #open-queue-list .ticket-no{flex:none;color:var(--muted);font-size:12.5px!important;font-weight:600;}
+.queue-card #open-queue-list .queue-category,
+.queue-card #open-queue-list .queue-priority{font-size:12px!important;white-space:nowrap;}
+.queue-card #open-queue-list .queue-title{
+  display:block!important;
+  margin:8px 0 0!important;
+  font-size:16px!important;
+  font-weight:600!important;
+  line-height:1.45!important;
+  letter-spacing:0!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+.queue-card #open-queue-list .queue-context{display:block!important;margin:8px 0 0!important;min-width:0;}
+.queue-card #open-queue-list .queue-people{display:flex;gap:8px 18px;min-width:0;align-items:center;}
+.queue-card #open-queue-list .queue-person{display:inline-flex;align-items:baseline;gap:4px;min-width:0;max-width:49%;font-size:12px!important;line-height:1.45;}
+.queue-card #open-queue-list .queue-detail-label{color:var(--muted);font-weight:400;flex:none;}
+.queue-card #open-queue-list .queue-detail-value{color:var(--text);font-weight:600;overflow:hidden;min-width:0;white-space:nowrap;text-overflow:ellipsis;}
+.queue-card #open-queue-list .queue-side{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  align-items:flex-end!important;
+  gap:20px!important;
+  min-width:0;
+}
+.queue-card #open-queue-list .queue-status,
+.queue-card #open-queue-list .queue-sla{
+  flex:0 0 auto!important;
+  margin:0!important;
+  font-size:12px!important;
+  white-space:nowrap;
+}
+.queue-card #open-queue-list .queue-status{display:inline-flex;align-items:center;gap:5px;font-weight:600;line-height:1.35;}
+.queue-card #open-queue-list .queue-sla{display:inline-flex;align-items:baseline;gap:5px;line-height:1.35;}
+.queue-card #open-queue-list>.queue-row-wrap>.queue-claim{grid-column:2!important;grid-row:2!important;min-width:0;margin:8px 0 0;}
+.queue-card #open-queue-list>.queue-row-wrap:not(:has(>.queue-check))>.queue-claim{grid-column:1!important;}
+.queue-card #open-queue-list .empty{margin:auto;}
+@media(hover:hover) and (pointer:fine){
+  .queue-card #open-queue-list>.queue-row-wrap:hover{
+    transform:translateY(-2px)!important;
     border-color:var(--border-strong)!important;
     box-shadow:0 4px 10px rgba(20,33,49,.065),0 15px 30px rgba(20,33,49,.11)!important;
   }
 }
-.queue-card .queue-list .queue-row-wrap:focus-within {
+.queue-card #open-queue-list>.queue-row-wrap:focus-within{
   border-color:var(--border-strong)!important;
   box-shadow:0 0 0 2px var(--focus,rgba(75,85,99,.2)),0 8px 20px rgba(20,33,49,.08)!important;
 }
-.queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
-  grid-template-columns:17px minmax(0,1fr)!important;
-  column-gap:12px!important;
+@media(min-width:901px){
+  .dashboard-layout>.queue-card{height:100%!important;max-height:none!important;align-self:stretch!important;min-height:0!important;}
+  .dashboard-layout>.create-card{align-self:stretch!important;}
+  .dashboard-layout>.queue-card #open-queue-list{flex:1 1 0!important;height:0!important;max-height:none!important;}
 }
-.queue-card .queue-row-wrap .queue-summary{min-height:20px;}
-.queue-card .queue-row-wrap .queue-title{margin-top:8px!important;}
-.queue-card .queue-row-wrap .queue-context{margin-top:8px!important;}
-.queue-card .queue-list .empty{margin:auto;}
-@media (max-width:900px){
-  .queue-card .queue-list{gap:10px!important;padding:6px 14px 16px!important;}
-  .queue-card .queue-list .queue-row-wrap{min-height:0!important;padding:14px 13px!important;}
+@media(max-width:900px){
+  .dashboard-layout>.queue-card{height:auto!important;max-height:520px!important;align-self:start!important;}
+  .dashboard-layout>.queue-card #open-queue-list{height:auto!important;max-height:none!important;flex:0 1 auto!important;}
 }
-@media (max-width:420px){
-  .queue-card .queue-list{padding:4px 11px 14px!important;}
-  .queue-card .queue-list .queue-row-wrap{padding:12px 11px!important;}
+@media(max-width:1100px){
+  .queue-card #open-queue-list>.queue-row-wrap>.queue-item{grid-template-columns:minmax(0,1fr)!important;row-gap:12px!important;}
+  .queue-card #open-queue-list .queue-side{flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:12px!important;}
+  .queue-card #open-queue-list .queue-context{margin-top:6px!important;}
+}
+@media(max-width:700px){
+  .queue-card #open-queue-list{padding:6px 12px 16px!important;gap:10px!important;}
+  .queue-card #open-queue-list>.queue-row-wrap{padding:15px 16px!important;min-height:0!important;}
+  .queue-card #open-queue-list>.queue-row-wrap:has(>.queue-check){column-gap:11px!important;}
+  .queue-card #open-queue-list .queue-title{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;font-size:14px!important;}
+  .queue-card #open-queue-list .queue-people{flex-wrap:wrap;gap:5px 12px;}
+  .queue-card #open-queue-list .queue-person{max-width:100%;font-size:11px!important;}
+  .queue-card #open-queue-list .queue-status,.queue-card #open-queue-list .queue-sla{font-size:11px!important;}
+  .queue-card #open-queue-list .queue-side{flex-wrap:wrap!important;}
 }
 @media(prefers-reduced-motion:reduce){
-  .queue-card .queue-list .queue-row-wrap{transition:none!important;}
-  .queue-card .queue-list .queue-row-wrap:hover{transform:none!important;}
+  .queue-card #open-queue-list>.queue-row-wrap{transition:none!important;}
+  .queue-card #open-queue-list>.queue-row-wrap:hover{transform:none!important;}
 }
-
-/* R77 — Fix card interior gutters and checkbox/status/SLA alignment.
-   Grid content stays within each elevated ticket card, not at its border. */
-.queue-card .queue-list .queue-row-wrap {
-  box-sizing:border-box!important;
-  width:100%!important;
-  min-width:0!important;
-  padding:16px 24px!important;
-  column-gap:12px!important;
-  overflow:visible;
-}
-.queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
-  grid-template-columns:18px minmax(0,1fr)!important;
-}
-.queue-card .queue-list .queue-row-wrap .queue-check {
-  grid-column:1;
-  align-self:start!important;
-  justify-self:center!important;
-  padding-top:1px!important;
-}
-.queue-card .queue-list .queue-row-wrap .queue-item {
-  min-width:0!important;
-  width:100%!important;
-  max-width:100%!important;
-  padding-right:10px!important;
-  box-sizing:border-box!important;
-}
-.queue-card .queue-list .queue-row-wrap:has(>.queue-check) .queue-item {
-  grid-column:2;
-}
-.queue-card .queue-list .queue-summary,
-.queue-card .queue-list .queue-context {
-  width:100%;
-  min-width:0;
-}
-.queue-card .queue-list .queue-status,
-.queue-card .queue-list .queue-sla {
-  flex-shrink:0;
-  margin-left:auto;
-}
-.queue-card .queue-list .queue-claim{min-width:0;}
-@media(max-width:900px){
-  .queue-card .queue-list .queue-row-wrap{padding:15px 18px!important;}
-  .queue-card .queue-list .queue-row-wrap .queue-item{padding-right:4px!important;}
-}
-@media(max-width:420px){
-  .queue-card .queue-list .queue-row-wrap{padding:13px 14px!important;column-gap:9px!important;}
-  .queue-card .queue-list .queue-row-wrap .queue-item{padding-right:0!important;}
-}
-
-/* R78 — Stable checkbox alignment in elevated ticket cards.
-   Position the admin checkbox within the card, separately from the ticket
-   content grid. Avoid competing grid-column rules from R41-R77. */
-.queue-card .queue-list .queue-row-wrap {
-  position:relative!important;
-  grid-template-columns:minmax(0,1fr)!important;
-  padding:16px 24px!important;
-}
-.queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
-  grid-template-columns:minmax(0,1fr)!important;
-  padding-left:56px!important;
-}
-.queue-card .queue-list .queue-row-wrap>.queue-check {
-  position:absolute!important;
-  left:20px!important;
-  top:19px!important;
-  width:18px!important;
-  height:18px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  justify-self:auto!important;
-  padding:0!important;
-  margin:0!important;
-  grid-column:auto!important;
-}
-.queue-card .queue-list .queue-row-wrap>.queue-check input {
-  margin:0!important;
-}
-.queue-card .queue-list .queue-row-wrap>.queue-item {
-  grid-column:1!important;
-  width:100%!important;
-  min-width:0!important;
-  padding:0!important;
-}
-.queue-card .queue-list .queue-row-wrap>.queue-claim {
-  grid-column:1!important;
-}
-@media(max-width:700px) {
-  .queue-card .queue-list .queue-row-wrap {
-    padding:13px 15px!important;
-  }
-  .queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
-    padding-left:47px!important;
-  }
-  .queue-card .queue-list .queue-row-wrap>.queue-check {
-    left:16px!important;
-    top:16px!important;
-  }
+/* View-all modal uses the same markup, without dashboard card decoration. */
+.modal-content .queue-row-wrap>.queue-item{display:grid!important;grid-template-columns:minmax(0,1fr) 150px;gap:18px;min-width:0;}
+.modal-content .queue-side{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;gap:10px;}
+.modal-content .queue-row-wrap>.queue-check{align-self:center;justify-self:center;padding:0;}
+@media(max-width:700px){
+  .modal-content .queue-row-wrap>.queue-item{grid-template-columns:minmax(0,1fr);gap:10px;}
+  .modal-content .queue-side{flex-direction:row;justify-content:space-between;align-items:center;}
 }
