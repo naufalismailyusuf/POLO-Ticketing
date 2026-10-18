@@ -53,13 +53,15 @@
       [guide.title, guide.description, guide.category, guide.author, guide.status]
         .some(value => normalize(value).includes(query))
     );
-    if (!matching.length) {
+    const overview = root.dataset.wsTab === 'all' && !query;
+    const shown = overview ? matching.slice(0, 4) : matching;
+    if (!shown.length) {
       guideList.append(make('p', 'ws-empty', guides.length ?
         'No guides match your search or category.' : 'No guides yet. Create a guide to get started.'));
     } else {
-      matching.forEach(guide => guideList.append(makeGuideCard(guide)));
+      shown.forEach(guide => guideList.append(makeGuideCard(guide)));
     }
-    guideCount.textContent = 'Showing ' + matching.length + ' of ' + guides.length + ' guides';
+    guideCount.textContent = 'Showing ' + shown.length + ' of ' + guides.length + ' guides';
   }
 
   async function loadGuides() {
@@ -109,6 +111,7 @@
     });
     $('#ws-project-panel').hidden = tab === 'guides';
     $('#ws-guide-panel').hidden = tab === 'projects';
+    renderGuides();
     if (updateUrl) {
       const url = new URL(location.href);
       if (tab === 'all') url.searchParams.delete('tab');
@@ -139,7 +142,10 @@
     })
   );
 
-  search.addEventListener('input', renderGuides);
+  search.addEventListener('input', () => {
+    root.classList.toggle('ws-has-query', Boolean(search.value.trim()));
+    renderGuides();
+  });
   category.addEventListener('change', renderGuides);
   const create = $('#ws-create');
   document.addEventListener('click', event => {
