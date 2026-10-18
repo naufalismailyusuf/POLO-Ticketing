@@ -1,0 +1,79 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POLO Indonesia · Workspace</title><link rel="icon" type="image/x-icon" href="/static/favicon.ico?v=polo-20261010"><script>try{document.documentElement.dataset.theme=localStorage.getItem('polo-theme')||localStorage.getItem('theme')||'light'}catch(e){}</script><link rel="stylesheet" href="/static/css/dashboard.css?v=admin-tools-30"><link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-28"><link rel="stylesheet" href="/static/css/admin-nav-dropdown.css?v=16"><link rel="stylesheet" href="/static/css/our-project.css?v=revisi-44"><link rel="stylesheet" href="/static/css/our-project-minimal.css?v=revisi-55"><link rel="stylesheet" href="/static/css/workspace-hub-v82.css?v=r82"><script src="/static/js/ui-controls.js?v=admin-tools-28" defer></script><script src="/static/js/admin-nav-dropdown.js?v=r60" defer></script><script src="/static/js/mobile-nav-v64.js?v=r64" defer></script><script src="/static/js/our-project.js?v=revisi-50" defer></script><script src="/static/js/workspace-hub-v82.js?v=r82" defer></script><link rel="stylesheet" href="/static/css/page-entrance-v63.css?v=r64"><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+</head><body>
+<header class="app-header">
+ <div class="header-inner">
+  <a class="brand" href="/">POLO INDONESIA</a>
+  <nav class="main-nav" aria-label="Navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a class="active" href="/workspace">Workspace</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+  <div class="header-actions">
+   <details class="profile-dropdown"><summary aria-label="Account menu"><span class="profile-avatar">◉</span><span class="profile-name" id="user-label"></span><span class="profile-chevron">▾</span></summary><div class="profile-menu"><div class="profile-heading"><strong id="profile-display">Account</strong><small id="user-role"></small></div><button type="button" class="profile-action" id="theme-toggle">◐ &nbsp; Toggle Dark / Light Mode</button><a class="profile-action" href="/password">Change Password</a><form class="logout-form" action="/logout" method="post"><input type="hidden" name="csrf" class="csrf-field" id="logout-csrf"><button class="profile-action profile-signout" type="submit">Sign out</button></form></div></details>
+   <button class="icon-button mobile-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu">☰</button>
+  </div>
+ </div>
+ <nav class="mobile-nav" id="mobile-nav" hidden aria-label="Mobile navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a class="active" href="/workspace">Workspace</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+</header>
+<main class="projects-page ws-page" id="workspace-home">
+  <div class="ws-hero">
+    <div>
+      <span class="eyebrow">TEAM SPACE</span>
+      <h1>Workspace</h1>
+      <p>Projects, documentation, and practical team knowledge in one place.</p>
+    </div>
+    <details class="ws-create" id="ws-create">
+      <summary class="project-primary" aria-label="Create project or guide">+ Create <span aria-hidden="true">▾</span></summary>
+      <div class="ws-create-options">
+        <button type="button" id="new-project">New project <small>Plan and track teamwork</small></button>
+        <a href="/guide/new">New guide <small>Document a workflow</small></a>
+      </div>
+    </details>
+  </div>
+  <div class="ws-controls">
+    <label class="ws-search"><span class="ws-visually-hidden">Search projects and guides</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+      <input id="project-search" type="search" placeholder="Search projects or guides…" autocomplete="off">
+    </label>
+    <div class="ws-tabs" role="tablist" aria-label="Workspace content">
+      <button type="button" role="tab" data-ws-tab="all" aria-selected="true" aria-controls="ws-project-panel ws-guide-panel">All</button>
+      <button type="button" role="tab" data-ws-tab="projects" aria-selected="false" aria-controls="ws-project-panel">Projects</button>
+      <button type="button" role="tab" data-ws-tab="guides" aria-selected="false" aria-controls="ws-guide-panel">Documentation</button>
+    </div>
+  </div>
+  <section class="project-stats" hidden aria-hidden="true">
+    <article><span>All Projects</span><strong id="count-total">0</strong></article>
+    <article><span>In Progress</span><strong id="count-progress">0</strong></article>
+    <article><span>In Discussion</span><strong id="count-discussion">0</strong></article>
+    <article><span>Completed</span><strong id="count-completed">0</strong></article>
+  </section>
+  <section class="projects-board ws-project-board" id="ws-project-panel" aria-labelledby="ws-project-title">
+    <div class="board-title">
+      <div class="board-heading"><h2 id="ws-project-title">Projects</h2><p>Current work, owners, and progress.</p></div>
+      <div class="ws-heading-actions">
+        <label class="ws-filter-label"><span class="ws-visually-hidden">Filter project status</span>
+          <select id="project-filter" data-native-select aria-label="Filter project status">
+            <option value="">All statuses</option><option>Idea</option><option>Discussion</option>
+            <option>Approved</option><option>In Progress</option><option>Completed</option>
+          </select>
+        </label>
+        <button class="ws-view-all" type="button" data-ws-show="projects">View all →</button>
+      </div>
+    </div>
+    <div class="project-list-heading" aria-hidden="true"><span>Project</span><span>Status</span><span>Progress</span><span>Owner / Activity</span><span></span></div>
+    <div id="project-list" class="project-rows" aria-live="polite"><p class="project-list-empty">Loading projects…</p></div>
+    <div class="project-list-footer" id="project-list-footer">Showing <span id="project-shown">0</span> projects</div>
+  </section>
+  <section class="ws-guide-board" id="ws-guide-panel" aria-labelledby="ws-guide-title">
+    <div class="ws-guide-heading">
+      <div><h2 id="ws-guide-title">Documentation</h2><p>Guides, procedures, and repeatable workflows.</p></div>
+      <div class="ws-heading-actions">
+        <label class="ws-filter-label"><span class="ws-visually-hidden">Guide category</span>
+          <select id="ws-guide-category" aria-label="Filter guide category"><option value="">All categories</option></select>
+        </label>
+        <button class="ws-view-all" type="button" data-ws-show="guides">View all →</button>
+      </div>
+    </div>
+    <div id="ws-guide-list" class="ws-guide-grid" aria-live="polite"><p class="ws-empty">Loading documentation…</p></div>
+    <p class="ws-guide-count" id="ws-guide-count" aria-live="polite"></p>
+  </section>
+  <p id="project-notice" role="status" aria-live="polite"></p>
+</main>
+<dialog id="project-dialog" class="project-dialog"><form id="project-create-form" class="project-form"><div class="dialog-top"><h2>Create Project</h2><button type="button" class="project-close" data-close="project-dialog" aria-label="Close">×</button></div><label>Project title<input name="title" maxlength="120" required placeholder="Name your idea"></label><label>Description<textarea name="description" maxlength="4000" rows="5" placeholder="What problem will this project solve?"></textarea></label><label>Priority<select name="priority" data-native-select aria-label="Project priority"><option>Medium</option><option>Low</option><option>High</option><option>Critical</option></select></label><fieldset class="project-members-field"><legend>Assign Support (optional)</legend><div id="project-support-options" class="project-support-options">Loading support accounts…</div></fieldset><button class="project-primary" type="submit">Create Project</button></form></dialog>
+<dialog id="detail-dialog" class="project-dialog project-detail"><div class="dialog-top"><div><span class="eyebrow">PROJECT DETAILS</span><h2 id="detail-title"></h2></div><button type="button" class="project-close" data-close="detail-dialog" aria-label="Close">×</button></div><p id="detail-description"></p><div class="detail-meta"><span id="detail-owner"></span><span id="detail-priority"></span><label>Status <select id="detail-status"><option>Idea</option><option>Discussion</option><option>Approved</option><option>In Progress</option><option>Completed</option></select></label></div><div class="detail-columns"><section><h3>Tasks <span id="detail-progress"></span></h3><div id="detail-tasks"></div><form id="task-form" class="inline-form"><input name="title" maxlength="180" placeholder="New task" required><input name="assignee" maxlength="48" placeholder="Username (optional)"><button class="project-primary" type="submit">Add Task</button></form></section><section><h3>Team Discussion</h3><div id="detail-comments" class="comments"></div><form id="comment-form"><textarea name="body" maxlength="3000" rows="3" placeholder="Share an update or idea…" required></textarea><button class="project-primary" type="submit">Post Comment</button></form></section></div></dialog></body></html>

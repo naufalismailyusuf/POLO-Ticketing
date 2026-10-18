@@ -631,7 +631,7 @@
   }
 
   function leaveEditor() {
-    if (isNew) { location.assign('/guide'); return; }
+    if (isNew) { location.assign('/workspace?tab=guides'); return; }
     editing = false;
     $('#gd-editor').hidden = true;
     $('#gd-view').hidden = false;
@@ -742,7 +742,7 @@
     $('#gd-delete').addEventListener('click', async () => {
       closeActions();
       if (!saved || !saved.can_edit || !confirm('Delete this guide, all steps and all images from QNAP? This cannot be undone.')) return;
-      try { await api('/api/guides/' + guideId, 'DELETE'); location.assign('/guide'); }
+      try { await api('/api/guides/' + guideId, 'DELETE'); location.assign('/workspace?tab=guides'); }
       catch (error) { notice(error.message, true); }
     });
     $('#gd-form').addEventListener('submit', async (event) => {
