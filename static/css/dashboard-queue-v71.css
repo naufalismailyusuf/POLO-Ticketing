@@ -146,7 +146,7 @@
   border:1px solid var(--border)!important;
   border-radius:13px!important;
   background:var(--surface)!important;
-  box-shadow:0 2px 5px rgba(20,33,49,.04),0 8px 20px rgba(20,33,49,.065)!important;
+  box-shadow:0 3px 8px rgba(20,33,49,.055),0 10px 24px rgba(20,33,49,.09)!important;
   transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important;
 }
 .queue-card #open-queue-list>.queue-row-wrap:has(>.queue-check){
@@ -236,7 +236,7 @@
   .queue-card #open-queue-list>.queue-row-wrap:hover{
     transform:translateY(-2px)!important;
     border-color:var(--border-strong)!important;
-    box-shadow:0 4px 10px rgba(20,33,49,.065),0 15px 30px rgba(20,33,49,.11)!important;
+    box-shadow:0 5px 12px rgba(20,33,49,.075),0 17px 32px rgba(20,33,49,.125)!important;
   }
 }
 .queue-card #open-queue-list>.queue-row-wrap:focus-within{
