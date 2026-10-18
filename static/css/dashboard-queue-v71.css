@@ -136,14 +136,10 @@
     justify-content:flex-start;
   }
   .dashboard-layout > .queue-card .queue-list .queue-row-wrap {
-    flex:1 0 102px!important;
-    min-height:102px!important;
-    align-content:center!important;
-    padding:13px 0!important;
-  }
-  .dashboard-layout > .queue-card .queue-list:has(> .queue-row-wrap:nth-child(6)) .queue-row-wrap {
     flex:0 0 auto!important;
-    min-height:102px!important;
+    min-height:106px!important;
+    align-content:center!important;
+    padding:16px 0!important;
   }
   .dashboard-layout > .queue-card .queue-list .empty {flex:1;}
 }
@@ -168,4 +164,24 @@
     max-height:none!important;
     overflow-y:auto!important;
   }
+}
+
+/* R74 — Consistent three-line ticket information hierarchy. */
+.queue-card .queue-row-wrap {align-content:center!important;row-gap:0!important;}
+.queue-card .queue-main {min-width:0;}
+.queue-card .queue-summary {align-items:center;min-height:18px;}
+.queue-card .queue-title {margin:9px 0 0!important;line-height:1.45!important;}
+.queue-card .queue-context {margin-top:10px!important;align-items:baseline;gap:8px 18px;}
+.queue-card .queue-people {gap:6px 18px;}
+.queue-card .queue-person {max-width:48%;}
+.queue-card .queue-sla {margin-left:auto;}
+@media(max-width:1100px) {
+  .queue-card .queue-context {flex-wrap:wrap;}
+  .queue-card .queue-people {flex:1 1 auto;width:auto;}
+}
+@media(max-width:700px) {
+  .queue-card .queue-title {margin-top:7px!important;}
+  .queue-card .queue-context {margin-top:7px!important;gap:5px 10px;}
+  .queue-card .queue-people {width:100%;flex:1 1 100%;}
+  .queue-card .queue-sla {margin-left:auto;}
 }
