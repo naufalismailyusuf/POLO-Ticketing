@@ -185,3 +185,21 @@
   .queue-card .queue-people {width:100%;flex:1 1 100%;}
   .queue-card .queue-sla {margin-left:auto;}
 }
+
+/* R75 — clear and consistent dashboard queue typography, without changing global 75% zoom. */
+.queue-card .queue-title{font-size:16px!important;font-weight:600!important;line-height:1.48!important;letter-spacing:0!important;}
+.queue-card .ticket-no,.queue-card .queue-category,.queue-card .queue-priority,
+.queue-card .queue-status,.queue-card .queue-person,.queue-card .queue-sla{
+  font-size:12.5px!important;line-height:1.5!important;letter-spacing:0!important;
+}
+.queue-card .queue-detail-label,.queue-card .queue-sla-label{color:var(--muted);}
+.queue-card .queue-detail-value{font-weight:600!important;}
+.queue-card .queue-summary{gap:12px;}
+.queue-card .queue-context{margin-top:8px!important;}
+.queue-card .queue-list .queue-row-wrap{min-height:110px!important;}
+@media(max-width:700px){
+  .queue-card .queue-title{font-size:14px!important;}
+  .queue-card .ticket-no,.queue-card .queue-category,.queue-card .queue-priority,
+  .queue-card .queue-status,.queue-card .queue-person,.queue-card .queue-sla{font-size:11px!important;}
+  .queue-card .queue-list .queue-row-wrap{min-height:0!important;}
+}
