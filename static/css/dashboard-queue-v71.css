@@ -116,20 +116,56 @@
   :is(.queue-card, .modal-content) .queue-item{transition:none!important}
 }
 
-/* Revisi 72: remove legacy R42 equal-height stretching.
-   Queue fits its content at small counts; the 520px cap keeps many
-   tickets scrollable without a visible scrollbar. New Ticket is unchanged. */
+/* R73 — Balanced compact queue. Desktop cards share the same grid-row height.
+   A small queue distributes available height; long queues scroll internally. */
 @media (min-width:901px) {
   .dashboard-layout > .queue-card {
-    align-self:start !important;
-    height:auto !important;
-    max-height:520px !important;
+    align-self:stretch!important;
+    height:100%!important;
+    max-height:none!important;
+    min-height:0!important;
+  }
+  .dashboard-layout > .create-card {align-self:stretch!important;}
+  .dashboard-layout > .queue-card .queue-list {
+    flex:1 1 0!important;
+    height:0!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    justify-content:flex-start;
+  }
+  .dashboard-layout > .queue-card .queue-list .queue-row-wrap {
+    flex:1 0 102px!important;
+    min-height:102px!important;
+    align-content:center!important;
+    padding:13px 0!important;
+  }
+  .dashboard-layout > .queue-card .queue-list:has(> .queue-row-wrap:nth-child(6)) .queue-row-wrap {
+    flex:0 0 auto!important;
+    min-height:102px!important;
+  }
+  .dashboard-layout > .queue-card .queue-list .empty {flex:1;}
+}
+.queue-card .queue-scroll-hint[hidden] {display:none!important;}
+.queue-card .queue-title {font-size:14.5px!important;line-height:1.45!important;}
+.queue-card .ticket-no,
+.queue-card .queue-category,
+.queue-card .queue-priority,
+.queue-card .queue-status,
+.queue-card .queue-person,
+.queue-card .queue-sla {font-size:11.5px!important;}
+.queue-card .queue-context {margin-top:7px;}
+@media (max-width:900px) {
+  .dashboard-layout > .queue-card {
+    align-self:start!important;
+    height:auto!important;
+    max-height:520px!important;
   }
   .dashboard-layout > .queue-card .queue-list {
-    flex:0 1 auto !important;
-    height:auto !important;
-    max-height:none !important;
-    overflow-y:auto !important;
+    flex:0 1 auto!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow-y:auto!important;
   }
 }
-.queue-card .queue-scroll-hint[hidden] { display:none !important; }
