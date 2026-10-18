@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/static/css/dashboard.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/workspace.css?v=admin-tools-27">
 <script src="/static/js/ui-controls.js?v=admin-tools-27" defer></script><script src="/static/js/workspace.js?v=admin-tools-27" defer></script>
 <link rel="stylesheet" href="/static/css/admin-nav-dropdown.css?v=16">
-<link rel="stylesheet" href="/static/css/file-center-resumable.css?v=revisi-23"><link rel="stylesheet" href="/static/css/file-center-layout-v22.css?v=revisi-22"><link rel="stylesheet" href="/static/css/file-center-minimal-v52.css?v=r52"><link rel="stylesheet" href="/static/css/file-center-capacity-v53.css?v=r53"><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+<link rel="stylesheet" href="/static/css/file-center-resumable.css?v=revisi-23"><link rel="stylesheet" href="/static/css/file-center-layout-v22.css?v=revisi-22"><link rel="stylesheet" href="/static/css/file-center-minimal-v52.css?v=r52"><link rel="stylesheet" href="/static/css/file-center-capacity-v53.css?v=r80"><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
 </head><body class="workspace-page"><header class="app-header">
  <div class="header-inner">
   <a class="brand" href="/">POLO INDONESIA</a>
@@ -20,11 +20,11 @@
 </header>
 <main class="workspace-shell files-shell"><div id="file-toast" aria-live="polite"></div>
 <div class="workspace-heading"><h1>File Center</h1><div class="storage-state"><span id="qnap-status" class="storage-badge" role="status"><i aria-hidden="true"></i><strong id="qnap-status-title">Checking…</strong></span><button class="text-button" type="button" id="qnap-refresh">Refresh</button></div></div>
-<section class="fc-storage-meter" aria-label="QNAP SMB share capacity">
+<section class="fc-storage-meter" aria-label="QNAP SMB share capacity" aria-describedby="fc-storage-meter-note" title="Capacity reported by this SMB share; may differ from total NAS storage.">
   <div class="fc-storage-meter-top"><span class="fc-storage-meter-label">QNAP STORAGE</span><span id="fc-capacity-summary" role="status" aria-live="polite">Checking capacity…</span></div>
   <div id="fc-capacity-bar" class="fc-storage-meter-bar" role="progressbar" aria-label="QNAP share space used" aria-valuemin="0" aria-valuemax="100"><span id="fc-capacity-fill"></span></div>
   <div class="fc-storage-meter-bottom"><span id="fc-capacity-used">Used: —</span><span id="fc-capacity-free">Free: —</span><span id="fc-capacity-total">Total: —</span></div>
-  <p class="fc-storage-meter-note">Capacity reported by this SMB share; may differ from total NAS storage.</p>
+  <p id="fc-storage-meter-note" class="fc-storage-meter-note">Capacity reported by this SMB share; may differ from total NAS storage.</p>
 </section>
 <section class="workspace-card" aria-label="Files">
 <div class="fc-workspace-top">
