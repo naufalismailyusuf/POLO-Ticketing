@@ -1,19 +1,76 @@
-/* Compact SMB share capacity meter; File Center only. */
+/* R80 — Slim File Center SMB capacity indicator. Existing IDs/API untouched. */
 .files-shell .fc-storage-meter {
-  margin:0 0 18px;padding:17px 22px 14px;
-  background:var(--surface,#fff);border:1px solid var(--border,#dce3ea);
-  border-radius:14px;box-shadow:0 5px 18px rgba(18,32,55,.035);
+  margin:0 0 16px;
+  padding:12px 20px 11px;
+  background:var(--surface,#fff);
+  border:1px solid var(--border,#dce3ea);
+  border-radius:13px;
+  box-shadow:0 3px 12px rgba(18,32,55,.035);
 }
-.files-shell .fc-storage-meter-top,.files-shell .fc-storage-meter-bottom {
-  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 20px;
+.files-shell .fc-storage-meter-top,
+.files-shell .fc-storage-meter-bottom {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 20px;
+  min-width:0;
 }
-.files-shell .fc-storage-meter-top {font-size:12px;color:var(--text,#172337);font-weight:600;}
-.files-shell .fc-storage-meter-label {letter-spacing:.09em;font-size:10px;color:var(--muted,#67768c);}
-.files-shell .fc-storage-meter-bar {height:8px;margin:12px 0 9px;background:var(--surface-2,#edf1f5);border:1px solid var(--border,#dce3ea);border-radius:99px;overflow:hidden;}
-.files-shell #fc-capacity-fill {display:block;width:0;height:100%;border-radius:99px;background:#5d8692;transition:width .3s ease;}
+.files-shell .fc-storage-meter-top {
+  justify-content:space-between;
+  font-size:12px;
+  line-height:1.4;
+  font-weight:600;
+  color:var(--text,#172337);
+}
+.files-shell .fc-storage-meter-label {
+  font-size:11px;
+  font-weight:650;
+  letter-spacing:.07em;
+  color:var(--muted,#67768c);
+}
+.files-shell .fc-storage-meter-bar {
+  height:5px;
+  margin:8px 0 7px;
+  background:var(--surface-2,#edf1f5);
+  border:1px solid var(--border,#dce3ea);
+  border-radius:99px;
+  overflow:hidden;
+}
+.files-shell #fc-capacity-fill {
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:99px;
+  background:#5d8692;
+  transition:width .3s ease;
+}
 .files-shell #fc-capacity-fill.fc-capacity-high {background:#bc7d44;}
-.files-shell .fc-storage-meter-bottom {font-size:12px;color:var(--text,#172337);font-variant-numeric:tabular-nums;}
-.files-shell .fc-storage-meter-note {font-size:10px;line-height:1.5;margin:8px 0 0;color:var(--muted,#67768c);}
+.files-shell .fc-storage-meter-bottom {
+  justify-content:flex-start;
+  color:var(--muted,#67768c);
+  font-size:12px;
+  line-height:1.4;
+  font-variant-numeric:tabular-nums;
+}
+.files-shell #fc-capacity-total {margin-left:auto;}
+/* Preserve the technical disclaimer for screen readers; show it as a native tooltip. */
+.files-shell .fc-storage-meter-note {
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
 .files-shell .fc-upload-hint .ui-inline-arrow {margin-inline:5px;}
-@media(max-width:600px){.files-shell .fc-storage-meter{padding:14px 16px;margin-bottom:14px}.files-shell .fc-storage-meter-bottom{gap:4px 12px;}}
-@media(prefers-reduced-motion:reduce){.files-shell #fc-capacity-fill{transition:none;}}
+@media(max-width:600px){
+  .files-shell .fc-storage-meter {padding:12px 15px;margin-bottom:14px;}
+  .files-shell .fc-storage-meter-bottom {gap:4px 14px;}
+  .files-shell #fc-capacity-total {margin-left:0;}
+}
+@media(prefers-reduced-motion:reduce){
+  .files-shell #fc-capacity-fill{transition:none;}
+}
