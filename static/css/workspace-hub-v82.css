@@ -85,3 +85,8 @@
   .ws-page .ws-tabs button{padding:7px 9px;font-size:11px;}
 }
 @media(prefers-reduced-motion:reduce){.ws-page .project-row,.ws-page .ws-guide-card{transition:none!important;transform:none!important;}}
+
+
+/* Overview shows a concise preview. Dedicated tabs show every item. */
+.ws-page[data-ws-tab="all"]:not(.ws-has-query) #project-list>.project-row:nth-of-type(n+5){display:none!important;}
+.ws-page[data-ws-tab="all"]:not(.ws-has-query) #project-list-footer{display:none!important;}
