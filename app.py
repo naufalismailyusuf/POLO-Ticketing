@@ -71,6 +71,11 @@ TEMP_UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "Ticketing-upload-temp")
 # only from environment variables and are used to establish the SMB session
 # when needed.
 QNAP_SHARE = os.environ.get("FILE_CENTER_QNAP_SHARE", r"\\172.16.0.74\IT").strip()
+# Secondary is used only for authenticated read-only download failover. Never
+# use it for uploads, metadata writes, deletions, or faster "striped" reads.
+QNAP_READ_SECONDARY_SHARE = os.environ.get(
+    "FILE_CENTER_QNAP_SECONDARY_SHARE", DASHBOARD_QNAP_SECONDARY_SHARE
+).strip()
 FILE_STORAGE_DIR = QNAP_SHARE
 QNAP_USERNAME = os.environ.get("FILE_CENTER_QNAP_USERNAME", "").strip()
 QNAP_PASSWORD = os.environ.get("FILE_CENTER_QNAP_PASSWORD", "")
@@ -568,23 +573,24 @@ def _qnap_error_text(code):
         return f"Windows error {code}"
 
 
-def _ensure_qnap_connection():
+def _ensure_qnap_connection(share=None):
     """Ensure the Windows process can reach the configured SMB share.
 
     Direct UNC access is preferred. If credentials are present, Windows'
     WNetAddConnection2 API is used rather than shelling out to `net use`, so
     the password does not appear in the process command line.
     """
-    if not QNAP_SHARE:
+    share = share if share is not None else QNAP_SHARE
+    if not share:
         return False, "QNAP share path is empty. Set FILE_CENTER_QNAP_SHARE."
-    if os.path.isdir(QNAP_SHARE):
-        return True, f"QNAP share reachable: {QNAP_SHARE}"
+    if os.path.isdir(share):
+        return True, f"QNAP share reachable: {share}"
 
     if os.name != "nt":
-        return False, f"QNAP share is not reachable from this host: {QNAP_SHARE}"
+        return False, f"QNAP share is not reachable from this host: {share}"
 
     if not QNAP_USERNAME:
-        return False, f"QNAP share is not reachable: {QNAP_SHARE}. Run the service with an SMB-enabled Windows account or configure FILE_CENTER_QNAP_USERNAME / FILE_CENTER_QNAP_PASSWORD."
+        return False, f"QNAP share is not reachable: {share}. Run the service with an SMB-enabled Windows account or configure FILE_CENTER_QNAP_USERNAME / FILE_CENTER_QNAP_PASSWORD."
 
     class NETRESOURCEW(ctypes.Structure):
         _fields_ = [
@@ -599,7 +605,7 @@ def _ensure_qnap_connection():
         ]
 
     resource = NETRESOURCEW(
-        0, 1, 0, 0, None, QNAP_SHARE, None, None
+        0, 1, 0, 0, None, share, None, None
     )
     username = f"{QNAP_DOMAIN}\\{QNAP_USERNAME}" if QNAP_DOMAIN else QNAP_USERNAME
     try:
@@ -613,16 +619,21 @@ def _ensure_qnap_connection():
         # 0 = success; 1219 = existing connection under different credentials.
         if result not in (0, 1219):
             message = _qnap_error_text(result)
-            return False, f"SMB connection to {QNAP_SHARE} failed: {message} (code {result})."
-        if os.path.isdir(QNAP_SHARE):
-            return True, f"QNAP share reachable: {QNAP_SHARE}"
-        return False, f"SMB session created but share is still unreachable: {QNAP_SHARE}"
+            return False, f"SMB connection to {share} failed: {message} (code {result})."
+        if os.path.isdir(share):
+            return True, f"QNAP share reachable: {share}"
+        return False, f"SMB session created but share is still unreachable: {share}"
     except Exception as exc:
-        return False, f"Could not initialize SMB connection to {QNAP_SHARE}: {type(exc).__name__}: {exc}"
+        return False, f"Could not initialize SMB connection to {share}: {type(exc).__name__}: {exc}"
 
 
 def qnap_storage_status():
+    started = time.perf_counter()
     available, message = _ensure_qnap_connection()
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    if elapsed_ms >= 750:
+        app.logger.warning("QNAP primary SMB check slow duration_ms=%.1f available=%s",
+                           elapsed_ms, available)
     _QNAP_LAST_STATUS.update(available=available, message=message)
     return {"available": available, "message": message, "path": QNAP_SHARE}
 
@@ -4370,18 +4381,25 @@ def file_center():
 
 @app.get("/api/files/list")
 def api_file_listing():
-    status=qnap_storage_status()
-    if not status["available"]:
-        return jsonify(ok=False,error=status["message"],code="qnap_unreachable"),503
+    started = time.perf_counter()
     relative_path=request.args.get("path","")
+    refresh = request.args.get("refresh") == "1"
+    # _qnap_listing() already verifies SMB availability. Do not repeat an
+    # expensive os.path.isdir(UNC) call before the actual directory lookup.
+    app.logger.info("File Center list start depth=%d refresh=%s",
+                    relative_path.count("/") + bool(relative_path), refresh)
     try:
-        # Scan just the active folder. A full-tree sync after uploads can block
-        # this GET on the SMB share and race metadata insertion with the POST.
         folder_id,parts,folders,files=_qnap_listing(
-            relative_path, force_refresh=request.args.get("refresh") == "1"
+            relative_path, force_refresh=refresh
         )
     except (OSError,ValueError,FileNotFoundError) as exc:
+        app.logger.warning("File Center list failed after %.1fms: %s",
+                           (time.perf_counter()-started)*1000, type(exc).__name__)
         return jsonify(ok=False,error=str(exc),code="qnap_list_failed"),503
+    elapsed_ms = (time.perf_counter()-started)*1000
+    if elapsed_ms >= 750:
+        app.logger.warning("File Center slow list took %.1fms depth=%d count=%d",
+                           elapsed_ms, len(parts), len(folders)+len(files))
     for item in folders:
         item.setdefault("created_by","QNAP"); item.setdefault("created_at",local_now().strftime("%Y-%m-%d %H:%M:%S"))
     payload_files=[]
@@ -4822,32 +4840,90 @@ def file_upload():
 
 
 
+def _qnap_read_fallback_path(primary_path):
+    """Map a File Center file to the equivalent secondary UNC path, read-only.
+
+    Preserve the shared folder-relative path and existing private directory
+    exclusion. This is not a general SMB load balancer.
+    """
+    secondary = QNAP_READ_SECONDARY_SHARE
+    if not secondary or ntpath.normcase(ntpath.normpath(secondary)) == ntpath.normcase(ntpath.normpath(QNAP_SHARE)):
+        return None
+    root = ntpath.normpath(QNAP_SHARE).rstrip("\\/")
+    full = ntpath.normpath(primary_path)
+    prefix = ntpath.normcase(root) + "\\"
+    full_casefold = ntpath.normcase(full)
+    if not full_casefold.startswith(prefix):
+        return None
+    relative = full[len(root):].lstrip("\\/")
+    if not relative or ".." in relative.split("\\"):
+        return None
+    candidate = ntpath.normpath(ntpath.join(secondary, relative))
+    if not _path_is_within_root(secondary, candidate):
+        return None
+    return candidate
+
+
 def _serve_file_download(file_id):
-    _sync_qnap_tree()
-    storage_ok, storage_status = require_qnap_storage()
-    if not storage_ok:
-        abort(Response(storage_status["message"], status=503, mimetype="text/plain"))
+    # Never run a full QNAP tree scan before a download: large shares could
+    # block every request and even rename legacy files during that scan.
+    started = time.perf_counter()
     with db() as c:
         row = c.execute("SELECT * FROM file_items WHERE id=?", (file_id,)).fetchone()
     if not row:
         abort(404)
-
     path = file_storage_path(row)
+    if not _path_is_within_root(QNAP_SHARE, path):
+        abort(404)
+    source = "primary"
+    try:
+        file_stat = os.stat(path)
+    except OSError as primary_error:
+        secondary_path = _qnap_read_fallback_path(path)
+        if not secondary_path:
+            app.logger.warning("File Center download source unavailable id=%d primary=%s",
+                               file_id, type(primary_error).__name__)
+            abort(404 if isinstance(primary_error, FileNotFoundError) else 503)
+        try:
+            available, _ = _ensure_qnap_connection(QNAP_READ_SECONDARY_SHARE)
+            if not available:
+                raise OSError("Secondary QNAP SMB unavailable")
+            secondary_stat = os.stat(secondary_path)
+            # A secondary share pointing at an older/different dataset must
+            # never silently return a file with a different byte count.
+            if int(secondary_stat.st_size) != int(row["size_bytes"]):
+                raise OSError("Secondary QNAP file size differs from indexed file")
+            path, file_stat, source = secondary_path, secondary_stat, "secondary"
+            app.logger.warning("File Center download read failover id=%d to secondary", file_id)
+        except OSError as secondary_error:
+            app.logger.warning("File Center download failed id=%d primary=%s secondary=%s",
+                               file_id, type(primary_error).__name__, type(secondary_error).__name__)
+            if isinstance(primary_error, FileNotFoundError) and isinstance(secondary_error, FileNotFoundError):
+                abort(404)
+            abort(503)
     if not os.path.isfile(path):
         abort(404)
 
-    # Let Werkzeug handle conditional requests, byte ranges and the WSGI
-    # file wrapper. This avoids reading the whole file into Python memory.
+    # The ETag does not depend on which of the QNAP NIC addresses is used.
+    # This preserves correct HTTP Range resume across same-file read failover.
+    import hashlib
+    stable_etag = hashlib.sha256(
+        f"{file_id}:{file_stat.st_size}:{file_stat.st_mtime_ns}".encode("ascii")
+    ).hexdigest()
     resp = send_file(
         path,
         as_attachment=True,
         download_name=row["original_name"],
         mimetype=row["mime_type"],
         conditional=True,
-        etag=True,
-        last_modified=os.path.getmtime(path),
+        etag=stable_etag,
+        last_modified=file_stat.st_mtime,
         max_age=300,
     )
+    setup_ms = (time.perf_counter()-started)*1000
+    if source == "secondary" or setup_ms >= 750:
+        app.logger.warning("File Center download setup id=%d source=%s time_ms=%.1f size=%d",
+                           file_id, source, setup_ms, file_stat.st_size)
     resp.headers["Accept-Ranges"] = "bytes"
     resp.headers["Cache-Control"] = "private, max-age=300"
     # Header role is known from the authenticated request: avoid navigation flicker.
