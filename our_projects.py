@@ -159,6 +159,10 @@ def register_our_projects(app, db, page_dir, upload_storage=None):
         p=conn.execute('SELECT * FROM team_projects WHERE id=? AND deleted_at IS NULL',(pid,)).fetchone()
         return p
 
+    @bp.get('/workspace')
+    def workspace_page():
+        return send_from_directory(page_dir, 'workspace.html')
+
     @bp.get('/our-project')
     def page():
         return send_from_directory(page_dir, 'our_project.html')
