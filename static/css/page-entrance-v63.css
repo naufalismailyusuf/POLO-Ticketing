@@ -1,0 +1,28 @@
+/* POLO Revisi 64 — page entry animation for Project and Guide listing.
+   Matches Dashboard's short 9px fade-up; does not affect dialogs, dropdowns,
+   search/filter rerenders, global 75% scale, or page detail/editor views. */
+
+.projects-page > .projects-intro,
+.projects-page > .project-stats,
+.projects-page > .projects-board,
+.gd-index-v56 > .gd-hero,
+.gd-index-v56 > .gd-guide-library {
+  animation-name: card-reveal;
+  animation-duration: 250ms;
+  animation-timing-function: var(--ease, ease-out);
+  animation-fill-mode: backwards;
+}
+
+.projects-page > .projects-intro,
+.gd-index-v56 > .gd-hero { animation-delay: 0ms; }
+.projects-page > .project-stats { animation-delay: 30ms; }
+.projects-page > .projects-board,
+.gd-index-v56 > .gd-guide-library { animation-delay: 50ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-page > .projects-intro,
+  .projects-page > .project-stats,
+  .projects-page > .projects-board,
+  .gd-index-v56 > .gd-hero,
+  .gd-index-v56 > .gd-guide-library { animation: none !important; }
+}

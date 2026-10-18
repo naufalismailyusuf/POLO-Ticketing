@@ -1,0 +1,36 @@
+/* Revisi 52 — File Center: minimal toolbar + contextual drag overlay.
+   Scoped to this page; does not change upload API, resume behavior, QNAP or other screens. */
+.files-shell .fc-native-input {
+  position:absolute!important;
+  width:1px!important;height:1px!important;padding:0!important;margin:0!important;
+  border:0!important;opacity:0!important;overflow:hidden!important;
+  clip-path:inset(50%)!important;pointer-events:none!important;
+}
+.files-shell .fc-workspace-top {padding-bottom:16px;}
+.files-shell .fc-search-row {margin-top:17px;}
+.files-shell .fc-new-menu {z-index:12;}
+.files-shell .fc-new-dropdown {z-index:13;}
+.files-shell .fc-list-card {min-height:150px;}
+.files-shell .fc-list-head {min-height:48px;padding-block:12px;}
+.files-shell .fc-list-card .fc-drop-overlay {
+  position:absolute;inset:0;z-index:20;
+  align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--surface) 87%,#e7edf5);
+  border:1.5px dashed color-mix(in srgb,var(--muted) 55%,transparent);
+  border-radius:0 0 14px 14px;pointer-events:none;
+}
+.files-shell .fc-list-card.fc-dragging .fc-drop-overlay {display:flex;}
+.files-shell .fc-drop-overlay-content {display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px;text-align:center;color:var(--text)}
+.files-shell .fc-drop-overlay-content svg {width:25px;height:25px;fill:none;stroke:var(--muted);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.files-shell .fc-drop-overlay-content strong {font-size:14px;font-weight:600;}
+.files-shell .fc-drop-overlay-content small {font-size:11px;color:var(--muted);}
+.files-shell .fc-upload-hint {margin:0;padding:12px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.5;}
+.files-shell .fc-empty {padding:32px 20px;}
+/* Toolbar dropdown remains under sticky header whenever their regions meet. */
+.files-shell .workspace-card {isolation:isolate;}
+:root[data-theme="dark"] .files-shell .fc-list-card .fc-drop-overlay {background:color-mix(in srgb,var(--surface) 92%,#27344b)}
+@media(max-width:600px){
+ .files-shell .fc-upload-hint{padding:10px 14px;}
+ .files-shell .fc-new-menu .fc-new-dropdown{left:auto;right:0;min-width:min(245px,calc(100vw - 48px));}
+}
+@media(prefers-reduced-motion:reduce){.files-shell .fc-drop-overlay-content{transition:none}}

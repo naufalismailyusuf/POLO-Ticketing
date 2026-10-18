@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>POLO · Sign in</title>
+<link rel="icon" href="/static/favicon.ico">
+
+<link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-27">
+<link rel="stylesheet" href="/static/css/login.css?v=admin-tools-27">
+<script src="/static/js/login.js?v=admin-tools-27" defer></script>
+<link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+</head>
+<body class="login-page">
+<main class="login-panel" aria-label="Sign in">
+ <header class="login-brand"><h1>POLO</h1></header>
+ <form id="login-form" method="post" action="/login">
+  <input type="hidden" name="csrf" id="csrf">
+  <input type="hidden" name="next" id="next">
+  <div id="login-error" class="login-error" role="alert" hidden></div>
+  <div class="login-field"><label for="username">Username</label><input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+  <div class="login-field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+  <button class="login-submit" type="submit">Sign in</button>
+ </form>
+</main>
+</body>
+</html>

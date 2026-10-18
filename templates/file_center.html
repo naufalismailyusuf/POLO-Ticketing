@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File Center · POLO INDONESIA</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico', v='76') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png', v='76') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css', v='76') }}">
+{{ theme_head|safe }}
+<style>
+.files-shell{padding-bottom:54px}
+.qnap-status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding:11px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:10px;line-height:1.45}
+.qnap-status-main{display:flex;align-items:flex-start;gap:10px}.qnap-refresh{min-height:34px;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text);font:inherit;font-size:9px;font-weight:800;cursor:pointer}.qnap-refresh:hover{background:var(--surface-3)}
+.qnap-status-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;margin-top:4px;background:var(--danger);box-shadow:0 0 0 4px var(--danger-soft)}
+.qnap-status.is-ok .qnap-status-dot{background:var(--success);box-shadow:0 0 0 4px var(--success-soft)}
+.qnap-status strong{display:block;font-size:10.5px;color:var(--text)}
+.qnap-status span{display:block;margin-top:2px;color:var(--muted)}
+.storage-path{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+
+.files-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.files-title{margin:0;font-size:28px;letter-spacing:-.04em}
+.files-sub{margin:5px 0 0;color:var(--muted);font-size:11.5px;line-height:1.5}
+.files-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin-bottom:12px}
+.files-toolbar-card{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.files-toolbar-card form{display:flex;align-items:center;gap:7px;margin:0;flex-wrap:wrap}
+.files-toolbar-card input[type=text]{min-height:38px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text);padding:8px 10px;font:inherit;font-size:11px}
+.files-toolbar-card input[type=text]{min-width:210px}
+.files-toolbar-card button,.file-download,.file-delete,.folder-link{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;text-decoration:none}
+.files-toolbar-card .primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.files-toolbar-card button:hover,.file-download:hover,.folder-link:hover{background:var(--surface-2);border-color:var(--border-strong);transform:translateY(-1px)}
+.breadcrumbs{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:var(--muted);font-size:10px;font-weight:700}
+.breadcrumbs a{color:var(--primary);text-decoration:none}
+.breadcrumbs .current{color:var(--text);font-weight:800}
+.files-limit{padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:9.5px;line-height:1.45}
+.files-card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-md);overflow:visible}
+.files-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px;border-bottom:1px solid var(--border)}
+.files-card-head h2{margin:0;font-size:14px}
+.files-card-head span{color:var(--muted);font-size:9.5px}
+.file-table{width:100%;border-collapse:collapse}
+.file-table th{text-align:left;padding:10px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);color:var(--muted);font-size:8.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.file-table td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:10.5px;vertical-align:middle}
+.file-table tr:last-child td{border-bottom:0}
+.file-name{display:flex;align-items:center;gap:9px;min-width:0}
+.file-icon{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--primary-soft);color:var(--primary-soft-text);font-size:8px;font-weight:900;text-transform:uppercase}
+.file-name-text{min-width:0}
+.file-name-text a{display:block;color:var(--text);font-weight:800;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-name-text small{display:block;margin-top:2px;color:var(--muted);font-size:8.5px}
+.file-meta{color:var(--muted);font-size:9.5px;white-space:nowrap}
+.file-action{white-space:nowrap;text-align:right}
+.file-download{min-height:30px;padding:6px 9px;font-size:9px}
+.file-delete{min-height:30px;padding:6px 9px;margin-left:5px;background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 22%,var(--border));color:var(--danger-text)}
+.file-delete:hover{background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 40%,var(--border));transform:translateY(-1px)}
+.folder-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:13px;border-bottom:1px solid var(--border)}
+.folder-card{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2);text-decoration:none;color:var(--text);transition:transform .18s var(--ease-smooth),background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.folder-card:hover{background:var(--surface-3);border-color:var(--border-strong);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.folder-card-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:9px;background:var(--warning-soft);color:var(--warning-text);font-weight:900}
+.folder-card-main{min-width:0}.folder-card-name{font-size:10.5px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.folder-card-meta{margin-top:2px;color:var(--muted);font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.files-empty{padding:44px 20px;text-align:center;color:var(--muted);font-size:11px}
+.files-empty b{display:block;color:var(--text);font-size:13px;margin-bottom:4px}
+@media(max-width:980px){.files-toolbar{grid-template-columns:1fr}.folder-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.file-table{min-width:760px}.folder-grid{grid-template-columns:1fr}.files-title{font-size:24px}}
+
+.upload-progress-bar{height:100%;width:0%;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--action));transition:width .12s linear}
+.folder-card-icon{overflow:hidden;background:transparent}
+.folder-card-icon img{width:100%;height:100%;display:block;object-fit:contain}
+@media(prefers-reduced-motion:reduce){.folder-card,.files-toolbar-card button,.file-download,.file-delete{transition:none!important}}
+
+.context-wrap{position:relative;margin-left:auto;flex:none;z-index:3;overflow:visible}
+.context-btn{width:30px;height:30px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);display:grid;place-items:center;font-size:20px;line-height:1;cursor:pointer;box-shadow:none}
+.context-btn:hover,.context-btn:focus-visible{background:var(--surface-2);color:var(--text);outline:none}
+.context-menu{position:fixed;min-width:164px;padding:5px;border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:0 16px 34px rgba(15,23,42,.18);z-index:2147483000;display:none;overflow:visible}
+.context-menu.is-floating{display:block}
+.context-menu form,.context-menu button.menu-action{display:block;width:100%;margin:0}
+.menu-action{border:0;background:transparent;color:var(--text);text-align:left;padding:9px 10px;border-radius:8px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.menu-action:hover,.menu-action:focus-visible{background:var(--surface-2);outline:none}
+.menu-action.danger{color:var(--danger-text)}
+.folder-card{position:relative;padding-right:43px;overflow:visible}
+.folder-card-main{min-width:0;flex:1}
+.file-action{position:relative;overflow:visible}
+@media(max-width:760px){.folder-grid{grid-template-columns:1fr}.folder-card{padding-right:41px}}
+
+
+.file-picker-wrap{display:flex;align-items:center;gap:8px;min-width:250px;max-width:100%;}
+.file-picker{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--primary) 28%,var(--border));border-radius:10px;background:color-mix(in srgb,var(--primary-soft) 46%,var(--surface-2));color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.file-picker:hover{background:var(--surface-3);border-color:var(--border-strong);transform:translateY(-1px)}
+.file-picker svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.file-picker input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.file-picker-name{min-width:0;max-width:220px;color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rename-dialog{position:fixed;inset:0;z-index:100001;display:grid;place-items:center;padding:18px;background:rgba(2,6,23,.62);backdrop-filter:blur(5px)}
+.rename-dialog[hidden]{display:none!important}
+.rename-dialog-card{width:min(440px,100%);padding:22px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:var(--shadow-lg)}
+.rename-dialog-card h3{margin:0;font-size:15px}
+.rename-dialog-card p{margin:6px 0 14px;color:var(--muted);font-size:10px}
+.rename-dialog-card input{width:100%;height:40px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text);padding:0 11px;font:inherit;font-size:11px;outline:0}
+.rename-dialog-card input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.rename-dialog-error{min-height:16px;margin-top:7px;color:var(--danger-text);font-size:10px;font-weight:700}
+.rename-dialog-actions .rename-save[disabled]{opacity:.62;cursor:wait}
+.rename-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.rename-dialog-actions button{min-height:36px;padding:8px 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer}
+.rename-dialog-actions .rename-save{border-color:var(--primary);background:var(--primary);color:#fff}
+.delete-dialog{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:rgba(2,6,23,.62);backdrop-filter:blur(5px)}
+.delete-dialog[hidden]{display:none!important}
+.delete-dialog-card{width:min(420px,100%);padding:22px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:var(--shadow-lg)}
+.delete-dialog-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--danger-soft);color:var(--danger);margin-bottom:12px}
+.delete-dialog-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.delete-dialog-card h3{margin:0;font-size:15px}
+.delete-dialog-card p{margin:7px 0 0;color:var(--muted);font-size:10.5px;line-height:1.55}
+.delete-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.delete-dialog-actions button{min-height:36px;padding:8px 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer}
+.delete-dialog-actions .delete-confirm{border-color:var(--danger);background:var(--danger);color:#fff}
+.context-btn{font-size:20px;font-weight:900}
+.context-menu{min-width:156px}
+.menu-action{display:flex!important;align-items:center;gap:8px}
+.menu-action svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.menu-action.danger{color:var(--danger-text);}
+.menu-action.danger:hover{background:var(--danger-soft);color:var(--danger-text)}
+.file-action .context-wrap{display:inline-flex!important}
+
+/* v66 File Center toolbar + rename */
+.files-toolbar{display:block;margin-bottom:12px}
+.files-toolbar-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm);overflow:visible}
+.toolbar-group{min-width:0;display:grid;grid-template-rows:auto 44px;gap:6px}
+.toolbar-label{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toolbar-form{display:grid;align-items:center;gap:10px;min-width:0;margin:0;height:44px}
+.toolbar-folder-form{grid-template-columns:minmax(0,1fr) auto}
+.toolbar-upload-form{grid-template-columns:minmax(0,1fr) auto}
+.toolbar-input,.file-picker,.toolbar-btn{height:44px;min-height:44px;box-sizing:border-box}
+.toolbar-input{width:100%;min-width:0;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text);padding:0 12px;font:inherit;font-size:11px;outline:0}
+.toolbar-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.toolbar-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.toolbar-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.toolbar-btn:hover{transform:translateY(-1px);border-color:var(--border-strong)}
+.toolbar-btn.primary:hover{filter:brightness(1.04)}
+.file-picker{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;min-height:86px;height:auto!important;padding:16px;border:1.5px dashed var(--border-strong);border-radius:16px;background:var(--surface-2);color:var(--text);font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;white-space:normal;text-align:center;transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}
+.file-picker:hover,.file-picker:focus-within{background:var(--primary-soft);border-color:var(--primary);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.file-picker svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.file-picker input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.file-picker input:focus-visible + span{outline:2px solid var(--primary);outline-offset:4px;border-radius:4px}
+.file-picker-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:9.5px}
+.context-btn{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:50%;width:32px;height:32px;padding:0;display:grid;place-items:center;color:var(--muted);cursor:pointer;font-size:21px;line-height:1}
+.context-btn:hover,.context-btn:focus-visible{background:var(--surface-2)!important;color:var(--text);outline:none}
+.context-menu{position:fixed!important;z-index:2147483000!important;overflow:visible!important}
+@media(max-width:760px){
+  .files-toolbar-panel{grid-template-columns:1fr}
+  .toolbar-group{grid-template-rows:auto auto}
+  .toolbar-form{height:auto;min-height:44px}
+  .toolbar-folder-form{grid-template-columns:minmax(0,1fr) auto}
+  .toolbar-upload-form{grid-template-columns:auto minmax(0,1fr) auto}
+}
+@media(max-width:520px){
+  .toolbar-folder-form,.toolbar-upload-form{grid-template-columns:1fr}
+  .toolbar-btn,.file-picker{width:100%}
+  .file-picker-name{min-height:20px;padding:2px 0}
+}
+
+/* Multi-file upload - compact selection + button-integrated progress */
+.upload-group{grid-template-rows:auto auto!important}
+.file-dropzone{min-width:150px;width:100%;transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}
+.file-dropzone.drag-over{border-color:var(--primary)!important;background:var(--primary-soft)!important;transform:translateY(-1px);box-shadow:0 0 0 4px var(--primary-soft)}
+.upload-selection-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;min-height:24px;color:var(--muted);font-size:8.8px}
+.upload-selection-summary[hidden]{display:none!important}
+.upload-selection-summary strong{color:var(--text);font-size:9.5px}
+.upload-selection-summary .upload-selected-clear{min-height:24px;padding:4px 7px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--muted);font:inherit;font-size:8px;font-weight:800;cursor:pointer}
+.upload-selection-summary .upload-selected-clear:hover{background:var(--surface-2);border-color:var(--border-strong);color:var(--text)}
+.toolbar-upload-form{position:relative}
+/* REVISI-2: split upload button; two real flex children with no overlap. */
+.upload-split{display:inline-flex;align-items:stretch;gap:0;position:relative;height:44px;flex:none;z-index:50}
+.upload-split-main,.upload-split-toggle{height:44px;min-height:44px;margin:0;border:1px solid var(--primary);background:var(--primary);color:#fff;font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.upload-split-main{min-width:104px;padding:0 14px;border-radius:10px 0 0 10px}
+.upload-split-toggle{width:42px;padding:0;border-left:1px solid rgba(255,255,255,.35);border-radius:0 10px 10px 0}
+.upload-split-main:hover,.upload-split-toggle:hover{filter:brightness(1.04)}
+.upload-split-main:disabled,.upload-split-toggle:disabled{opacity:.82;cursor:wait}
+.upload-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:2147483001;min-width:170px;padding:5px;border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:0 16px 34px rgba(15,23,42,.18);overflow:visible}
+.upload-menu[hidden]{display:none!important}
+.upload-menu button{display:flex;width:100%;align-items:center;gap:8px;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:10.5px;font-weight:700;cursor:pointer;text-align:left}
+.upload-menu button:hover{background:var(--surface-2)}
+/* REVISI-1: fixed upload panel; it remains visible until the whole cycle finishes. */
+.upload-panel{position:fixed;right:18px;bottom:18px;width:min(430px,calc(100vw - 36px));max-height:min(62vh,560px);z-index:2147483002;border:1px solid var(--border-strong);border-radius:14px;background:var(--surface);box-shadow:0 18px 48px rgba(15,23,42,.22);overflow:hidden}
+.upload-panel[hidden]{display:none!important}
+.upload-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid var(--border)}
+.upload-panel-title{font-size:11px;font-weight:900;color:var(--text)}
+.upload-panel-state{margin-top:2px;font-size:9px;color:var(--muted)}
+.upload-panel-close{width:28px;height:28px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);cursor:pointer;font:inherit}
+.upload-panel-list{display:grid;gap:7px;padding:10px;max-height:calc(min(62vh,560px) - 66px);overflow:auto}
+.upload-panel-item{padding:8px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}
+.upload-panel-item-row{display:flex;align-items:center;gap:8px;min-width:0}
+.upload-panel-name{min-width:0;flex:1;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.upload-panel-status{font-size:9px;font-weight:800;white-space:nowrap;color:var(--muted)}
+.upload-panel-status.done{color:var(--success-text)}
+.upload-panel-status.failed{color:var(--danger-text)}
+.upload-panel-progress{height:5px;margin-top:7px;border-radius:999px;background:var(--border);overflow:hidden}
+.upload-panel-progress>span{display:block;width:0;height:100%;border-radius:inherit;background:var(--primary);transition:width .12s linear}
+.upload-panel-error{margin-top:5px;color:var(--danger-text);font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:760px){.upload-group{grid-template-rows:auto auto!important}.file-dropzone{width:100%}.upload-selection-summary{align-items:flex-start}}
+@media(max-width:620px){.upload-panel{left:0;right:0;bottom:0;width:auto;max-height:58vh;border-radius:14px 14px 0 0}.upload-panel-list{max-height:calc(58vh - 66px)}}
+
+/* v68 File Center folder layout */
+.files-card{width:100%;max-width:100%;min-width:0;height:auto;overflow:hidden;box-sizing:border-box}
+.folder-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px;padding:13px;box-sizing:border-box;min-width:0}
+.folder-card{display:flex;align-items:center;gap:11px;min-width:0;width:100%;box-sizing:border-box;padding:11px 10px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);overflow:visible;position:relative}
+.folder-card-main{display:flex;align-items:center;gap:11px;flex:1;min-width:0;text-decoration:none;color:inherit;overflow:hidden}
+.folder-card-icon{width:40px;height:40px;min-width:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:10px;background:var(--warning-soft);color:var(--warning-text);overflow:hidden}
+.folder-card-icon svg{width:25px;height:25px;fill:currentColor;stroke:currentColor;stroke-width:0}
+.folder-card-info{display:block;flex:1;min-width:0;overflow:hidden}
+.folder-card-name{display:block;min-width:0;font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.folder-card-meta{display:block;margin-top:3px;color:var(--muted);font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.context-wrap{margin-left:auto;flex:0 0 30px;z-index:4;position:relative}
+.context-menu{z-index:2147483000}
+.file-table-wrap{max-width:100%;min-width:0;overflow:auto}
+
+/* REVISI-1: File Center modern full-width layout. */
+/* REVISI-CARD: keep the File Center content card from touching the viewport edges. */
+.fc-modern{width:calc(100% - 32px);max-width:none;min-width:0;margin-inline:auto;box-sizing:border-box}
+.files-hero-modern{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.files-hero-left{display:flex;align-items:center;gap:12px;min-width:0}
+.files-title{font-size:28px}
+.qnap-badge{display:inline-flex;align-items:center;gap:7px;min-height:28px;padding:0 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--muted);font-size:9.5px;font-weight:800;white-space:nowrap;box-shadow:var(--shadow-sm)}
+.qnap-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+.qnap-badge.is-ok .qnap-badge-dot{background:var(--success);box-shadow:0 0 0 3px var(--success-soft)}
+.qnap-badge strong{color:var(--text);font-size:9.5px}
+.qnap-badge button{border:0;background:transparent;color:var(--primary);font:inherit;font-size:9px;font-weight:900;cursor:pointer;padding:2px 0}
+.files-limit-modern{padding:7px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--muted);font-size:9px;white-space:nowrap}
+.files-breadcrumbs{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 10px;color:var(--muted);font-size:10px;font-weight:800}
+.files-breadcrumbs a{color:var(--primary);text-decoration:none}
+.files-breadcrumbs .sep{color:var(--muted)}
+.files-breadcrumbs .current{color:var(--text)}
+/* REVISI-2: single-line toolbar; Upload is the primary action and the file picker is hidden. */
+.fc-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;min-width:0}
+.fc-toolbar .new-folder-form{display:flex;align-items:center;gap:7px;margin:0;flex:none}
+.fc-toolbar .new-folder-input{height:40px;width:190px;min-width:140px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;font-size:10.5px;outline:0}
+.fc-toolbar .new-folder-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.fc-toolbar .btn-outline,.fc-toolbar .btn-primary{height:40px;min-height:40px;padding:0 13px;border-radius:9px;font:inherit;font-size:10.5px;font-weight:850;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.fc-toolbar .btn-outline{border:1px solid var(--border-strong);background:var(--surface);color:var(--text)}
+.fc-toolbar .btn-primary{border:1px solid var(--primary);background:var(--primary);color:#fff}
+.fc-toolbar .btn-outline:hover,.fc-toolbar .btn-primary:hover{transform:translateY(-1px)}
+.fc-toolbar-search{flex:1;min-width:160px}
+.fc-toolbar-search input{width:100%;height:40px;box-sizing:border-box;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);padding:0 11px;font:inherit;font-size:10.5px;outline:0}
+.fc-toolbar-search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.fc-toolbar-status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:9px;white-space:nowrap}
+/* REVISI-4: one card only; no nested item cards. */
+.fc-list-card{position:relative;width:100%;max-width:100%;min-width:0;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-md);overflow:visible}
+.fc-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--surface)}
+.fc-list-head-left{display:flex;align-items:center;gap:8px;min-width:0}
+.fc-selectall{width:16px;height:16px;margin:0}
+.fc-list-title{font-size:12px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-list-count{color:var(--muted);font-size:9.5px}
+.fc-list-body{display:grid;gap:0;min-width:0}
+.fc-row{display:grid;grid-template-columns:28px minmax(0,1fr) 120px 120px 90px 120px;align-items:center;gap:10px;min-width:0;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--surface);box-sizing:border-box}
+.fc-row:last-child{border-bottom:0}
+.fc-row:hover{background:var(--surface-2)}
+.fc-row.folder-row{grid-template-columns:28px minmax(0,1fr) 160px 100px 110px}
+.fc-check{width:15px;height:15px;margin:0}
+.fc-item{display:flex;align-items:center;gap:10px;min-width:0}
+.fc-item-icon{width:32px;height:32px;min-width:32px;display:grid;place-items:center;border-radius:8px;background:var(--primary-soft);color:var(--primary-soft-text);font-size:8px;font-weight:900;text-transform:uppercase}
+.fc-item-icon.folder{background:var(--warning-soft);color:var(--warning-text)}
+.fc-item-main{min-width:0;display:flex;flex-direction:column}
+.fc-item-main a{color:var(--text);text-decoration:none;font-size:10.5px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-item-main small{margin-top:2px;color:var(--muted);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-meta{color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fc-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+.fc-actions .file-download{min-height:30px;padding:6px 9px;font-size:9px}
+.fc-empty{padding:44px 20px;text-align:center;color:var(--muted);font-size:11px}
+.fc-drop-overlay{pointer-events:none;position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;border-radius:16px;background:color-mix(in srgb,var(--primary-soft) 88%,transparent);border:2px dashed var(--primary);color:var(--primary);font-size:14px;font-weight:900}
+.fc-list-card.fc-dragging .fc-drop-overlay{display:flex}
+.fc-selected{background:color-mix(in srgb,var(--primary-soft) 65%,var(--surface))}
+/* REVISI-5: floating mass action bar and confirmation dialog. */
+.fc-mass-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147483004;display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 18px 40px rgba(15,23,42,.2)}
+.fc-mass-bar[hidden]{display:none!important}
+.fc-mass-count{font-size:10.5px;font-weight:900;color:var(--text)}
+.fc-mass-action{height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:9.5px;font-weight:850;cursor:pointer}
+.fc-mass-action.danger{background:var(--danger);border-color:var(--danger);color:#fff}.fc-mass-action:disabled{opacity:.5;cursor:not-allowed}
+.fc-mass-dialog{position:fixed;inset:0;z-index:2147483005;display:grid;place-items:center;padding:18px;background:rgba(2,6,23,.62);backdrop-filter:blur(5px)}
+.fc-mass-dialog[hidden]{display:none!important}
+.fc-mass-dialog-card{width:min(520px,100%);max-height:min(74vh,620px);display:flex;flex-direction:column;padding:18px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-lg);box-sizing:border-box}
+.fc-mass-dialog-card h3{margin:0;font-size:15px;color:var(--text)}
+.fc-mass-dialog-sub{margin:6px 0 10px;color:var(--muted);font-size:10px;line-height:1.5}
+.fc-mass-list{margin:0;padding:8px 10px;display:grid;gap:5px;overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.fc-mass-list div{font-size:10px;color:var(--text);overflow-wrap:anywhere}
+.fc-mass-warning{margin-top:9px;padding:9px 10px;border-radius:9px;border:1px solid color-mix(in srgb,var(--warning) 35%,var(--border));background:var(--warning-soft);color:var(--warning-text);font-size:9.5px;line-height:1.5}
+.fc-mass-error{margin-top:9px;padding:9px 10px;border-radius:9px;background:var(--danger-soft);color:var(--danger-text);font-size:9.5px;line-height:1.5;white-space:pre-wrap}
+.fc-mass-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px}
+.fc-mass-dialog-actions button{height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:10px;font-weight:850;cursor:pointer}
+.fc-mass-dialog-actions .confirm{background:var(--danger);border-color:var(--danger);color:#fff}
+@media(max-width:900px){.fc-row{grid-template-columns:28px minmax(0,1fr) 95px 95px 80px}.fc-row.folder-row{grid-template-columns:28px minmax(0,1fr) 110px 90px}}
+@media(max-width:700px){.files-hero-left{align-items:flex-start;flex-wrap:wrap}.files-title{font-size:24px}.fc-toolbar{flex-direction:column;align-items:stretch}.fc-toolbar .new-folder-form{width:100%}.fc-toolbar .new-folder-input{flex:1;width:auto}.fc-toolbar-search{width:100%}.fc-toolbar-search input{width:100%}.fc-row,.fc-row.folder-row{grid-template-columns:24px minmax(0,1fr);gap:8px;padding:11px 10px}.fc-row>.fc-meta,.fc-row>.fc-actions,.fc-row.folder-row>.fc-meta,.fc-row.folder-row>.fc-actions{grid-column:2}.fc-row>.fc-meta{font-size:9px}.fc-actions{justify-content:flex-start}.fc-list-head{padding:10px}.fc-mass-bar{left:8px;right:8px;bottom:8px;transform:none;justify-content:space-between}.fc-mass-count{font-size:10px}}
+
+</style>
+</head>
+<body data-user="{{ g.user.username }}">
+<header>
+ <div class="wrap topbar">
+  <div class="brand">
+   
+   <div class="brand-copy">
+    <span class="brand-eyebrow">IT OPERATIONS</span>
+    <h1 class="brand-polo">POLO INDONESIA</h1>
+    <p class="brand-company">PT. PrimaJaya Pantes Garment</p>
+    <span class="brand-role"><i></i> IT Support</span>
+   </div>
+  </div>
+  <nav class="app-nav" aria-label="Primary navigation"><a class="app-nav-link" href="/">Dashboard</a><a class="app-nav-link is-active" href="/files">File Center</a>{% if is_admin %}<a class="app-nav-link" href="/admin/tickets">Archive</a>{% endif %}</nav><button type="button" class="app-nav-toggle" id="app-nav-toggle" aria-expanded="false" aria-controls="app-nav-mobile">☰</button>
+ <div class="userbox">
+   <!-- REVISI-6: remove duplicate Dashboard/Archive links from the user box; primary navigation remains. -->
+   {{ theme_btn|safe }}
+   <span class="me">{{ g.user.display }} &bull; {{ g.user.role|title }}</span>
+   <a class="password-link" href="/password"><span>Password</span></a>
+   <form method="post" action="/logout" style="margin:0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ghost" type="submit">Sign Out</button></form>
+  </div>
+  <nav class="app-nav-mobile" id="app-nav-mobile"><a href="/">Dashboard</a><a href="/files" class="is-active">File Center</a>{% if is_admin %}<a href="/admin/tickets">Archive</a>{% endif %}</nav>
+ </div>
+</header>
+
+<main class="wrap files-shell fc-modern">
+ <section class="files-hero-modern">
+  <div class="files-hero-left">
+   <div>
+    <h2 class="files-title">File Center</h2>
+    <p class="files-sub">Shared IT files</p>
+   </div>
+   <!-- REVISI-3: compact QNAP status badge beside the File Center title. -->
+   <div id="qnap-status" class="qnap-badge {{ 'is-ok' if storage_status.available else '' }}" role="status" data-status-url="/api/files/storage-status">
+    <span class="qnap-badge-dot" aria-hidden="true"></span>
+    <strong id="qnap-status-title">{{ 'QNAP Connected' if storage_status.available else 'QNAP Disconnected' }}</strong>
+    <button type="button" id="qnap-refresh">Refresh</button>
+   </div>
+  </div>
+  <div class="files-limit-modern">Maximum per file: <b>{{ file_max_label }}</b></div>
+ </section>
+
+ <!-- REVISI-4: clickable breadcrumb path. -->
+ <nav class="files-breadcrumbs" aria-label="File path">
+  <a href="{{ url_for('file_center') }}">Root</a>
+  {% for crumb in breadcrumbs %}
+   <span class="sep">›</span>
+   {% if loop.last %}<span class="current">{{ crumb.name }}</span>{% else %}<a href="{{ url_for('file_center', folder=crumb.id) }}">{{ crumb.name }}</a>{% endif %}
+  {% endfor %}
+ </nav>
+
+ <!-- REVISI-2: one toolbar row; no visible dropzone. -->
+ <div class="fc-toolbar">
+  <form method="post" action="{{ url_for('file_create_folder') }}" class="new-folder-form" id="new-folder-form">
+   <input type="hidden" name="csrf" value="{{ csrf }}">
+   <input type="hidden" name="folder_id" value="{{ folder.id if folder else '' }}">
+   <input type="hidden" name="folder_path" value="{{ breadcrumbs|map(attribute='name')|join('/') if breadcrumbs else '' }}">
+   <input class="new-folder-input" type="text" name="name" maxlength="80" placeholder="New folder name" required aria-label="New folder name">
+   <button class="btn-outline" type="submit">New Folder</button>
+  </form>
+  <button id="file-upload-btn" class="btn-primary" type="button">Upload</button>
+  <button id="file-upload-folder-btn" class="btn-outline" type="button">Upload Folder</button>
+  {% if is_admin %}<button id="fc-paste-here" class="btn-outline" type="button" hidden>Paste</button>{% endif %}
+  <input id="file-upload-input" type="file" name="file" multiple accept="*/*" hidden>
+  <input id="file-upload-folder-input" type="file" multiple webkitdirectory directory hidden>
+  <form id="file-upload-form" method="post" action="/files/upload" enctype="multipart/form-data" hidden>
+   <input type="hidden" name="csrf" value="{{ csrf }}">
+   <input type="hidden" name="folder_id" value="{{ folder.id if folder else '' }}">
+   <input type="hidden" name="folder_path" value="{{ breadcrumbs|map(attribute='name')|join('/') if breadcrumbs else '' }}">
+  </form>
+  <div class="fc-toolbar-search">
+   <input id="file-search" type="search" placeholder="Search files and folders…" autocomplete="off" aria-label="Search files and folders">
+  </div>
+  <div class="fc-toolbar-status" id="file-search-status" aria-live="polite"></div>
+ </div>
+
+ <section id="files-card" class="fc-list-card" aria-label="Files and folders">
+  <div class="fc-list-head">
+   <div class="fc-list-head-left">
+    {% if is_admin %}<input class="fc-selectall" id="fc-select-all" type="checkbox" aria-label="Select all">{% endif %}
+    <span class="fc-list-title">{{ folder.name if folder else 'Root Files' }}</span>
+   </div>
+   <span class="fc-list-count" id="fc-list-count">{{ folders|length }} folder(s) · {{ files|length }} file(s)</span>
+  </div>
+  <div id="fc-drop-overlay" class="fc-drop-overlay">Lepas file di sini</div>
+  <div class="fc-list-body" id="fc-list-body">
+   {% for item in folders %}
+   <div class="fc-row folder-row" data-kind="folder" data-item-id="{{ item.id }}" data-name="{{ item.name|e }}" data-search="{{ item.name|e|lower }}" data-qnap-path="{{ ((folder_relative_path ~ '/' if folder_relative_path else '') ~ item.name)|e }}" data-has-files="{{ '1' if item.has_files else '0' }}">
+    {% if is_admin %}<input class="fc-check fc-item-check" type="checkbox" aria-label="Select folder {{ item.name|e }}">{% else %}<span></span>{% endif %}
+    <div class="fc-item">
+     <span class="fc-item-icon folder" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"/></svg></span>
+     <span class="fc-item-main"><a href="{{ url_for('file_center', folder=item.id) }}" title="Open {{ item.name|e }}">{{ item.name }}</a><small>Created by {{ item.created_by }} · {{ item.created_at }}</small></span>
+    </div>
+    <div class="fc-meta">Folder</div>
+    <div class="fc-meta">{{ 'Contains files' if item.has_files else 'Empty' }}</div>
+    <div class="fc-actions">
+     {% if is_admin %}
+     <div class="context-wrap">
+      <button type="button" class="context-btn" aria-label="Folder options" onclick="toggleFileMenu(this,event)">⋮</button>
+      <div class="context-menu">
+       <button type="button" class="menu-action" data-rename-trigger data-rename-type="folder" data-rename-id="{{ item.id }}" data-rename-name="{{ item.name|e }}">Rename</button>
+       <form method="post" action="{{ url_for('file_delete_folder', folder_id=item.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="menu-action danger" type="submit">Delete</button></form>
+      </div>
+     </div>
+     {% endif %}
+    </div>
+   </div>
+   {% endfor %}
+
+   {% for item in files %}
+   <div class="fc-row file-row" data-kind="file" data-item-id="{{ item.id }}" data-name="{{ item.original_name|e }}" data-search="{{ (item.original_name ~ ' ' ~ item.mime_type)|e|lower }}" data-qnap-path="{{ ((folder_relative_path ~ '/' if folder_relative_path else '') ~ item.original_name)|e }}" data-has-files="0">
+    {% if is_admin %}<input class="fc-check fc-item-check" type="checkbox" aria-label="Select file {{ item.original_name|e }}">{% else %}<span></span>{% endif %}
+    <div class="fc-item">
+     <span class="fc-item-icon" aria-hidden="true">{{ item.kind[:7] }}</span>
+     <span class="fc-item-main"><a href="{{ url_for('file_download', file_id=item.id) }}" title="Download {{ item.original_name }}">{{ item.original_name }}</a><small>{{ item.mime_type }}</small></span>
+    </div>
+    <div class="fc-meta">{{ item.size_label }}</div>
+    <div class="fc-meta">{{ item.uploaded_display }}</div>
+    <div class="fc-actions">
+     <a class="file-download" href="{{ url_for('file_download', file_id=item.id) }}">Download</a>
+     {% if is_admin %}
+     <div class="context-wrap">
+      <button type="button" class="context-btn" aria-label="File options" onclick="toggleFileMenu(this,event)">⋮</button>
+      <div class="context-menu">
+       <button type="button" class="menu-action" data-rename-trigger data-rename-type="file" data-rename-id="{{ item.id }}" data-rename-name="{{ item.original_name|e }}">Rename</button>
+       <form method="post" action="{{ url_for('file_delete', file_id=item.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="menu-action danger" type="submit">Delete</button></form>
+      </div>
+     </div>
+     {% endif %}
+    </div>
+   </div>
+   {% endfor %}
+
+   {% if not folders and not files %}<div class="fc-empty"><b>This folder is empty</b>Create a folder or upload the first file here.</div>{% endif %}
+  </div>
+ </section>
+</main>
+
+<!-- REVISI-1: upload panel remains independent from the file list and is controlled only by upload terminal states. -->
+<div id="upload-panel" class="upload-panel" hidden aria-live="polite">
+ <div class="upload-panel-head">
+  <div><div class="upload-panel-title">Upload</div><div id="upload-panel-state" class="upload-panel-state">Menunggu file…</div></div>
+  <button type="button" class="upload-panel-close" id="upload-panel-close" aria-label="Close upload panel">×</button>
+ </div>
+ <div id="upload-panel-list" class="upload-panel-list"></div>
+</div>
+
+<!-- REVISI-5: admin-only mass delete confirmation UI. -->
+<div id="fc-mass-bar" class="fc-mass-bar" hidden>
+ <span id="fc-mass-count" class="fc-mass-count">0 dipilih</span>
+ <button type="button" class="fc-mass-action" id="fc-mass-copy">Copy</button>
+ <button type="button" class="fc-mass-action" id="fc-mass-cut">Cut</button>
+ <button type="button" class="fc-mass-action" id="fc-mass-rename" disabled>Rename</button>
+ <button type="button" class="fc-mass-action danger" id="fc-mass-delete">Hapus</button>
+ <button type="button" class="fc-mass-action" id="fc-mass-cancel">Batal</button>
+</div>
+<div id="fc-mass-dialog" class="fc-mass-dialog" hidden aria-hidden="true">
+ <div class="fc-mass-dialog-card" role="dialog" aria-modal="true" aria-labelledby="fc-mass-dialog-title">
+  <h3 id="fc-mass-dialog-title">Hapus item?</h3>
+  <p class="fc-mass-dialog-sub">Item berikut akan dipindahkan ke recycle bin QNAP bila tersedia.</p>
+  <div id="fc-mass-list" class="fc-mass-list"></div>
+  <div id="fc-mass-warning" class="fc-mass-warning" hidden></div>
+  <div id="fc-mass-error" class="fc-mass-error" hidden></div>
+  <div class="fc-mass-dialog-actions"><button type="button" id="fc-mass-dialog-cancel">Batal</button><button type="button" id="fc-mass-dialog-confirm" class="confirm">Hapus</button></div>
+ </div>
+</div>
+
+
+
+<script>
+(function(){
+  const form=document.getElementById('file-upload-form');
+  const input=document.getElementById('file-upload-input');
+  const card=document.getElementById('files-card');
+  const button=document.getElementById('file-upload-btn');
+  const folderButton=document.getElementById('file-upload-folder-btn');
+  const folderInput=document.getElementById('file-upload-folder-input');
+  const panel=document.getElementById('upload-panel');
+  const panelList=document.getElementById('upload-panel-list');
+  const panelState=document.getElementById('upload-panel-state');
+  const panelClose=document.getElementById('upload-panel-close');
+  if(!form||!input||!card||!button||!panel||!panelList)return;
+
+  /* REVISI-UPLOAD: keep QNAP writes serialized so one SMB stream cannot starve the others. */
+  const MAX_CONCURRENT=1;
+  let files=[];
+  let nextId=1;
+  let running=0;
+  let finishTimer=null;
+  let uploadSessionActive=false;
+  window.__fileCenterUploadSessionActive=false;
+  let cancelled=false;
+  const activeXhrs=new Map();
+
+  /* REVISI-UPLOAD: queued items also block QNAP polling/reload. */
+  window.fileCenterUploadInProgress=()=>running>0||files.some(x=>x.status==='queued');
+
+  const fmtBytes=n=>{const units=['B','KB','MB','GB','TB'];let v=Number(n)||0,i=0;while(v>=1024&&i<units.length-1){v/=1024;i++;}return `${v.toFixed(v>=100||i===0?0:v>=10?1:2)} ${units[i]}`;};
+  const showPanel=()=>{panel.hidden=false;};
+
+  function queueRow(item){
+    if(item.row)return item.row;
+    const row=document.createElement('div');
+    row.className='upload-panel-item';
+    row.innerHTML='<div class="upload-panel-item-row"><span class="upload-panel-name"></span><span class="upload-panel-status">Queued</span></div><div class="upload-panel-progress"><span></span></div><div class="upload-panel-error" hidden></div>';
+    panelList.appendChild(row);item.row=row;return row;
+  }
+  function updatePanelItem(item){
+    const row=queueRow(item),status=row.querySelector('.upload-panel-status'),progress=row.querySelector('.upload-panel-progress>span'),error=row.querySelector('.upload-panel-error');
+    row.querySelector('.upload-panel-name').textContent=item.relativePath||item.file.name;
+    row.querySelector('.upload-panel-name').title=item.relativePath||item.file.name;
+    const pct=item.file.size?Math.min(100,(item.loaded||0)/item.file.size*100):0;
+    progress.style.width=pct.toFixed(1)+'%';status.className='upload-panel-status';
+    if(item.status==='uploading')status.textContent=`Uploading ${Math.floor(pct)}%`;
+    else if(item.status==='done'){status.textContent='Done';status.classList.add('done');progress.style.width='100%';error.hidden=true;}
+    else if(item.status==='failed'){status.textContent='Failed';status.classList.add('failed');error.hidden=false;error.textContent=item.error||'Upload failed.';}
+    else status.textContent='Queued';
+  }
+  function updateSummary(){
+    files.forEach(updatePanelItem);
+    const done=files.filter(x=>x.status==='done').length,failed=files.filter(x=>x.status==='failed').length,queued=files.filter(x=>x.status==='queued').length;
+    if(uploadSessionActive)showPanel();
+    if(running){panelState.textContent=`${done} done · ${failed} failed · ${queued} queued`;button.textContent=`Uploading ${done}/${files.length}`;button.disabled=true;}
+    else if(files.length&&done+failed===files.length){panelState.textContent=failed?`${done} done · ${failed} failed`:'Semua file berhasil diupload';button.textContent=failed?'Upload selesai dengan error':'Upload selesai';button.disabled=false;}
+    else{panelState.textContent=`${queued} queued`;button.disabled=false;button.textContent='Upload';}
+  }
+  function addFiles(list,folderMode=false){
+    const incoming=Array.from(list||[]).filter(f=>f&&f.size>=0);
+    const existing=new Set(files.map(x=>`${x.relativePath||x.file.name}|${x.file.size}|${x.file.lastModified}`));
+    incoming.forEach(file=>{
+      const relativePath=folderMode?(file.webkitRelativePath||file.name):'';
+      const key=`${relativePath||file.name}|${file.size}|${file.lastModified}`;
+      if(!existing.has(key)){files.push({id:nextId++,file,relativePath,folderMode,status:'queued',loaded:0,error:'',row:null,xhr:null});existing.add(key);}
+    });
+    if(incoming.length){uploadSessionActive=true;window.__fileCenterUploadSessionActive=true;showPanel();updateSummary();}
+  }
+  function clearSession(){if(running)return;clearTimeout(finishTimer);files=[];uploadSessionActive=false;window.__fileCenterUploadSessionActive=false;panel.hidden=true;panelList.innerHTML='';input.value='';if(folderInput)folderInput.value='';}
+
+  button.addEventListener('click',()=>{if(running)return;if(files.some(x=>x.status==='queued')){form.requestSubmit();return;}input.click();});
+  folderButton?.addEventListener('click',()=>{if(running||!folderInput)return;folderInput.click();});
+  input.addEventListener('change',()=>{addFiles(input.files);input.value='';});
+  folderInput?.addEventListener('change',()=>{
+    const selected=Array.from(folderInput.files||[]);
+    addFiles(selected,true);
+    folderInput.value='';
+    if(selected.length&&!running)form.requestSubmit();
+  });
+  ['dragenter','dragover'].forEach(type=>card.addEventListener(type,e=>{if(!e.dataTransfer?.types?.includes('Files'))return;e.preventDefault();e.stopPropagation();card.classList.add('fc-dragging');}));
+  ['dragleave','drop'].forEach(type=>card.addEventListener(type,e=>{e.preventDefault();e.stopPropagation();card.classList.remove('fc-dragging');}));
+  card.addEventListener('drop',e=>{if(e.dataTransfer?.files?.length)addFiles(e.dataTransfer.files);});
+  panelClose?.addEventListener('click',()=>{if(running)return;if(files.some(x=>x.status==='failed'))return;clearSession();});
+
+  window.addEventListener('beforeunload',e=>{if(running>0){e.preventDefault();e.returnValue='Upload masih berjalan. Tinggalkan halaman akan menghentikan upload.';return e.returnValue;}});
+  function parseResponse(xhr){try{return xhr.responseText?JSON.parse(xhr.responseText):{};}catch(_e){return {};}}
+  function uploadOne(item){
+    return new Promise(resolve=>{
+      item.status='uploading';item.loaded=0;item.error='';running++;uploadSessionActive=true;updateSummary();
+      const xhr=new XMLHttpRequest();item.xhr=xhr;activeXhrs.set(item.id,xhr);
+      xhr.open('POST','{{ url_for('file_upload_fast') }}',true);xhr.timeout=6*60*60*1000;
+      xhr.setRequestHeader('Content-Type','application/octet-stream');
+      xhr.setRequestHeader('X-File-Name',encodeURIComponent(item.file.name));
+      xhr.setRequestHeader('X-File-Size',String(item.file.size));
+      xhr.setRequestHeader('X-Folder-Id',form.querySelector('input[name=folder_id]')?.value||'');
+      xhr.setRequestHeader('X-Folder-Path',form.querySelector('input[name=folder_path]')?.value||'');
+      if(item.relativePath)xhr.setRequestHeader('X-Relative-Path',encodeURIComponent(item.relativePath));
+      xhr.setRequestHeader('X-CSRF-Token','{{ csrf }}');
+      xhr.upload.onprogress=ev=>{if(ev.lengthComputable){item.loaded=ev.loaded;updateSummary();}};
+      const finish=(status,error,ok)=>{item.status=status;item.error=error||'';running=Math.max(0,running-1);activeXhrs.delete(item.id);item.xhr=null;if(ok)item.loaded=item.file.size;updateSummary();resolve(ok);};
+      xhr.onload=()=>{const data=parseResponse(xhr);const ok=xhr.status>=200&&xhr.status<300&&data.ok===true;finish(ok?'done':'failed',ok?'':(data.error||`Server upload failed (${xhr.status}).`),ok);};
+      xhr.onerror=()=>finish('failed','Network error while uploading.',false);
+      xhr.ontimeout=()=>finish('failed','Upload timed out.',false);
+      xhr.onabort=()=>finish('failed','Upload aborted.',false);
+      try{xhr.send(item.file);}catch(err){finish('failed',err?.message||'Unable to start upload.',false);}
+    });
+  }
+  async function worker(){while(!cancelled){const item=files.find(x=>x.status==='queued');if(!item)return;await uploadOne(item);}}
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    if(running||!files.some(x=>x.status==='queued'))return;
+    clearTimeout(finishTimer);cancelled=false;uploadSessionActive=true;showPanel();updateSummary();
+    const workers=Math.min(MAX_CONCURRENT,files.filter(x=>x.status==='queued').length);
+    await Promise.all(Array.from({length:workers},()=>worker()));
+    const failed=files.filter(x=>x.status==='failed').length;
+    const done=files.filter(x=>x.status==='done').length;
+    const terminal=files.length>0&&files.every(x=>x.status==='done'||x.status==='failed');
+    const hasFolderUpload=files.some(x=>x.folderMode);
+    updateSummary();
+    if(!terminal||running>0)return;
+    if(hasFolderUpload){
+      const message=failed?`Upload Folder selesai: ${done} berhasil · ${failed} gagal`:`Upload Folder selesai: ${done} file berhasil diupload`;
+      window.fileCenterToast?.(message,failed?'err':'ok');
+      finishTimer=setTimeout(()=>{if(running>0)return;panel.hidden=true;uploadSessionActive=false;window.__fileCenterUploadSessionActive=false;window.location.reload();},1700);
+      return;
+    }
+    if(failed){uploadSessionActive=true;window.__fileCenterUploadSessionActive=true;panelState.textContent=`${done} done · ${failed} failed`;return;}
+    finishTimer=setTimeout(()=>{if(running>0||!files.length||!files.every(x=>x.status==='done'))return;panel.hidden=true;uploadSessionActive=false;window.__fileCenterUploadSessionActive=false;window.location.reload();},2000);
+  });
+  updateSummary();
+})();
+</script>
+
+
+
+<div id="rename-dialog" class="rename-dialog" hidden aria-hidden="true">
+ <div class="rename-dialog-card" role="dialog" aria-modal="true" aria-labelledby="rename-dialog-title">
+  <h3 id="rename-dialog-title">Rename item</h3>
+  <p id="rename-dialog-subtitle">Enter a new name.</p>
+  <input id="rename-dialog-input" type="text" maxlength="180" autocomplete="off">
+  <div id="rename-dialog-error" class="rename-dialog-error" role="alert" aria-live="polite"></div>
+  <div class="rename-dialog-actions">
+   <button type="button" id="rename-dialog-cancel">Cancel</button>
+   <button type="button" id="rename-dialog-save" class="rename-save">Save</button>
+  </div>
+ </div>
+</div>
+
+<script>
+(function(){
+  const copyBtn=document.getElementById('fc-mass-copy');
+  const cutBtn=document.getElementById('fc-mass-cut');
+  const renameBtn=document.getElementById('fc-mass-rename');
+  const pasteBtn=document.getElementById('fc-paste-here');
+  const checks=()=>Array.from(document.querySelectorAll('.fc-item-check'));
+  const selected=()=>checks().filter(x=>x.checked).map(x=>x.closest('.fc-row')).filter(Boolean);
+  const storageKey='polo_filecenter_clipboard';
+  const currentPath='{{ folder_relative_path|e }}';
+  function readClip(){try{const v=JSON.parse(localStorage.getItem(storageKey)||'null');return v&&Array.isArray(v.items)&&v.items.length?v:null;}catch(_e){return null;}}
+  function writeClip(value){try{localStorage.setItem(storageKey,JSON.stringify(value));}catch(_e){}}
+  function clearClip(){try{localStorage.removeItem(storageKey);}catch(_e){}}
+  function syncPaste(){if(!pasteBtn)return;const clip=readClip();pasteBtn.hidden=!clip;pasteBtn.textContent=clip?.operation==='cut'?'Paste / Move':'Paste';}
+  function syncActions(){const rows=selected();if(renameBtn)renameBtn.disabled=rows.length!==1;syncPaste();}
+  function copyCut(operation){
+    const rows=selected();
+    if(!rows.length)return;
+    writeClip({operation,items:rows.map(row=>({kind:row.dataset.kind,path:row.dataset.qnapPath||'',name:row.dataset.name||''}))});
+    syncPaste();
+  }
+  copyBtn?.addEventListener('click',()=>copyCut('copy'));
+  cutBtn?.addEventListener('click',()=>copyCut('cut'));
+  renameBtn?.addEventListener('click',()=>{
+    const row=selected()[0];if(!row)return;
+    const trigger=row.querySelector('[data-rename-trigger]');
+    if(trigger){trigger.click();return;}
+    window.fcOpenRename?.(row.dataset.kind,row.dataset.itemId,row.dataset.name||'');
+  });
+  pasteBtn?.addEventListener('click',async()=>{
+    const clip=readClip();if(!clip)return;
+    pasteBtn.disabled=true;
+    try{
+      const response=await fetch('/api/files/transfer',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-Token':'{{ csrf }}'},credentials:'same-origin',body:JSON.stringify({operation:clip.operation,items:clip.items,destination_path:currentPath})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.ok)throw new Error(data.error||`Transfer failed (${response.status}).`);
+      clearClip();
+      checks().forEach(c=>{c.checked=false;});
+      window.fcSyncSelection?.();
+      location.reload();
+    }catch(err){
+      pasteBtn.disabled=false;
+      window.fcActivity?.show?.('error','Transfer gagal',err.message||'Transfer failed.','',2600);
+    }
+  });
+  checks().forEach(c=>c.addEventListener('change',syncActions));
+  syncActions();
+  window.fcSyncTransferActions=syncActions;
+})();
+</script>
+
+<script>
+(function(){
+  /* REVISI-5: admin-only batch selection, confirmation, and one-request delete. */
+  const bar=document.getElementById('fc-mass-bar');
+  const countEl=document.getElementById('fc-mass-count');
+  const deleteBtn=document.getElementById('fc-mass-delete');
+  const cancelBtn=document.getElementById('fc-mass-cancel');
+  const dialog=document.getElementById('fc-mass-dialog');
+  const listEl=document.getElementById('fc-mass-list');
+  const warningEl=document.getElementById('fc-mass-warning');
+  const errorEl=document.getElementById('fc-mass-error');
+  const dialogCancel=document.getElementById('fc-mass-dialog-cancel');
+  const dialogConfirm=document.getElementById('fc-mass-dialog-confirm');
+  const selectAll=document.getElementById('fc-select-all');
+  const checks=()=>Array.from(document.querySelectorAll('.fc-item-check'));
+  if(!bar||!dialog||!deleteBtn)return;
+  function selected(){return checks().filter(x=>x.checked).map(x=>x.closest('.fc-row')).filter(Boolean);}
+  function syncSelection(){const rows=selected();countEl.textContent=`${rows.length} dipilih`;bar.hidden=rows.length===0;if(selectAll){const all=checks();selectAll.checked=all.length>0&&rows.length===all.length;selectAll.indeterminate=rows.length>0&&rows.length<all.length;}checks().forEach(c=>c.closest('.fc-row')?.classList.toggle('fc-selected',c.checked));window.fcSyncTransferActions?.();}
+  function openDialog(){const rows=selected();if(!rows.length)return;listEl.innerHTML='';let folderFiles=0;rows.forEach(row=>{const d=document.createElement('div');d.textContent=`${row.dataset.kind==='folder'?'Folder':'File'}: ${row.dataset.name||''}`;listEl.appendChild(d);if(row.dataset.kind==='folder'&&row.dataset.hasFiles==='1')folderFiles++;});warningEl.hidden=!folderFiles;warningEl.textContent=folderFiles?`${folderFiles} folder berisi file. Seluruh isi folder akan ikut dipindahkan ke recycle bin QNAP.`:'';errorEl.hidden=true;errorEl.textContent='';dialog.hidden=false;dialog.setAttribute('aria-hidden','false');dialogConfirm.disabled=false;dialogConfirm.focus();}
+  function closeDialog(){dialog.hidden=true;dialog.setAttribute('aria-hidden','true');}
+  checks().forEach(c=>c.addEventListener('change',syncSelection));
+  selectAll?.addEventListener('change',()=>{checks().forEach(c=>{c.checked=selectAll.checked;});syncSelection();});
+  deleteBtn.addEventListener('click',openDialog);cancelBtn.addEventListener('click',()=>{checks().forEach(c=>c.checked=false);syncSelection();});dialogCancel.addEventListener('click',closeDialog);dialog.addEventListener('click',e=>{if(e.target===dialog)closeDialog();});
+  dialogConfirm.addEventListener('click',async()=>{
+    const rows=selected();if(!rows.length)return;dialogConfirm.disabled=true;errorEl.hidden=true;
+    const paths=rows.map(r=>r.dataset.qnapPath).filter(Boolean);
+    try{
+      const response=await fetch('/api/files/mass-delete',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-Token':'{{ csrf }}'},credentials:'same-origin',body:JSON.stringify({paths})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data){throw new Error(data.error||`Delete failed (${response.status}).`);}
+      const okCount=Number(data.successful||0),failedCount=Number(data.failed||0);
+      if(failedCount===0){location.reload();return;}
+      const failures=(data.results||[]).filter(x=>!x.ok).map(x=>`${x.path}: ${x.reason||'Unknown error'}`);
+      errorEl.hidden=false;errorEl.textContent=`${okCount} berhasil, ${failedCount} gagal\n${failures.join('\n')}`;dialogConfirm.disabled=false;
+    }catch(err){errorEl.hidden=false;errorEl.textContent=err.message||'Mass delete failed.';dialogConfirm.disabled=false;}
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.hidden)closeDialog();});
+  window.fcSyncSelection=syncSelection;syncSelection();
+
+  var activeMenu=null, activeOwner=null;
+  var renameDialog=document.getElementById('rename-dialog');
+  var renameInput=document.getElementById('rename-dialog-input');
+  var renameError=document.getElementById('rename-dialog-error');
+  var renameTitle=document.getElementById('rename-dialog-title');
+  var renameCancel=document.getElementById('rename-dialog-cancel');
+  var renameSave=document.getElementById('rename-dialog-save');
+  var renameTarget=null;
+
+  function closeFileMenu(){
+    if(!activeMenu)return;
+    if(activeMenu.__placeholder && activeOwner){ activeOwner.appendChild(activeMenu); }
+    activeMenu.classList.remove('is-floating');
+    activeMenu.style.left=''; activeMenu.style.top='';
+    activeMenu.__placeholder=false;
+    activeMenu=null; activeOwner=null;
+  }
+
+  function openFileMenu(btn){
+    closeFileMenu();
+    var wrap=btn.parentElement, menu=wrap.querySelector('.context-menu');
+    if(!menu)return;
+    activeOwner=wrap; activeMenu=menu;
+    var r=btn.getBoundingClientRect();
+    menu.classList.add('is-floating');
+    menu.__placeholder=true;
+    document.body.appendChild(menu);
+    var menuWidth=menu.offsetWidth || 164;
+    var menuHeight=menu.offsetHeight || 90;
+    var left=Math.min(Math.max(8,r.right-menuWidth),window.innerWidth-menuWidth-8);
+    var top=r.bottom+6;
+    if(top+menuHeight>window.innerHeight-8) top=Math.max(8,r.top-menuHeight-6);
+    menu.style.left=Math.round(left)+'px'; menu.style.top=Math.round(top)+'px';
+  }
+
+  window.toggleFileMenu=function(btn,e){
+    e.preventDefault(); e.stopPropagation();
+    if(activeMenu && activeOwner===btn.parentElement){ closeFileMenu(); return; }
+    openFileMenu(btn);
+  };
+  document.addEventListener('click',function(e){
+    if(e.target.closest('.context-menu') || e.target.closest('.context-btn')) return;
+    closeFileMenu();
+  });
+  window.addEventListener('resize',closeFileMenu);
+  window.addEventListener('scroll',closeFileMenu,true);
+
+  function clearRenameError(){ if(renameError) renameError.textContent=''; }
+  function showRenameError(message){ if(renameError) renameError.textContent=message||'Rename failed.'; }
+  function openRenameDialog(type,id,current){
+    renameTarget={type:type,id:String(id),current:current||''};
+    renameTitle.textContent=type==='folder'?'Rename folder':'Rename file';
+    renameInput.maxLength=type==='folder'?80:180;
+    renameInput.value=current||'';
+    clearRenameError();
+    renameSave.disabled=false;
+    renameDialog.hidden=false; renameDialog.setAttribute('aria-hidden','false');
+    closeFileMenu();
+    requestAnimationFrame(function(){ renameInput.focus(); renameInput.select(); });
+  }
+  function closeRenameDialog(){
+    renameTarget=null; clearRenameError(); renameSave.disabled=false;
+    renameDialog.hidden=true; renameDialog.setAttribute('aria-hidden','true');
+  }
+  window.fcOpenRename=openRenameDialog;
+
+  function validateClientName(type,name){
+    var invalid=/[<>:"/\\|?*]/;
+    if(!name) return 'Name cannot be empty.';
+    if(name.length>(type==='folder'?80:180)) return 'Name is too long.';
+    if(invalid.test(name)) return 'Use a name without < > : " / \\ | ? *.';
+    if(/[. ]$/.test(name)) return 'Name cannot end with a dot or space.';
+    var upper=(type==='file' ? name.replace(/\.[^.]*$/,'') : name).toUpperCase();
+    if(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/.test(upper)) return 'That name is reserved by Windows.';
+    return '';
+  }
+
+  async function requestRename(method,endpoint,name){
+    return fetch(endpoint,{
+      method:method,
+      headers:{
+        'Content-Type':'application/json',
+        'Accept':'application/json',
+        'X-CSRF-Token':'{{ csrf }}'
+      },
+      body:JSON.stringify({name:name}),
+      cache:'no-store',
+      credentials:'same-origin',
+      redirect:'follow'
+    });
+  }
+
+  async function submitRename(){
+    if(!renameTarget || renameSave.disabled) return;
+    var name=(renameInput.value||'').trim();
+    var clientError=validateClientName(renameTarget.type,name);
+    if(clientError){ showRenameError(clientError); renameInput.focus(); return; }
+    if(name===renameTarget.current){ closeRenameDialog(); return; }
+
+    renameSave.disabled=true; clearRenameError();
+    var endpoint=renameTarget.type==='folder'
+      ? '{{ url_for('api_file_rename_folder', folder_id=0) }}'.replace('/0','/'+encodeURIComponent(renameTarget.id))
+      : '{{ url_for('api_file_rename', file_id=0) }}'.replace('/0','/'+encodeURIComponent(renameTarget.id));
+    try{
+      var response=await requestRename('PATCH',endpoint,name);
+      var contentType=response.headers.get('content-type')||'';
+      var data={};
+      if(contentType.indexOf('application/json')!==-1){
+        try{ data=await response.json(); }catch(_e){ data={}; }
+      }
+      if(response.redirected || !response.ok || !data.ok){
+        var message=response.redirected ? 'Your session has expired. Please sign in again.' : (data.error || ('Rename failed ('+response.status+').'));
+        console.error('[File Center] rename failed', {endpoint:endpoint,method:'PATCH',status:response.status,redirected:response.redirected,response:data});
+        showRenameError(message);
+        renameSave.disabled=false;
+        return;
+      }
+      console.info('[File Center] rename success', {type:renameTarget.type,id:renameTarget.id,name:data.name});
+      closeRenameDialog();
+      window.location.assign(window.location.href);
+    }catch(err){
+      console.error('[File Center] rename request error',err);
+      showRenameError('Connection error. Please try again.');
+      renameSave.disabled=false;
+    }
+  }
+
+  // Use event delegation so Rename keeps working even when context menus are
+  // moved to <body> for overflow-safe positioning.
+  document.addEventListener('click',function(e){
+    var trigger=e.target.closest ? e.target.closest('[data-rename-trigger]') : null;
+    if(!trigger) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openRenameDialog(trigger.dataset.renameType,trigger.dataset.renameId,trigger.dataset.renameName||'');
+  },true);
+  renameCancel.addEventListener('click',closeRenameDialog);
+  renameSave.addEventListener('click',submitRename);
+  renameInput.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();submitRename();}
+    if(e.key==='Escape'){e.preventDefault();closeRenameDialog();}
+  });
+  renameDialog.addEventListener('click',function(e){ if(e.target===renameDialog) closeRenameDialog(); });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ if(!renameDialog.hidden) closeRenameDialog(); else closeFileMenu(); }
+  });
+})();
+</script>
+
+<script>
+/* REVISI-1: client-side search only; no backend/file logic is changed. */
+(function(){
+  const input=document.getElementById('file-search'),status=document.getElementById('file-search-status');
+  if(!input)return;
+  function filter(){const q=(input.value||'').trim().toLowerCase();let shown=0;document.querySelectorAll('#fc-list-body .fc-row').forEach(row=>{const ok=!q||(row.dataset.search||'').includes(q);row.hidden=!ok;if(ok)shown++;});if(status)status.textContent=q?`${shown} hasil`:'';}
+  input.addEventListener('input',filter);
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/ui.js', v='76') }}" defer></script>
+{{ theme_js|safe }}
+
+<script>
+/* REVISI-3: compact QNAP badge refresh; refresh is disabled during uploads. */
+(()=>{const box=document.getElementById('qnap-status'),btn=document.getElementById('qnap-refresh');if(!box)return;const url=box.dataset.statusUrl||'/api/files/storage-status';async function status(){try{const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});const d=await r.json().catch(()=>({}));const ok=!!d.available;box.classList.toggle('is-ok',ok);document.getElementById('qnap-status-title').textContent=ok?'QNAP Connected':'QNAP Disconnected';}catch(e){box.classList.remove('is-ok');document.getElementById('qnap-status-title').textContent='QNAP Disconnected';}}function forceRefresh(){if(window.fileCenterUploadInProgress?.()||window.__fileCenterUploadSessionActive)return;location.reload();}btn?.addEventListener('click',forceRefresh);status();setInterval(forceRefresh,45000);})();
+</script>
+<script>(()=>{const b=document.getElementById("app-nav-toggle"),m=document.getElementById("app-nav-mobile");if(!b||!m)return;b.addEventListener("click",()=>{const o=m.classList.toggle("is-open");b.setAttribute("aria-expanded",o?"true":"false")})})();</script></body>
+</html>

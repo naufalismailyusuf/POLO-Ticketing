@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>POLO Indonesia · Dashboard</title>
+<link rel="icon" href="/static/favicon.ico">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('polo-theme')||localStorage.getItem('theme')||'light'}catch(e){}</script>
+<link rel="stylesheet" href="/static/css/dashboard.css?v=r43-layout">
+<link rel="stylesheet" href="/static/css/dashboard-age-v54.css?v=r54">
+<script src="/static/js/dashboard-static.js?v=r71" defer></script>
+<link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-28">
+<script src="/static/js/ui-controls.js?v=admin-tools-28" defer></script>
+<link rel="stylesheet" href="/static/css/admin-nav-dropdown.css?v=16">
+<link rel="stylesheet" href="/static/css/edp-dropzone.css?v=revisi-20"><script src="/static/js/edp-dropzone.js?v=revisi-20" defer></script><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+<link rel="stylesheet" href="/static/css/dashboard-queue-v71.css?v=r72">
+</head>
+<body>
+<header class="app-header">
+ <div class="header-inner">
+  <a class="brand" href="/">POLO INDONESIA</a>
+  <nav class="main-nav" aria-label="Navigation"><a class="active" href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a href="/guide">Guide</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+  <div class="header-actions">
+   <details class="profile-dropdown"><summary aria-label="Account menu"><span class="profile-avatar">◉</span><span class="profile-name" id="user-label"></span><span class="profile-chevron">▾</span></summary><div class="profile-menu"><div class="profile-heading"><strong id="profile-display">Account</strong><small id="user-role"></small></div><button type="button" class="profile-action" id="theme-toggle">◐ &nbsp; Toggle Dark / Light Mode</button><a class="profile-action" href="/password">Change Password</a><form class="logout-form" action="/logout" method="post"><input type="hidden" name="csrf" class="csrf-field" id="logout-csrf"><button class="profile-action profile-signout" type="submit">Sign out</button></form></div></details>
+   <button class="icon-button mobile-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu">☰</button>
+  </div>
+ </div>
+ <nav class="mobile-nav" id="mobile-nav" hidden aria-label="Mobile navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a href="/guide">Guide</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+</header>
+<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+<main class="dashboard-layout">
+ <section class="ticket-summary" aria-label="Ticket statistics">
+  <div class="summary-panel summary-open">
+   <div class="open-metric"><span>Open tickets</span><strong id="stat-open">0</strong></div>
+   <div class="breach-metric" title="Active tickets at or beyond 4 days (96 hours) since Case time"><span>SLA breach</span><strong id="stat-breach">0</strong></div>
+  </div>
+  <div class="summary-panel summary-metrics">
+   <div class="summary-stat" id="total-kpi"><span>Total</span><strong id="stat-total">0</strong></div>
+   <div class="summary-stat summary-success" id="completed-kpi"><span>Completed</span><strong id="stat-done">0</strong></div>
+   <div class="summary-stat"><span>Created today</span><strong id="stat-today">0</strong></div>
+   <div class="summary-stat"><span>Resolved today</span><strong id="resolved-today">0</strong></div>
+  </div>
+  <div class="summary-panel summary-aging">
+   <div class="aging-caption"><h2>Open ticket age</h2><span class="aging-count" id="aging-open-count">0 active</span></div>
+   <div class="age-values">
+    <div><strong id="age-01">0</strong><span>0–1 days</span></div>
+    <div><strong id="age-23">0</strong><span>2–3 days</span></div>
+    <div><strong id="age-47">0</strong><span title="SLA breach: active tickets aged at least 4 days">4–7 days</span></div>
+    <div><strong id="age-8">0</strong><span title="SLA breach: active tickets aged at least 4 days">8+ days</span></div>
+   </div>
+   <div id="age-distribution" class="age-distribution" role="img" aria-label="Open ticket age distribution"><i id="age-bar-01"></i><i id="age-bar-23"></i><i id="age-bar-47"></i><i id="age-bar-8"></i></div>
+   <div class="aging-sla-note" title="SLA breach is measured from Case time, starting at 96 hours for active tickets."><span>SLA threshold: 4 days</span><strong id="aging-breach-count">0 breached</strong></div>
+  </div>
+ </section>
+ <section class="card queue-card">
+  <div class="card-head"><h1>Open Ticket Queue <span id="queue-count" class="count-pill">0</span></h1><div class="card-actions"><label id="select-all-wrap" class="check-label admin-only" hidden><input id="queue-select-all" type="checkbox" data-select-scope="queue">All</label><button id="refresh-dashboard" class="text-button" type="button">Refresh</button><button id="queue-view-all" class="text-button" type="button">View all</button></div></div>
+  <div id="bulk-action-bar" class="bulk-bar" hidden><strong><span id="bulk-selected-count">0</span> selected</strong><select id="bulk-action" aria-label="Bulk action"><option value="assign">Assign</option><option value="close">Close</option><option value="assign_close">Assign + Close</option></select><select id="bulk-assign-owner" aria-label="Assign Support"></select><button id="bulk-action-btn" class="button primary" type="button">Assign</button><span id="bulk-action-result" aria-live="polite"></span></div>
+  <div id="open-queue-list" class="queue-list" tabindex="0" role="region" aria-label="Active tickets only. Resolved and closed tickets are in Archive. Scroll for more."></div>
+  <div id="queue-scroll-hint" class="queue-scroll-hint" aria-hidden="true" hidden><span class="queue-scroll-hint-icon">&#8595;</span> Scroll for more tickets</div>
+ </section>
+ <section class="card create-card" id="new-ticket">
+  <div class="card-head"><h2>New Ticket</h2><span class="status status-open">Open</span></div>
+  <form id="new-ticket-form" class="ticket-form">
+   <label>Support<select id="new-ticket-support" name="support_id"></select></label>
+   <label>Priority<select id="new-priority" name="priority"></select></label>
+   <label>Reporter<input name="pelapor" maxlength="100" autocomplete="name" required></label>
+   <label>WhatsApp<input name="whatsapp" maxlength="20" inputmode="tel"></label>
+   <label>Division<select id="new-division" name="division" required><option value="">Select division</option></select></label>
+   <label>Category<select id="new-category" name="category"></select></label>
+   <label class="case-time-field">Case time<input id="case-at" name="case_at" type="datetime-local" required></label>
+   <label class="textarea-field issue-field">Issue<textarea name="masalah" maxlength="2000" required></textarea></label>
+   <div class="evidence-field edp-upload-field" id="new-ticket-evidence-field"><span class="edp-upload-field-title">Evidence</span><label class="edp-dropzone" data-edp-dropzone><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span class="edp-dropzone-content"><strong>Drop evidence here or browse files</strong><small data-edp-drop-status>Images, PDF, or documents</small></span><input class="edp-file-native" id="new-ticket-evidence" name="evidence" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></label><span class="edp-upload-hint" id="new-ticket-evidence-hint">Optional</span></div>
+   <button class="button primary form-submit" type="submit">Create ticket</button>
+  </form>
+ </section>
+ <section class="card performance-card">
+  <div class="card-head chart-head"><h2>Team Performance</h2><div class="date-controls"><label>From<input id="chart-start" type="date"></label><label>To<input id="chart-end" type="date"></label><button id="chart-today" class="text-button" type="button">Today</button><button id="chart-all-dates" class="text-button" type="button">All dates</button></div></div>
+  <div class="chart-legend"><span><i class="done"></i>Completed</span><span><i class="open"></i>Open</span><span><i class="breach"></i>SLA breach</span></div>
+  <div id="chart-wrap" class="chart-wrap" aria-label="Team ticket chart"></div>
+ </section>
+ <section class="card workload-card">
+  <div class="card-head"><h2>Workload Board</h2><div class="card-actions"><button id="support-toolbar-toggle" class="text-button mobile-filters" type="button" aria-expanded="false" aria-controls="support-toolbar-content">Filters</button><a id="support-export" class="text-button" href="/export">Export</a><a id="support-export-all" class="text-button" href="/export?ticket_all=1">Export all</a></div></div>
+  <div class="workload-filters" id="support-toolbar-content">
+   <input id="support-q" type="search" placeholder="Search" aria-label="Search tickets">
+   <label class="workload-date-field">From<input id="support-from" type="date"></label><label class="workload-date-field">To<input id="support-to" type="date"></label>
+   <label class="owner-filter-label">Support<select id="support-owner-filter" aria-label="Support"></select></label>
+   <div class="filter-actions"><button id="support-today-date" class="button" type="button">Today</button><button id="support-all-dates" class="button" type="button">All dates</button></div>
+   <div class="segmented" id="support-filters" aria-label="Status filter"><button class="is-active" type="button" data-support-filter="all">All</button><button type="button" data-support-filter="Open">Open</button><button type="button" data-support-filter="In Progress">In Progress</button><button type="button" data-support-filter="Resolved">Resolved</button></div>
+  </div>
+  <div class="table-wrap"><table class="workload-table"><thead><tr><th>Support</th><th>Total</th><th>Open</th><th>Resolved</th><th>Latest ticket</th></tr></thead><tbody id="support-team-content"></tbody></table></div>
+ </section>
+</main>
+<dialog id="details-modal" class="details-modal" aria-labelledby="modal-title">
+ <div class="modal-frame"><div class="modal-head"><h2 id="modal-title"></h2><div class="card-actions"><button id="modal-close" class="icon-button" type="button" aria-label="Close">×</button></div></div>
+ <div id="modal-bulk-bar" class="bulk-bar" hidden><label class="check-label"><input id="modal-select-all" type="checkbox" data-select-scope="all">All</label><strong><span id="modal-selected-count">0</span> selected</strong><select id="modal-bulk-action" aria-label="Bulk action"><option value="assign">Assign</option><option value="close">Close</option><option value="assign_close">Assign + Close</option></select><select id="modal-bulk-owner" aria-label="Assign Support"></select><button id="modal-bulk-submit" class="button primary" type="button">Assign</button></div>
+ <div class="modal-content" id="modal-content"></div></div>
+</dialog>
+<script src="/static/js/admin-nav-dropdown.js?v=r60" defer></script>
+</body>
+</html>

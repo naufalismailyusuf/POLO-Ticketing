@@ -1,0 +1,16 @@
+/* Revisi 21: reusable upload state bars; inherits existing File Center themes. */
+.upload-panel .fc-upload-entry{padding:10px 0;border-bottom:1px solid color-mix(in srgb,currentColor 15%,transparent);min-width:0}
+.upload-panel .fc-upload-entry-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;min-width:0;font-size:13px}
+.upload-panel .fc-upload-entry-head>span{overflow-wrap:anywhere;min-width:0;flex:1}
+.upload-panel .fc-upload-entry-head>strong{font-size:12px;font-weight:600;flex-shrink:0;max-width:44%;text-align:right;overflow-wrap:anywhere}
+.upload-panel .fc-upload-track{height:5px;border-radius:20px;background:color-mix(in srgb,currentColor 14%,transparent);overflow:hidden;margin-top:10px}
+.upload-panel .fc-upload-track>span{display:block;height:100%;border-radius:inherit;background:#4390d4;transition:width .18s ease}
+@media(max-width:600px){.upload-panel .fc-upload-entry-head{font-size:12px;gap:8px}.upload-panel .fc-upload-entry-head>strong{font-size:11px}}
+
+/* Revisi 23: upload and QNAP-copy progress are distinct, labeled stages. */
+.upload-panel .fc-upload-stage{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:11px;color:color-mix(in srgb,currentColor 72%,transparent)}
+.upload-panel .fc-upload-stage>span:last-child{font-variant-numeric:tabular-nums;flex-shrink:0}
+.upload-panel .fc-upload-stage+.fc-upload-track{margin-top:5px}
+.upload-panel .fc-upload-qnap-stage{margin-top:12px}
+.upload-panel .fc-upload-qnap-track>span{background:#269a81}
+@media(max-width:600px){.upload-panel .fc-upload-stage{font-size:10px}}

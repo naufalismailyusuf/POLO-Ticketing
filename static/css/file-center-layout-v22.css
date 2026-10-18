@@ -1,0 +1,75 @@
+/* Revisi 22 — File Center layout only. Scoped to avoid modifying other pages. */
+.files-shell .workspace-card{overflow:visible}
+.files-shell .fc-workspace-top{padding:21px 24px 18px;border-bottom:0}
+.files-shell .fc-location-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;min-width:0}
+.files-shell .fc-location{display:flex;min-width:0;flex:1;flex-direction:column;gap:9px}
+.files-shell .fc-section-kicker{font-size:10px;font-weight:650;letter-spacing:.095em;color:var(--muted)}
+.files-shell .fc-location .breadcrumbs{font-size:13px;min-height:20px}
+.files-shell .fc-top-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex:0 0 auto;min-width:0;flex-wrap:wrap}
+.files-shell .fc-top-actions>.button,.files-shell .fc-folder-toggle,.files-shell .fc-new-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:40px;padding:0 14px;border-radius:10px;line-height:1.2;font-size:12px;font-weight:650;text-decoration:none}
+.files-shell .fc-top-actions svg,.files-shell .fc-new-dropdown svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.files-shell .fc-new-trigger svg.fc-caret{width:12px;height:12px;opacity:.8;transition:transform .18s ease}
+.files-shell .fc-new-menu[open] svg.fc-caret{transform:rotate(180deg)}
+.files-shell .fc-new-menu{position:relative;z-index:32}
+.files-shell .fc-new-menu>summary{list-style:none;cursor:pointer;user-select:none}
+.files-shell .fc-new-menu>summary::-webkit-details-marker{display:none}
+.files-shell .fc-new-menu>summary:focus-visible,.files-shell .fc-folder-toggle:focus-visible{outline:2px solid var(--info,#528fcb);outline-offset:3px}
+.files-shell .fc-new-dropdown{position:absolute;right:0;top:calc(100% + 9px);z-index:33;min-width:245px;padding:6px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-hover);animation:card-reveal 150ms var(--ease)}
+.files-shell .fc-new-dropdown button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 10px;border:0;border-radius:8px;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+.files-shell .fc-new-dropdown button:hover,.files-shell .fc-new-dropdown button:focus-visible{background:var(--surface-2)}
+.files-shell .fc-new-dropdown button>span{min-width:0;display:flex;flex-direction:column;gap:3px}
+.files-shell .fc-new-dropdown button strong{font-size:12px;font-weight:650}
+.files-shell .fc-new-dropdown button small{font-size:11px;color:var(--muted);font-weight:400}
+.files-shell .fc-new-folder-panel{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:18px 0 3px;max-width:none;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px}
+.files-shell .fc-new-folder-panel[hidden]{display:none!important}
+.files-shell .fc-new-folder-panel input{max-width:430px;min-width:175px;flex:1 1 240px;min-height:40px}
+.files-shell .fc-new-folder-panel .button{min-height:40px}
+.files-shell .fc-new-folder-panel .form-error{flex:0 0 100%;font-size:11px}
+.files-shell .fc-search-row{display:flex;align-items:center;gap:12px;margin-top:20px;min-width:0}
+.files-shell .fc-search-field{position:relative;min-width:0;flex:1 1 auto}
+.files-shell .fc-search-field svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;pointer-events:none;fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linecap:round}
+:root body .files-shell .fc-search-field input{width:100%;height:46px!important;padding-left:43px!important;border-radius:11px;background:var(--surface-2);font-size:13px}
+.files-shell .fc-toolbar-status{flex:none;min-width:0;text-align:right}
+.files-shell .fc-dropzone-wrap{padding:0 24px 18px}
+.files-shell .fc-edp-dropzone{margin:0;min-height:143px;padding:23px 20px;border:1.5px dashed #79a7a3;border-radius:13px;background:color-mix(in srgb,var(--surface) 94%,#62bda9);display:flex;flex-direction:column;gap:9px;text-align:center;transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.files-shell .fc-edp-dropzone:hover,.files-shell .fc-edp-dropzone:focus-within,.files-shell .fc-edp-dropzone.is-dragover{border-color:#469a95;background:color-mix(in srgb,var(--surface) 90%,#62bda9)}
+.files-shell .fc-dropzone-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);box-shadow:0 2px 9px rgba(0,0,0,.035)}
+.files-shell .fc-edp-dropzone .fc-dropzone-icon svg{width:21px;height:21px;flex:auto;stroke:#508c8a}
+.files-shell .fc-edp-dropzone .edp-dropzone-content{gap:4px;align-items:center;max-width:100%}
+.files-shell .fc-edp-dropzone .edp-dropzone-content strong{font-size:14px;letter-spacing:-.01em}
+.files-shell .fc-edp-dropzone .edp-dropzone-content small{font-size:12px;line-height:1.5;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.files-shell .fc-dropzone-badge{display:inline-flex;align-items:center;padding:5px 9px;border:1px solid var(--border);border-radius:99px;background:var(--surface);color:var(--muted);font-size:10px;font-weight:550;line-height:1}
+.files-shell .fc-list-card{margin-top:0;border-top:1px solid var(--border)}
+.files-shell .fc-list-head{padding:14px 24px;min-height:52px}
+.files-shell .fc-list-head::before{content:'Files & folders';font-size:12px;font-weight:650;color:var(--text)}
+.files-shell .fc-list-head #fc-list-count{margin-left:auto;white-space:nowrap}
+.files-shell .fc-list-head .check-label{margin-right:12px}
+.files-shell .fc-list-head .check-label[hidden]{display:none!important}
+.files-shell #fc-paste-here[hidden]{display:none!important}
+:root[data-theme="dark"] .files-shell .fc-edp-dropzone{background:color-mix(in srgb,var(--surface) 95%,#4faaa0);border-color:#577f7d}
+:root[data-theme="dark"] .files-shell .fc-edp-dropzone:hover,:root[data-theme="dark"] .files-shell .fc-edp-dropzone.is-dragover{background:color-mix(in srgb,var(--surface) 90%,#4faaa0);border-color:#75ada5}
+@media(max-width:850px){
+  .files-shell .fc-workspace-top{padding:18px 18px 15px}
+  .files-shell .fc-location-actions{align-items:flex-start;flex-wrap:wrap;gap:15px}
+  .files-shell .fc-location{flex-basis:100%}
+  .files-shell .fc-top-actions{width:100%;justify-content:flex-start}
+  .files-shell .fc-search-row{margin-top:16px}
+  .files-shell .fc-dropzone-wrap{padding:0 18px 15px}
+}
+@media(max-width:600px){
+  .files-shell .fc-workspace-top{padding:16px 14px 14px}
+  .files-shell .fc-top-actions{flex-wrap:wrap;gap:8px}
+  .files-shell .fc-top-actions>.button,.files-shell .fc-folder-toggle,.files-shell .fc-new-trigger{min-height:38px;padding:0 12px}
+  .files-shell .fc-new-menu{flex:0 0 auto}
+  .files-shell .fc-new-dropdown{right:auto;left:0;min-width:min(245px,calc(100vw - 56px))}
+  .files-shell .fc-new-folder-panel{margin-top:12px;padding:10px}
+  .files-shell .fc-new-folder-panel input{flex-basis:100%;width:100%;max-width:none}
+  .files-shell .fc-search-row{flex-wrap:wrap;gap:5px}
+  .files-shell .fc-search-field{flex-basis:100%}
+  :root body .files-shell .fc-search-field input{height:42px!important}
+  .files-shell .fc-toolbar-status:not(:empty){width:100%;text-align:left}
+  .files-shell .fc-dropzone-wrap{padding:0 14px 14px}
+  .files-shell .fc-edp-dropzone{min-height:136px;padding:17px 12px}
+  .files-shell .fc-list-head{padding:11px 14px}
+}
+@media(prefers-reduced-motion:reduce){.files-shell .fc-edp-dropzone,.files-shell .fc-new-trigger svg.fc-caret{transition:none}}

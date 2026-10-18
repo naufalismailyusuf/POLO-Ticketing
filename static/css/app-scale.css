@@ -1,0 +1,13 @@
+/* Shared visual scale for all Ticketing pages. Browser zoom remains at 100%. */
+:root {
+  --app-ui-scale: 0.75;
+  zoom: var(--app-ui-scale);
+}
+/* Keep full-height backgrounds when the root is scaled down. */
+:root body { min-height: 133.3333vh; }
+
+/* Preserve readable text and controls on phones / narrow screens. */
+@media (max-width: 767px) {
+  :root { --app-ui-scale: 1; }
+  :root body { min-height: 100vh; }
+}

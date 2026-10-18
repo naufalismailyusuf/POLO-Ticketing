@@ -1,0 +1,15 @@
+/* Revisi 43: Manage Divisions (Admin Tools only) */
+.admin-tools-shell{display:grid;gap:18px}
+.division-admin-card{padding-bottom:18px}
+.division-add-form{display:grid;gap:8px;padding:0 20px 12px}
+.division-add-form>label{font-size:12px;color:var(--muted)}
+.division-add-controls{display:flex;gap:10px;align-items:center}
+.division-add-controls input{flex:1;min-width:0}
+.division-admin-hint{margin:0;padding:0 20px 14px;font-size:12px;color:var(--muted)}
+.division-settings{display:grid;gap:9px;padding:0 20px}
+.division-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
+.division-setting-info{min-width:0;display:grid;gap:2px}
+.division-setting-info strong{font-size:13px;overflow-wrap:anywhere}
+.division-setting-info small{color:var(--muted)}
+.division-setting-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:520px){.division-add-controls,.division-setting-row{align-items:stretch;flex-direction:column}.division-setting-actions .button{flex:1}}

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light dark"><title>Open Ticket · POLO</title><link rel="icon" href="/static/favicon.ico">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('polo-theme')||localStorage.getItem('theme')||'light'}catch(e){}</script>
+<link rel="stylesheet" href="/static/css/dashboard.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/workspace.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/ticket-staff.css?v=admin-tools-27">
+<script src="/static/js/ui-controls.js?v=admin-tools-27" defer></script><script src="/static/js/workspace.js?v=admin-tools-27" defer></script><link rel="stylesheet" href="/static/css/edp-dropzone.css?v=revisi-20"><script src="/static/js/edp-dropzone.js?v=revisi-20" defer></script><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+</head><body class="workspace-page staff-page">
+<main class="workspace-shell staff-shell"><div class="workspace-heading"><h1>Open Ticket</h1><span class="staff-status"><i aria-hidden="true"></i>IT Support</span></div><div id="error" class="staff-error" role="alert" hidden></div>
+<form class="workspace-card staff-form" method="post" enctype="multipart/form-data" action="/open" id="ticket-form"><input type="hidden" name="csrf" id="csrf"><div class="staff-form-grid">
+<label class="form-field" for="staff_name">Your name<input id="staff_name" name="staff_name" maxlength="100" required autocomplete="name"></label>
+<label class="form-field" for="support_id">Support<select id="support_id" name="support_id" required><option value="">Select Support</option></select></label>
+<label class="form-field" for="division">Division<select id="division" name="division" required><option value="">Select division</option></select></label>
+<label class="form-field" for="category">Category<select id="category" name="category"></select></label>
+<label class="form-field" for="priority">Priority<select id="priority" name="priority"></select></label>
+<label class="form-field" for="whatsapp"><span class="label-line"><span>WhatsApp</span><span class="field-optional">Optional</span></span><input id="whatsapp" name="whatsapp" maxlength="30" inputmode="tel"></label>
+<div class="form-field" id="staff-evidence-field"><label for="foto">Photo <span class="field-optional" id="staff-evidence-hint">Optional · 10 MB max</span></label><label class="edp-dropzone" data-edp-dropzone><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span class="edp-dropzone-content"><strong>Drop photo here or browse</strong><small id="file-name" data-edp-drop-status>JPG, PNG, or other image · 10 MB max</small></span><input class="edp-file-native" id="foto" type="file" name="foto" accept="image/*"></label></div>
+<div class="form-field full"><label for="masalah">Issue</label><textarea id="masalah" name="masalah" maxlength="2000" required placeholder="Describe the issue"></textarea><div class="text-meta"><span id="char-count">0 / 2000</span></div></div></div><div class="staff-form-actions"><button class="button primary" id="submit-btn" type="submit">Submit ticket</button></div></form></main>
+<script src="/static/js/open.js?v=r43" defer></script></body></html>

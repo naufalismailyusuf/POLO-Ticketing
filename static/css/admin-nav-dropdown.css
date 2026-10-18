@@ -1,0 +1,76 @@
+/* Admin-only header dropdown; parent visibility follows existing admin-only role logic. */
+.main-nav,.header-inner{overflow:visible}
+.admin-nav-dropdown{position:relative;flex-shrink:0}
+.admin-nav-dropdown[hidden]{display:none!important}
+.admin-nav-dropdown>summary{list-style:none;cursor:pointer;user-select:none;padding:9px 13px;border-radius:8px;font-size:12px;font-weight:600;color:#a9b5c8;white-space:nowrap;transition:background .2s,color .2s}
+.admin-nav-dropdown>summary::-webkit-details-marker{display:none}
+.admin-nav-dropdown>summary:hover,.admin-nav-dropdown[open]>summary,.admin-nav-dropdown.active>summary{background:rgba(255,255,255,.08);color:#fff}
+.admin-chevron{display:inline-block;margin-left:5px;transition:transform .22s ease}
+.admin-nav-dropdown[open] .admin-chevron{transform:rotate(180deg)}
+.admin-nav-menu{position:absolute;top:calc(100% + 9px);left:0;min-width:174px;padding:6px;background:#101a2b;border:1px solid rgba(255,255,255,.15);border-radius:10px;box-shadow:0 14px 32px rgba(0,0,0,.24);z-index:1000;animation:admin-menu-fade .22s ease both}
+.admin-nav-menu a{display:block;padding:10px 12px!important;white-space:nowrap;border-radius:7px;color:#d8e0ec!important}
+.admin-nav-menu a:hover,.admin-nav-menu a.active{background:rgba(255,255,255,.12)!important;color:#fff!important}
+@keyframes admin-menu-fade{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+.mobile-nav .admin-nav-dropdown{width:100%}
+.mobile-nav .admin-nav-dropdown>summary{display:block;width:100%;padding:10px 12px;color:#d8e0ec}
+.mobile-nav .admin-nav-menu{position:static;min-width:0;margin:4px 0 6px 10px;box-shadow:none;background:rgba(255,255,255,.04)}
+@media(prefers-reduced-motion:reduce){.admin-nav-menu{animation:none}.admin-chevron{transition:none}}
+
+/* Profile dropdown - retains header shadow, responsive layout and theme */
+.profile-dropdown{position:relative;flex:none;color:#e6edf7}
+.profile-dropdown>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;min-height:36px;padding:4px 11px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.035);font-size:12px;font-weight:600;white-space:nowrap;transition:background .2s,border-color .2s}
+.profile-dropdown>summary::-webkit-details-marker{display:none}
+.profile-dropdown>summary:hover,.profile-dropdown[open]>summary{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.3)}
+.profile-avatar{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.13);color:#f3d99c}
+.profile-name{max-width:100px;overflow:hidden;text-overflow:ellipsis}
+.profile-chevron{font-size:11px;transition:transform .2s}
+.profile-dropdown[open] .profile-chevron{transform:rotate(180deg)}
+.profile-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:220px;padding:7px;background:#101a2b;border:1px solid rgba(255,255,255,.17);border-radius:12px;box-shadow:0 16px 36px rgba(0,0,0,.3);z-index:1100;animation:admin-menu-fade .22s ease both}
+.profile-heading{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:4px}
+.profile-heading small{text-transform:capitalize;color:#a9b5c8}
+.profile-action{width:100%;display:block;text-align:left;padding:11px 12px;border:0;border-radius:8px;background:transparent;color:#e2e8f0;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none}
+.profile-action:hover{background:rgba(255,255,255,.1);color:white}
+.profile-signout{color:#f5b5b5}
+.profile-menu .logout-form{display:block!important}
+@media(max-width:900px){.profile-dropdown{display:block}.profile-name{max-width:70px}}
+@media(max-width:480px){.profile-dropdown>summary{gap:5px;padding:4px 7px}.profile-name{max-width:55px}.profile-menu{min-width:205px}}
+@media(prefers-reduced-motion:reduce){.profile-menu,.admin-nav-menu{animation:none}}
+
+
+/* REVISI 6: shared modern profile badge on all app headers.
+   Green means THIS signed-in session, not live presence of other users. */
+.profile-dropdown>summary{gap:10px;min-height:42px;padding:5px 13px 5px 6px;border:1px solid rgba(189,206,228,.22);border-radius:14px;background:rgba(255,255,255,.045);box-shadow:inset 0 1px rgba(255,255,255,.045);transition:border-color .18s,background .18s,box-shadow .18s}
+.profile-dropdown>summary:hover,.profile-dropdown[open]>summary{background:rgba(255,255,255,.085);border-color:rgba(203,219,240,.38);box-shadow:0 6px 16px rgba(5,10,20,.12)}
+.profile-dropdown>summary:focus-visible{outline:2px solid #8db4ed;outline-offset:3px}
+.profile-dropdown .profile-avatar{position:relative;isolation:isolate;flex:0 0 32px;width:32px;height:32px;box-sizing:border-box;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#3c526f,#293d58);border:1px solid rgba(255,255,255,.13);color:transparent;font-size:0;line-height:0}
+.profile-dropdown .profile-avatar::before{content:'';display:block;width:19px;height:19px;background-repeat:no-repeat;background-position:center;background-size:contain;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 24 24' stroke='%23e9f0fa' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.5'/%3E%3Cpath d='M5.5 20v-2a6.5 6.5 0 0 1 13 0v2'/%3E%3C/svg%3E")}
+.profile-dropdown .profile-avatar::after{content:'';position:absolute;right:-3px;bottom:-2px;width:9px;height:9px;border-radius:50%;background:#28c77f;border:2px solid #202b3d;box-shadow:0 0 0 1px rgba(40,199,127,.18)}
+.profile-dropdown .profile-name{font-size:12px;font-weight:700;letter-spacing:.01em;color:#f2f6fc;max-width:115px}
+.profile-dropdown .profile-chevron{font-size:0;width:8px;height:8px;display:inline-block;box-sizing:border-box;border-right:1.5px solid #c6d3e7;border-bottom:1.5px solid #c6d3e7;transform:rotate(45deg) translateY(-2px);transition:transform .18s ease;margin:0 2px 0 3px}
+.profile-dropdown[open] .profile-chevron{transform:rotate(225deg) translate(-1px,-1px)}
+/* Revisi 16: real grid children, no absolutely-positioned Online badge. */
+.profile-dropdown .profile-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:10px;row-gap:3px;align-items:center;min-height:42px;padding:12px;position:static}
+.profile-dropdown .profile-heading::before,.profile-dropdown .profile-heading::after{content:none!important;display:none!important}
+.profile-dropdown .profile-heading strong{grid-column:1;grid-row:1;min-width:0;overflow-wrap:anywhere;font-size:13px}
+.profile-dropdown .profile-heading small{grid-column:1;grid-row:2;min-width:0;overflow-wrap:anywhere}
+.profile-dropdown .profile-presence{grid-column:2;grid-row:1/3;justify-self:end;display:inline-flex;align-items:center;gap:6px;flex:none;max-width:90px;padding:5px 9px;border:1px solid rgba(40,199,127,.28);border-radius:999px;background:rgba(40,199,127,.08);color:#8fe8b9;white-space:nowrap;font-size:10px;font-weight:700;line-height:1.2}
+.profile-dropdown .profile-presence-dot{display:block;flex:none;width:6px;height:6px;border-radius:50%;background:#35d68b}
+.profile-dropdown .profile-menu{box-sizing:border-box;width:max-content;min-width:235px;max-width:min(320px,calc(100vw - 24px));overflow:visible}
+.profile-dropdown .profile-menu .profile-action{box-sizing:border-box;min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){.profile-dropdown>summary{gap:7px;padding:4px 10px 4px 5px;min-height:40px}.profile-dropdown .profile-avatar{width:30px;height:30px;flex-basis:30px}.profile-dropdown .profile-name{max-width:65px}.profile-dropdown .profile-menu{min-width:215px}}
+@media(prefers-reduced-motion:reduce){.profile-dropdown>summary,.profile-dropdown .profile-chevron{transition:none}}
+
+
+/* REVISI 7 — single-layer compact account pill, subtle online indicator. */
+.profile-dropdown>summary{min-height:40px;gap:9px;padding:4px 12px 4px 5px;border-radius:999px;border:1px solid rgba(189,206,228,.20);background:rgba(255,255,255,.035);box-shadow:none;transition:background .2s,border-color .2s}
+.profile-dropdown>summary:hover,.profile-dropdown[open]>summary{background:rgba(255,255,255,.075);border-color:rgba(189,206,228,.34);box-shadow:none}
+.profile-dropdown .profile-avatar{width:30px;height:30px;flex-basis:30px;border-radius:50%;background:#30445f;border:0;box-shadow:none}
+.profile-dropdown .profile-avatar::after{width:8px;height:8px;right:-1px;bottom:0;background:#2bc787;border:2px solid #202b3d;box-shadow:none}
+.profile-dropdown .profile-chevron{margin-left:4px;opacity:.85}
+.profile-menu{border-radius:14px;padding:7px;box-shadow:0 14px 34px rgba(5,12,24,.25)}
+.profile-menu #theme-toggle{display:flex!important;align-items:center!important;gap:11px;width:100%!important;min-height:42px!important;box-sizing:border-box;text-align:left!important;padding:10px 11px!important;white-space:nowrap;color:#e2e8f0!important;font-weight:600!important;line-height:1.3!important}
+.profile-menu #theme-toggle::before{content:'';display:block;flex:0 0 18px;width:18px;height:18px;background-size:18px;background-position:center;background-repeat:no-repeat;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23dce7f6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.9 13.4A9 9 0 0 1 10.6 3.1 9 9 0 1 0 20.9 13.4Z'/%3E%3C/svg%3E")}
+.profile-menu #theme-toggle[data-mode-target='light']::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23dce7f6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41'/%3E%3C/svg%3E")}
+.profile-dropdown .profile-menu .profile-action:focus-visible{outline:2px solid #83b5ed;outline-offset:-2px}
+@media(max-width:480px){.profile-dropdown>summary{padding:4px 9px 4px 5px}.profile-dropdown .profile-avatar{width:29px;height:29px;flex-basis:29px}}
+@media(prefers-reduced-motion:reduce){.profile-dropdown>summary{transition:none}}

@@ -1,0 +1,800 @@
+
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Support Dashboard</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico', v='87') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png', v='87') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css', v='92') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-page.css', v='1') }}">{{ theme_head|safe }}
+<style>
+.resolution-banner {
+  margin-bottom:10px;
+  padding:9px 10px;
+  border-radius:10px;
+  background:var(--success-soft);
+  color:var(--success-text);
+  border:1px solid color-mix(in srgb,var(--success) 24%,var(--border));
+  font-size:10px;
+  line-height:1.45;
+}
+.legacy-action {
+  margin-top:10px;
+  padding:9px 10px;
+  border-radius:9px;
+  background:var(--surface-2);
+  border:1px dashed var(--border);
+  color:var(--muted);
+  font-size:10.5px;
+  line-height:1.45;
+}
+.workflow-status-form {
+  margin-top:9px;
+}
+.workflow-status-form select {
+  min-height:36px;
+  width:100%;
+  padding:8px 10px;
+  border-radius:9px;
+}
+.workflow-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+@media(max-width:640px){
+  .comment-evidence { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .progress-form-grid { grid-template-columns:1fr; }
+}
+
+/* v31 queue + layout refinements */
+.overview{row-gap:18px;column-gap:18px}
+.stats{gap:16px;row-gap:16px}
+.stat{margin:0}
+.open-queue-list{max-height:430px;overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-gutter:stable;}
+.open-queue-item{min-height:68px;}
+.open-queue-item-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+.open-queue-item-wrap > a{min-width:0}
+.open-queue-item-wrap .queue-claim{display:flex;align-items:center;padding:0 10px 0 0}
+.queue-claim button{min-height:30px;padding:6px 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--primary);font:inherit;font-size:9px;font-weight:800;cursor:pointer;white-space:nowrap}
+.queue-claim button:hover{background:var(--primary-soft)}
+.open-queue-list::-webkit-scrollbar{width:7px}.open-queue-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px}
+.progress-form-grid{grid-template-columns:minmax(0,240px)}
+.progress-form-grid .progress-form-note{display:none}
+.progress-form select{width:100%;font-size:11px}
+
+/* v38 native select reset; ui.js renders the animated dropdown */
+select {
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:none !important;
+  padding-right:12px !important;
+}
+.brand-copy{min-width:0}
+.brand-polo{margin:0;font-size:28px;line-height:.92;letter-spacing:.06em;font-weight:900}
+.brand-company{margin:5px 0 0;color:rgba(255,255,255,.78);font-size:11.5px;letter-spacing:.01em}
+.brand-role{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#eef2ff;font-size:10px;font-weight:850;letter-spacing:.02em}
+.brand-role i{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.12)}
+.brand-mark img{transform:translateX(4px);width:39px;height:39px}
+.password-link{display:inline-flex !important;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);padding:8px 10px !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.password-link svg{width:14px;height:14px;opacity:.9}
+
+
+/* Bulk ticket assignment */
+.queue-head-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.queue-select-all{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:9px;font-weight:800;cursor:pointer;white-space:nowrap}
+.queue-select-all input,.queue-check input{accent-color:var(--primary);cursor:pointer}
+.bulk-assign-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:11px;background:var(--primary-soft);color:var(--text);font-size:9.5px}
+.bulk-assign-bar[hidden]{display:none!important}
+.bulk-assign-bar select,.bulk-assign-bar button{min-height:32px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);padding:5px 9px;font:inherit;font-size:9px;font-weight:800}
+.bulk-assign-bar button{background:var(--primary);border-color:var(--primary);color:#fff;cursor:pointer}
+.bulk-assign-bar button:disabled{opacity:.55;cursor:not-allowed}
+.open-queue-item-wrap{grid-template-columns:auto minmax(0,1fr) auto;align-items:stretch}
+.queue-check{display:flex;align-items:center;justify-content:center;padding:0 2px 0 3px;min-width:20px}
+.open-queue-item-wrap>.open-queue-item{grid-column:2}
+.open-queue-item-wrap>.queue-claim{grid-column:3}
+@media(max-width:700px){.queue-head-right{justify-content:flex-start}.open-queue-item-wrap{grid-template-columns:auto minmax(0,1fr)}.open-queue-item-wrap>.open-queue-item{grid-column:2}.open-queue-item-wrap>.queue-claim{grid-column:2;justify-self:end;padding:0 8px 8px 0}}
+
+/* Support Team board revision */
+.support-section{margin-top:22px}
+.support-section-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.support-section-label{flex:0 0 auto}
+.support-section-label .eyebrow{margin-bottom:3px}
+.support-toolbar{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.support-toolbar-form{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;flex-wrap:wrap}
+.support-toolbar .q{width:min(260px,22vw);min-width:180px;height:40px}
+.support-toolbar .support-date{display:flex;align-items:center;gap:7px;height:40px}
+.support-toolbar .support-date label{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.support-toolbar input[type=date]{height:40px;min-width:130px}
+.support-toolbar .toolbar-btn,.support-toolbar .support-filter{height:40px;min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--muted);font:inherit;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.support-toolbar .toolbar-btn:hover,.support-toolbar .support-filter:hover,.support-toolbar .support-filter.is-active{background:var(--primary-soft);border-color:color-mix(in srgb,var(--primary) 35%,var(--border));color:var(--primary)}
+.support-toolbar .toolbar-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.support-toolbar .support-filter-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.support-toolbar .support-filter{padding:0 11px}
+
+
+/* v72 app header */
+.app-nav{display:flex;align-items:center;justify-content:center;gap:4px;flex:1;min-width:0}
+.app-nav-link{position:relative;color:rgba(255,255,255,.76)!important;text-decoration:none!important;font-size:11px;font-weight:850;padding:12px 13px;border-radius:9px;transition:.18s ease}
+.app-nav-link:hover,.app-nav-link.is-active{color:#fff!important;background:rgba(255,255,255,.07)}
+.app-nav-link.is-active::after{content:"";position:absolute;left:14px;right:14px;bottom:5px;height:2px;border-radius:2px;background:#8b93ff}
+.app-nav-toggle,.app-nav-mobile{display:none}
+.support-card-eyebrow{font-size:8px;font-weight:950;letter-spacing:.14em;color:var(--primary);margin-bottom:3px}
+.chart-wrap .bar-seg.breach{background:var(--danger)!important;color:#fff;}
+
+
+</style>
+</head><body data-user="{{ g.user.username }}">
+<header><div class="wrap topbar">
+ <div class="brand">
+  
+  <div class="brand-copy">
+   <span class="brand-eyebrow">IT OPERATIONS</span>
+   <h1 class="brand-polo">POLO INDONESIA</h1>
+   <p class="brand-company">PT. PrimaJaya Pantes Garment</p>
+   <span class="brand-role"><i></i> IT Support</span>
+  </div>
+ </div>
+ <nav class="app-nav" aria-label="Primary navigation">
+  <a href="/" class="app-nav-link is-active">Dashboard</a>
+  <a href="/files" class="app-nav-link">File Center</a>
+  {% if is_admin %}<a href="/admin/tickets" class="app-nav-link">Archive</a>{% endif %}
+ </nav>
+ <button type="button" class="app-nav-toggle" id="app-nav-toggle" aria-expanded="false" aria-controls="app-nav-mobile" aria-label="Open menu">☰</button>
+ <div class="userbox">
+  {{ theme_btn|safe }}
+  <details class="notif-wrap">
+   <summary class="notif-trigger" title="Notifications" aria-label="Notifications">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    {% if unread_notifications %}<span class="notif-count">{{ unread_notifications if unread_notifications < 99 else '99+' }}</span>{% endif %}
+   </summary>
+   <div class="notif-panel">
+    <div class="notif-head"><div><b>Notifications</b><span class="notif-unread-label">{{ unread_notifications }} unread</span></div>
+     {% if unread_notifications %}<form method="post" action="/notifications/read" style="margin:0" class="notif-mark-form"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="notif-mark" type="button">Mark all read</button></form>{% endif %}
+    </div>
+    <div class="notif-list">
+     {% for n in notifications %}
+      <a class="notif-item {{ 'unread' if not n.is_read else '' }}" href="{% if n.ticket_id %}/ticket/{{ n.ticket_id }}{% else %}#{% endif %}" {% if n.ticket_id %}target="_blank" rel="noopener noreferrer"{% endif %}>
+       <b>{{ n.title }}</b><p>{{ n.body }}</p><time>{{ n.created_at }}</time>
+      </a>
+     {% else %}<div class="notif-empty">No notifications yet.</div>{% endfor %}
+    </div>
+   </div>
+  </details>
+  <span class="me">{{ g.user.display }} &bull; {{ g.user.role|title }}</span>
+  <a class="files-link" href="/files">Files</a>{% if is_admin %}<a class="archive-link" href="/admin/tickets">Archive</a>{% endif %}<a class="password-link" href="/password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg><span>Password</span></a>
+  <form method="post" action="/logout" style="margin:0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ghost">Sign Out</button></form>
+ </div>
+ <nav class="app-nav-mobile" id="app-nav-mobile" aria-label="Mobile navigation">
+  <a href="/" class="is-active">Dashboard</a>
+  <a href="/files">File Center</a>
+  {% if is_admin %}<a href="/admin/tickets">Archive</a>{% endif %}
+  <a href="/password">Password</a>
+  <button type="button" id="mobile-theme-toggle" class="app-nav-mobile-action">Theme</button>
+  <form method="post" action="/logout" class="app-nav-mobile-logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="app-nav-mobile-action">Sign Out</button></form>
+ </nav>
+</div></header>
+
+<main class="wrap">
+{{ alerts|safe }}
+
+<section class="overview">
+ <section class="queue-card">
+  <div class="queue-head">
+   <div>
+    <div class="eyebrow">NEEDS ATTENTION</div>
+    <h2 class="queue-title">Open Ticket Queue</h2>
+    <p class="queue-subtitle">Oldest open tickets first.</p>
+   </div>
+   <div class="queue-head-right">
+    <span class="queue-count">{{ open_queue_total }} open{% if unassigned_open_count %} · {{ unassigned_open_count }} unassigned{% endif %}</span>
+    {% if is_admin and open_queue %}<label class="queue-select-all"><input id="queue-select-all" type="checkbox"> Select all</label>{% endif %}
+   </div>
+  </div>
+  {% if is_admin and open_queue %}
+  <div id="bulk-action-bar" class="bulk-assign-bar" hidden>
+   <span><b id="bulk-selected-count">0</b> ticket selected</span>
+   <select id="bulk-action">
+    <option value="assign">Assign</option>
+    <option value="close">Close</option>
+    <option value="assign_close">Assign + Close</option>
+   </select>
+   <select id="bulk-assign-owner">
+    <option value="">Choose Support</option>
+    {% for p2 in support_users if p2 != unassigned %}<option value="{{ p2 }}">{{ p2 }}</option>{% endfor %}
+   </select>
+   <button id="bulk-action-btn" type="button">Assign</button>
+   <span id="bulk-action-result" class="bulk-action-result" role="status" aria-live="polite"></span>
+  </div>
+  {% endif %}
+  {% if open_queue %}
+   <div id="open-queue-list" class="open-queue-list">
+    {% for r in open_queue %}
+    <div class="open-queue-item-wrap" data-ticket-id="{{ r.id }}">
+     {% if is_admin %}<label class="queue-check"><input type="checkbox" class="queue-ticket-check" value="{{ r.id }}" aria-label="Select {{ r.no_tiket }}"></label>{% endif %}
+     <a class="open-queue-item sla-{{ r.sla_level }}" href="/ticket/{{ r.id }}" target="_blank" rel="noopener noreferrer">
+      <div class="open-queue-icon">!</div>
+      <div class="open-queue-main">
+       <div class="open-queue-top"><span class="no">{{ r.no_tiket }}</span><span class="status-badge status-{{ r.status|replace(' ','-')|replace('_','-') }}">{{ r.status }}</span><span class="priority-badge priority-{{ r.priority }}">{{ r.priority }}</span><span class="category-badge">{{ r.category }}</span>{% if r.support_id == unassigned %}<span class="unassigned-badge">Unassigned</span>{% else %}<span class="open-owner">{{ r.support_id }}</span>{% endif %}<span class="sla-badge {{ r.sla_level }}">{{ r.sla_label }}</span></div>
+       <div class="open-queue-title">{{ r.masalah }}</div>
+       <div class="open-queue-meta">Case {{ r.case_tanggal or r.tanggal }} &bull; {{ r.case_jam or r.jam }} &bull; {{ r.pelapor }}</div>
+      </div>
+      <span class="open-queue-arrow">→</span>
+     </a>
+     {% if r.support_id == unassigned and g.user.role == 'support' and r.status not in ['Resolved','Closed','Done'] %}
+     <form class="queue-claim" method="post" action="/claim/{{ r.id }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" title="Assign this ticket to me">Take ticket</button>
+     </form>
+     {% endif %}
+    </div>
+    {% endfor %}
+   </div>
+  {% else %}
+   <div class="queue-empty"><div class="queue-empty-icon">✓</div><div><b>No open tickets</b><span>Queue is clear.</span></div></div>
+  {% endif %}
+ </section>
+ <div class="stats">
+  <div class="stat" style="--c:#6366f1"><small>Total Tickets</small><b>{{ total }}</b><span>{{ ticket_filter_label }}</span></div>
+  <div class="stat" style="--c:#f59e0b"><small>Open Tickets</small><b>{{ all_open_count }}</b><span>All dates</span></div>
+  <div class="stat" style="--c:#ef4444"><small>SLA Breach</small><b>{{ sla_breach_count }}</b><span>4+ days open</span></div>
+  <div class="stat" style="--c:#10b981"><small>Completed</small><b>{{ n_done }}</b><span>{{ ticket_filter_label }}</span></div>
+  <div class="stat secondary-stat" style="--c:#3b82f6"><small>Today</small><b>{{ today_total }}</b><span>Created today</span></div>
+  <div class="stat secondary-stat notification-stat" style="--c:#8b5cf6"><small>Notifications</small><b class="notification-stat-count">{{ unread_notifications }}</b><span class="notification-stat-label">{{ 'Unread' if unread_notifications else 'All read' }}</span></div>
+ </div>
+</section>
+
+<div class="top">
+ <section class="panel">
+  <div class="panel-title">
+   <div><h2>Team Performance</h2><p>Open vs. resolved by date.</p></div>
+   <form class="chart-range" method="get" action="/">
+    {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+    <input type="hidden" name="ticket_start" value="{{ ticket_start or '' }}">
+    <input type="hidden" name="ticket_end" value="{{ ticket_end or '' }}">
+    {% if ticket_all %}<input type="hidden" name="ticket_all" value="1">{% endif %}
+    <div class="chart-range-field"><label class="f">From</label><input type="date" name="chart_start" value="{{ chart_start }}" required></div>
+    <div class="chart-range-field"><label class="f">To</label><input type="date" name="chart_end" value="{{ chart_end }}" required></div>
+    <button class="range-apply" type="submit">Apply</button>
+   </form>
+  </div>
+  <div class="range-note">Range: <b>{{ chart_start }}</b> – <b>{{ chart_end }}</b></div>
+  <div class="chart-wrap">
+   {% if chart_total == 0 %}
+    <div class="empty">No data for this range.</div>
+   {% else %}
+    {% for b in bars %}
+    <div class="chart-row">
+     <div class="bar-track" title="{{ b.name }}: {{ b.done }} completed, {{ b.open }} open">
+      {% if b.done > 0 %}<div class="bar-seg done" style="height:{{ b.done_bar_pct }}%">{{ b.done if b.done_bar_pct > 14 else '' }}</div>{% endif %}
+      {% if b.open_normal > 0 %}<div class="bar-seg open" style="height:{{ b.open_bar_pct }}%">{{ b.open_normal if b.open_bar_pct > 14 else '' }}</div>{% endif %}
+      {% if b.breach > 0 %}<div class="bar-seg breach" style="height:{{ b.breach_bar_pct }}%">{{ b.breach if b.breach_bar_pct > 14 else '' }}</div>{% endif %}
+     </div>
+     <div class="chart-user"><span class="dot" style="background:{{ b.color }}"></span><span>{{ b.name }}</span></div>
+     <div class="chart-meta"><b>{{ b.total }} tickets</b><div><small>{{ b.done }} completed · {{ b.open }} open</small></div></div>
+    </div>
+    {% endfor %}
+   {% endif %}
+  </div>
+  <div class="leg"><span><i style="background:var(--success)"></i> Completed</span><span><i style="background:var(--warning)"></i> Open</span><span><i style="background:var(--danger)"></i> SLA Breach</span></div>
+  <section class="chat-box" id="team-chat">
+   <div class="chat-head">
+    <div><h3 class="chat-title">Team Chat</h3><p class="chat-note">Internal team chat.</p></div>
+    <button type="button" class="chat-refresh" id="chatRefresh">Refresh</button>
+   </div>
+   <div class="chat-feed" id="chatFeed">
+    {% if chat_messages %}
+     {% for m in chat_messages %}
+      <div class="chat-msg {% if m.username == g.user.username %}me{% endif %}">
+       <div class="chat-msg-head"><span class="chat-msg-user">{{ m.display }}</span><span class="chat-msg-time">{{ m.created_at }}</span></div>
+       <div class="chat-msg-text">{{ m.message }}</div>
+      </div>
+     {% endfor %}
+    {% else %}
+     <div class="chat-empty">No messages.</div>
+    {% endif %}
+   </div>
+   <form class="chat-form" method="post" action="/chat">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="text" name="message" maxlength="500" placeholder="Write a message..." autocomplete="off" required>
+    <button class="chat-send">Send</button>
+   </form>
+  </section>
+ </section>
+
+ <section class="panel">
+  <div class="panel-title">
+   <div><h2>New Ticket</h2><p>Create a support ticket.</p></div>
+   <span class="title-chip">New Ticket</span>
+  </div>
+  <form method="post" action="/add" enctype="multipart/form-data">
+   <input type="hidden" name="csrf" value="{{ csrf }}">
+   <label class="f">Assigned Support</label>
+   <div class="form-hint" style="margin:-4px 0 8px">Leave unassigned for the next available support user.</div>
+   <div class="pills">
+    {% for p in allowed %}<input type="radio" name="support_id" id="p{{ loop.index }}" value="{{ p }}" {% if loop.first %}checked{% endif %}><label for="p{{ loop.index }}" style="--c:{{ support_colors[p] }}">{{ p }}</label>{% endfor %}
+   </div>
+   <div class="row2">
+    <div><label class="f">Reporter</label><input type="text" name="pelapor" maxlength="100" placeholder="Example: Budi - HR" required></div>
+    <div><label class="f">WhatsApp Number</label><input type="text" name="whatsapp" maxlength="20" inputmode="tel" placeholder="08xxxxxxxxxx (optional)"></div>
+   </div>
+   <div class="case-time-create">
+    <label class="f">Case Occurred Date &amp; Time</label>
+    <input type="datetime-local" name="case_at" value="{{ current_datetime_input }}" required>
+    <div class="form-hint">Used for ticket age and SLA.</div>
+   </div>
+   <div class="form-mini-row">
+    <div><label class="f">Priority</label><select name="priority">{% for priority in priorities %}<option>{{ priority }}</option>{% endfor %}</select></div>
+    <div><label class="f">Category</label><select name="category">{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></div>
+   </div>
+   <label class="f">Issue / Problem</label><textarea name="masalah" maxlength="2000" placeholder="Describe the issue..." required></textarea>
+   <label class="f">Resolution / Action (Optional)</label><textarea name="tindakan" maxlength="2000" placeholder="Add the action taken so far..."></textarea>
+   <div class="form-hint">Starts as <b>Open</b>.</div>
+   <button class="full">+ Create Ticket</button>
+  </form>
+ </section>
+</div>
+
+<div class="insights-grid">
+ <section class="panel">
+  <div class="panel-title"><div><h2>Resolved</h2><p>Completed today.</p></div><span class="title-chip">Today</span></div>
+  <div class="metric-hero"><div><div class="metric-value">{{ resolved_today }}</div><p class="metric-caption">Completed</p></div></div>
+ </section>
+ <section class="panel">
+  <div class="panel-title"><div><h2>Aging</h2><p>Open ticket age.</p></div><span class="title-chip">{{ aging_total }} open</span></div>
+  <div class="aging-list">
+   <div class="aging-item"><b>{{ aging['0–1 day'] }}</b><span>0–1 day</span></div>
+   <div class="aging-item"><b>{{ aging['2–3 days'] }}</b><span>2–3 days</span></div>
+   <div class="aging-item breach"><b>{{ aging['4–7 days'] }}</b><span>4–7 days</span></div>
+   <div class="aging-item breach"><b>{{ aging['8+ days'] }}</b><span>8+ days</span></div>
+  </div>
+ </section>
+</div>
+
+<section class="support-section">
+ <div class="support-section-bar">
+  <div class="support-section-label">
+   <div class="eyebrow">SUPPORT TEAM</div>
+   <button type="button" class="support-section-toggle support-toolbar-toggle" id="support-toolbar-toggle" aria-expanded="false" aria-controls="support-toolbar-content">
+    <span class="support-toolbar-toggle-title">Filter &amp; Export</span>
+    <span class="support-toolbar-active-badge" id="support-toolbar-active-badge" hidden></span>
+    <span class="support-section-toggle-icon" aria-hidden="true">⌄</span>
+   </button>
+  </div>
+ </div>
+ <div class="support-toolbar-content" id="support-toolbar-content">
+  <div class="support-toolbar" id="support-toolbar">
+   <form class="support-toolbar-form" method="get" action="/" id="support-toolbar-form">
+    <input type="text" class="q" name="q" placeholder="Search ticket number, reporter, issue..." value="{{ q }}" aria-label="Search tickets">
+    <input type="hidden" name="support_owner" id="support-owner-hidden" value="{{ support_owner or 'all' }}">
+    <div class="support-date"><label for="support-from">From</label><input id="support-from" type="date" name="ticket_start" value="{{ ticket_start or '' }}"></div>
+    <div class="support-date"><label for="support-to">To</label><input id="support-to" type="date" name="ticket_end" value="{{ ticket_end or '' }}"></div>
+    {% if ticket_all %}<input type="hidden" name="ticket_all" value="1">{% endif %}
+    {% if chart_start %}<input type="hidden" name="chart_start" value="{{ chart_start }}">{% endif %}
+    {% if chart_end %}<input type="hidden" name="chart_end" value="{{ chart_end }}">{% endif %}
+    <button type="submit" class="toolbar-btn primary">Apply</button>
+    <button type="button" class="toolbar-btn" id="support-today-date" data-date="{{ today_date }}">Today</button>
+    <button type="button" class="toolbar-btn" id="support-all-dates">All Dates</button>
+    <div class="support-filter-group" id="support-filters" role="tablist" aria-label="Ticket status filter">
+        <button type="button" class="support-filter" data-support-filter="Open">Open</button>
+     <button type="button" class="support-filter" data-support-filter="In Progress">In Progress</button>
+     <button type="button" class="support-filter" data-support-filter="Resolved">Resolved</button>
+    </div>
+    <select id="support-owner-filter" class="support-owner-filter" aria-label="Filter by Support">
+     <option value="all">All Support</option>
+     {% for support_name in support_users %}<option value="{{ support_name }}">{{ support_name }}</option>{% endfor %}
+    </select>
+    <a class="toolbar-btn primary" id="support-export" href="/export?ticket_start={{ ticket_start or '' }}&ticket_end={{ ticket_end or '' }}&ticket_all={{ 1 if ticket_all else 0 }}&q={{ q|urlencode }}&support_status={{ support_status|urlencode }}&support_owner={{ (support_owner or 'all')|urlencode }}">Export</a>
+    <a class="toolbar-btn" id="support-export-all" href="/export?ticket_all=1&q={{ q|urlencode }}&support_status={{ support_status|urlencode }}&support_owner={{ (support_owner or 'all')|urlencode }}">Export All</a>
+   </form>
+  </div>
+ </div>
+ <div class="support-team-content" id="support-team-content" data-open-tickets-persist="1">
+  {% include "_support_grid.html" %}
+ </div>
+</section>
+
+
+<div id="bulk-result-modal" class="bulk-result-modal" hidden aria-hidden="true">
+ <div class="bulk-result-card" role="dialog" aria-modal="true" aria-labelledby="bulk-result-title">
+  <div id="bulk-result-icon" class="bulk-result-icon" aria-hidden="true"></div>
+  <h3 id="bulk-result-title">Berhasil</h3>
+  <p id="bulk-result-summary" class="bulk-result-summary"></p>
+  <div id="bulk-result-reasons" class="bulk-result-reasons" hidden></div>
+  <div class="bulk-result-actions"><button type="button" id="bulk-result-ok">OK</button></div>
+ </div>
+</div>
+
+<aside class="ticket-drawer" id="ticket-drawer" aria-hidden="true">
+ <div class="ticket-drawer-backdrop" data-drawer-close></div>
+ <div class="ticket-drawer-panel" role="dialog" aria-modal="true" aria-label="Ticket detail">
+  <header class="ticket-drawer-head"><div><span class="drawer-eyebrow">TICKET DETAIL</span></div></header>
+  <div class="ticket-drawer-body" id="ticket-drawer-body"></div>
+ </div>
+</aside>
+
+</main>
+
+<script>
+(function(){
+  const drawer=document.getElementById('ticket-drawer');
+  const drawerBody=document.getElementById('ticket-drawer-body');
+  const filterButtons=[...document.querySelectorAll('.support-filter')];
+  let cards=[...document.querySelectorAll('.support-card')];
+  const exportLink=document.getElementById('support-export');
+  const ownerFilter=document.getElementById('support-owner-filter');
+  const ownerHidden=document.getElementById('support-owner-hidden');
+  const toolbarForm=document.getElementById('support-toolbar-form');
+  const supportToolbarToggle=document.getElementById('support-toolbar-toggle');
+  const supportToolbarContent=document.getElementById('support-toolbar-content');
+  const supportToolbarBadge=document.getElementById('support-toolbar-active-badge');
+  let currentFilter={{ (support_status or 'all')|tojson }};
+
+  function syncSupportToolbarToggle(){
+    const open=supportToolbarToggle?.getAttribute('aria-expanded')==='true';
+    if(supportToolbarContent) supportToolbarContent.classList.toggle('is-open',open);
+    const icon=supportToolbarToggle?.querySelector('.support-section-toggle-icon');
+    if(icon) icon.textContent=open?'⌃':'⌄';
+  }
+
+  function updateSupportFilterBadge(){
+    if(!supportToolbarBadge) return;
+    const q=(document.querySelector('input[name="q"]')?.value||'').trim();
+    const from=document.getElementById('support-from')?.value||'';
+    const to=document.getElementById('support-to')?.value||'';
+    const owner=ownerFilter?.value||'all';
+    let count=0;
+    if(q) count++;
+    if(from) count++;
+    if(to) count++;
+    if(currentFilter && currentFilter!=='all') count++;
+    if(owner!=='all') count++;
+    supportToolbarBadge.hidden=count===0;
+    supportToolbarBadge.textContent=count?`${count} filter aktif`:'';
+  }
+
+  function toggleSupportToolbar(){
+    if(!supportToolbarToggle) return;
+    const open=supportToolbarToggle.getAttribute('aria-expanded')==='true';
+    supportToolbarToggle.setAttribute('aria-expanded',String(!open));
+    syncSupportToolbarToggle();
+  }
+
+  supportToolbarToggle?.addEventListener('click',toggleSupportToolbar);
+  supportToolbarToggle?.addEventListener('keydown',(event)=>{
+    if(event.key==='Enter' || event.key===' '){ event.preventDefault(); toggleSupportToolbar(); }
+  });
+  syncSupportToolbarToggle();
+
+  const statusMatches=(status,filter)=>{
+    if(filter==='all') return true;
+    if(filter==='Open') return status==='Open';
+    if(filter==='In Progress') return status==='In Progress' || status==='Waiting for User';
+    if(filter==='Resolved') return status==='Resolved' || status==='Closed' || status==='Done';
+    return true;
+  };
+
+  function syncSupportFilterState(){
+    const value=ownerFilter?.value || 'all';
+    if(ownerHidden) ownerHidden.value=value;
+    if(!exportLink)return;
+    const url=new URL(exportLink.getAttribute('href'),window.location.origin);
+    url.searchParams.set('support_status',currentFilter);
+    url.searchParams.set('support_owner',value);
+    exportLink.href=url.pathname+url.search;
+    updateSupportFilterBadge();
+  }
+
+  function bindSupportTicketRows(){
+    document.querySelectorAll('.support-ticket-row').forEach(row=>{
+      row.onclick=()=>openDrawer(row.dataset.ticketId);
+    });
+  }
+
+  let supportRangeRefreshRunning=false;
+
+  async function refreshSupportCardsForRange(mode){
+    if(supportRangeRefreshRunning) return;
+    const todayButton=document.getElementById('support-today-date');
+    const allDateButton=document.getElementById('support-all-dates');
+    const grid=document.getElementById('support-grid');
+    if(!grid || !todayButton || !allDateButton) return;
+    const isAll=mode==='all';
+    const today=todayButton.dataset.date||'';
+    const q=(document.querySelector('input[name="q"]')?.value||'').trim();
+    const owner=ownerFilter?.value||'all';
+    const apiUrl=new URL('/api/support-cards',window.location.origin);
+    const pageUrl=new URL('/',window.location.origin);
+    pageUrl.searchParams.set('support_status',currentFilter);
+    pageUrl.searchParams.set('support_owner',owner);
+    if(q) pageUrl.searchParams.set('q',q);
+    if(isAll){
+      apiUrl.searchParams.set('ticket_all','1');
+      pageUrl.searchParams.set('ticket_all','1');
+    }else{
+      apiUrl.searchParams.set('ticket_start',today);
+      apiUrl.searchParams.set('ticket_end',today);
+      pageUrl.searchParams.set('ticket_start',today);
+      pageUrl.searchParams.set('ticket_end',today);
+    }
+    const activeButton=isAll?allDateButton:todayButton;
+    const previous=activeButton.textContent;
+    supportRangeRefreshRunning=true;
+    todayButton.disabled=true; allDateButton.disabled=true; activeButton.textContent='Refreshing…';
+    grid.classList.add('is-refreshing'); grid.setAttribute('aria-busy','true');
+    grid.innerHTML='<div class="support-skeleton-card"></div><div class="support-skeleton-card"></div><div class="support-skeleton-card"></div><div class="support-skeleton-card"></div>';
+    try{
+      const response=await fetch(apiUrl.pathname+apiUrl.search,{method:'GET',headers:{'Accept':'text/html','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',cache:'no-store'});
+      if(!response.ok) throw new Error('Support Team refresh failed (HTTP '+response.status+').');
+      const html=await response.text();
+      const parsed=new DOMParser().parseFromString(html,'text/html');
+      const nextGrid=parsed.querySelector('#support-grid');
+      if(!nextGrid) throw new Error('Support Team data was not found in the response.');
+      const currentGrid=document.getElementById('support-grid');
+      if(!currentGrid || !currentGrid.isConnected) throw new Error('Support Team grid is no longer available.');
+      currentGrid.replaceWith(nextGrid);
+      cards=[...document.querySelectorAll('.support-card')];
+      bindSupportTicketRows();
+      applySupportFilter(currentFilter);
+      const fromInput=document.getElementById('support-from');
+      const toInput=document.getElementById('support-to');
+      if(fromInput) fromInput.value=isAll?'':today;
+      if(toInput) toInput.value=isAll?'':today;
+      if(exportLink){
+        const exportUrl=new URL(exportLink.getAttribute('href'),window.location.origin);
+        exportUrl.searchParams.delete('ticket_all');
+        if(isAll){
+          exportUrl.searchParams.delete('ticket_start');
+          exportUrl.searchParams.delete('ticket_end');
+          exportUrl.searchParams.set('ticket_all','1');
+        }else{
+          exportUrl.searchParams.set('ticket_start',today);
+          exportUrl.searchParams.set('ticket_end',today);
+        }
+        exportLink.href=exportUrl.pathname+exportUrl.search;
+      }
+      document.getElementById('support-today-date')?.classList.toggle('is-active',!isAll);
+      document.getElementById('support-all-dates')?.classList.toggle('is-active',isAll);
+      document.getElementById('support-today-date')?.setAttribute('aria-pressed',String(!isAll));
+      document.getElementById('support-all-dates')?.setAttribute('aria-pressed',String(isAll));
+      window.history.replaceState({},'',pageUrl.pathname+pageUrl.search);
+      syncSupportFilterState();
+    }catch(err){
+      console.error('[support-range]',err);
+      window.fileCenterToast?.(err.message||'Support Team refresh failed.','err');
+    }finally{
+      supportRangeRefreshRunning=false;
+      todayButton.disabled=false; allDateButton.disabled=false; activeButton.textContent=previous;
+      document.getElementById('support-grid')?.classList.remove('is-refreshing');
+      document.getElementById('support-grid')?.removeAttribute('aria-busy');
+    }
+  }
+
+  updateSupportFilterBadge();
+
+  function updateCardCounts(card){
+    const rows=[...card.querySelectorAll('.support-ticket-row')];
+    const visible=rows.filter(row=>!row.hidden);
+    const total=visible.length;
+    const open=visible.filter(row=>row.dataset.status==='Open').length;
+    const resolved=visible.filter(row=>statusMatches(row.dataset.status,'Resolved')).length;
+    card.querySelector('[data-count="total"]').textContent=total;
+    card.querySelector('[data-count="open"]').textContent=open;
+    card.querySelector('[data-count="resolved"]').textContent=resolved;
+    const empty=card.querySelector('[data-empty-state]');
+    if(empty) empty.hidden=visible.length!==0;
+  }
+
+  function applySupportFilter(filter){
+    currentFilter=filter;
+    filterButtons.forEach(b=>b.classList.toggle('is-active',b.dataset.supportFilter===filter));
+    cards.forEach(card=>{
+      card.hidden=false;
+      const rows=[...card.querySelectorAll('.support-ticket-row')];
+      rows.forEach(row=>{ row.hidden=!statusMatches(row.dataset.status||'',filter); });
+      const fold=card.querySelector('.support-resolved-fold');
+      if(fold){
+        const visibleClosed=[...fold.querySelectorAll('.support-ticket-row')].some(r=>!r.hidden);
+        fold.hidden=!visibleClosed;
+        if(filter==='Resolved' && visibleClosed) fold.open=true;
+        else if(filter!=='Resolved') fold.open=false;
+      }
+      updateCardCounts(card);
+    });
+    syncSupportFilterState();
+  }
+
+  filterButtons.forEach(btn=>btn.addEventListener('click',()=>applySupportFilter(btn.dataset.supportFilter)));
+  document.getElementById('support-today-date')?.addEventListener('click',()=>{
+    refreshSupportCardsForRange('today');
+  });
+  document.getElementById('support-all-dates')?.addEventListener('click',()=>{
+    refreshSupportCardsForRange('all');
+  });
+  document.getElementById('support-all-dates')?.setAttribute('aria-pressed',{{ ticket_all|tojson }});
+  document.getElementById('support-today-date')?.setAttribute('aria-pressed',{{ (not ticket_all)|tojson }});
+  document.getElementById('support-all-dates')?.classList.toggle('is-active',{{ ticket_all|tojson }});
+  document.getElementById('support-today-date')?.classList.toggle('is-active',{{ (not ticket_all)|tojson }});
+  if(ownerFilter){
+    ownerFilter.value={{ (support_owner or 'all')|tojson }};
+    ownerFilter.addEventListener('change',()=>syncSupportFilterState());
+  }
+
+  document.querySelectorAll('.support-collapse').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.support-card');
+    const collapsed=card.classList.toggle('is-collapsed');
+    btn.setAttribute('aria-expanded',String(!collapsed));
+    btn.textContent=collapsed?'⌄':'⌃';
+  }));
+
+  const searchInput=toolbarForm?.querySelector('input[name="q"]');
+  let searchTimer=null;
+  searchInput?.addEventListener('input',()=>{
+    clearTimeout(searchTimer);
+    searchTimer=setTimeout(()=>{ refreshSupportCardsForRange(document.getElementById('support-all-dates')?.classList.contains('is-active')?'all':'today'); },300);
+  });
+
+  toolbarForm?.addEventListener('submit',()=>{
+    const from=document.getElementById('support-from')?.value||'';
+    const to=document.getElementById('support-to')?.value||'';
+    if(from || to){
+      toolbarForm.querySelectorAll('input[name="ticket_all"]').forEach(x=>x.remove());
+    }
+    toolbarForm.querySelectorAll('input[name="support_status"]').forEach(x=>x.remove());
+    const hidden=document.createElement('input');
+    hidden.type='hidden'; hidden.name='support_status'; hidden.value=currentFilter;
+    toolbarForm.appendChild(hidden);
+  });
+
+  function closeDrawer(){
+    if(!drawer)return; drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden','true'); document.body.classList.remove('drawer-open');
+  }
+  document.querySelectorAll('[data-drawer-close]').forEach(x=>x.addEventListener('click',closeDrawer));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+
+  async function openDrawer(id){
+    if(!drawer)return;
+    drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden','false'); document.body.classList.add('drawer-open');
+    drawerBody.innerHTML='<div class="drawer-loading">Loading ticket detail…</div>';
+    try{
+      const res=await fetch('/api/tickets/'+encodeURIComponent(id),{headers:{'Accept':'application/json'}});
+      const data=await res.json();
+      if(!res.ok || !data.ok) throw new Error(data.error||'Failed to load ticket');
+      const t=data.ticket;
+      const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      drawerBody.innerHTML=`
+       <div class="drawer-grid">
+        <div class="drawer-meta"><small>Status</small><b>${esc(t.status)}</b></div>
+        <div class="drawer-meta"><small>Priority</small><b>${esc(t.priority)}</b></div>
+        <div class="drawer-meta"><small>Category</small><b>${esc(t.category)}</b></div>
+        <div class="drawer-meta"><small>Assigned to</small><b>${esc(t.support_id)}</b></div>
+        <div class="drawer-meta"><small>Reporter</small><b>${esc(t.pelapor)}</b></div>
+        <div class="drawer-meta"><small>Updates</small><b>${esc(t.updates)}</b></div>
+       </div>
+       <div class="drawer-block"><h3>Issue</h3><div class="drawer-text">${esc(t.masalah)}</div></div>
+       ${t.tindakan?`<div class="drawer-block"><h3>Action / Resolution</h3><div class="drawer-text">${esc(t.tindakan)}</div></div>`:''}
+       <div class="drawer-block"><h3>Case time</h3><div class="drawer-text">${esc(t.case_time)}</div></div>
+       <div class="drawer-actions"><a class="primary" href="/ticket/${encodeURIComponent(t.id)}" target="_blank" rel="noopener">Open full ticket</a>${t.whatsapp?`<a href="https://wa.me/${encodeURIComponent(t.whatsapp)}" target="_blank" rel="noopener">WhatsApp reporter</a>`:''}</div>`;
+    }catch(err){ drawerBody.innerHTML='<div class="drawer-loading">Failed to load ticket detail. <br><small>'+String(err.message||err)+'</small></div>'; console.error(err); }
+  }
+  bindSupportTicketRows();
+  applySupportFilter(currentFilter);
+})();
+
+</script>
+<script>
+(function(){
+  if(window.__poloSpaNavInitialized) return;
+  window.__poloSpaNavInitialized=true;
+  const hostSelector='main.wrap';
+  const skeleton='<div class="page-skeleton"><i></i><i></i><i></i><i></i></div>';
+  const execScripts=(container)=>{
+    container.querySelectorAll('script').forEach(old=>{
+      const s=document.createElement('script');
+      for(const attr of old.attributes) s.setAttribute(attr.name,attr.value);
+      s.textContent=old.textContent;
+      old.replaceWith(s);
+    });
+  };
+  const setNav=(path)=>document.querySelectorAll('a.app-nav-link, a.archive-link, a.files-link').forEach(a=>{
+    const href=new URL(a.getAttribute('href'),location.origin).pathname;
+    a.classList.toggle('is-active',path==='/'?href==='/':path.startsWith('/admin/tickets')?href==='/admin/tickets':path.startsWith('/files')?href==='/files':false);
+  });
+  async function loadPage(url,{push=true}={}){
+    const target=new URL(url,location.origin);
+    const isDashboard=target.pathname==='/';
+
+    // Archive must use a real browser navigation. Its own page loads
+    // archive.css from <head>; loading only its <main> as an SPA fragment
+    // leaves that stylesheet behind and makes the first Archive click appear
+    // unstyled. Keep the dashboard SPA, but never fragment-load Archive.
+    if(!isDashboard){
+      window.location.assign(target.href);
+      return;
+    }
+
+    const host=document.querySelector(hostSelector);
+    if(!host){window.location.assign(target.href);return;}
+    host.innerHTML=skeleton;
+    host.classList.add('is-spa-loading');
+    try{
+      const res=await fetch(target.pathname+target.search,{headers:{'X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',cache:'no-store'});
+      if(!res.ok) throw new Error(`Page load failed (HTTP ${res.status}).`);
+      const html=await res.text();
+      const parsed=new DOMParser().parseFromString(html,'text/html');
+      const next=parsed.querySelector('main.wrap');
+      if(!next) throw new Error('Page content was not found.');
+      host.replaceWith(next);
+      parsed.querySelectorAll('script[src]').forEach(oldScript=>{
+        const src=oldScript.getAttribute('src');
+        if(!src) return;
+        const absolute=new URL(src,location.origin).href;
+        if([...document.scripts].some(x=>new URL(x.src||location.href,location.origin).href===absolute)) return;
+        const s=document.createElement('script');
+        for(const attr of oldScript.attributes) s.setAttribute(attr.name,attr.value);
+        document.body.appendChild(s);
+      });
+      parsed.querySelectorAll('script:not([src])').forEach(oldScript=>{
+        const s=document.createElement('script');
+        for(const attr of oldScript.attributes) s.setAttribute(attr.name,attr.value);
+        s.textContent=oldScript.textContent;
+        document.body.appendChild(s);
+      });
+      if(push) history.pushState({},'',target.pathname+target.search);
+      setNav(target.pathname);
+      document.title='POLO INDONESIA';
+    }catch(err){
+      console.error('[SPA navigation]',err);
+      window.location.assign(target.href);
+    }
+  }
+  window.__poloLoadPage=loadPage;
+  document.addEventListener('click',(event)=>{
+    const a=event.target.closest('a[href]');
+    if(!a || a.target || a.hasAttribute('download') || event.defaultPrevented || event.button!==0) return;
+    const href=new URL(a.href,location.origin);
+    if(href.origin!==location.origin) return;
+    // Only Dashboard stays inside the SPA. Archive intentionally uses a
+    // full page load so its dedicated archive.css is parsed on first entry.
+    if(href.pathname==='/'){
+      event.preventDefault(); loadPage(href.href,{push:true});
+    }
+  });
+  // Archive is a normal page now. Its search form must submit normally too,
+  // otherwise the browser would remain on the dashboard document.
+  window.addEventListener('popstate',()=>loadPage(location.href,{push:false}));
+})();
+</script>
+
+<script>
+(()=>{
+  const btn=document.getElementById('app-nav-toggle');
+  const menu=document.getElementById('app-nav-mobile');
+  if(btn&&menu){
+    const close=()=>{menu.classList.remove('is-open');btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-label','Open menu')};
+    btn.addEventListener('click',()=>{
+      const open=!menu.classList.contains('is-open');
+      menu.classList.toggle('is-open',open);
+      btn.setAttribute('aria-expanded',open?'true':'false');
+      btn.setAttribute('aria-label',open?'Close menu':'Open menu');
+    });
+    menu.addEventListener('click',(e)=>{
+      if(e.target.closest('a')) close();
+    });
+    document.addEventListener('click',(e)=>{
+      if(!menu.contains(e.target)&&e.target!==btn) close();
+    });
+  }
+  const theme=document.getElementById('mobile-theme-toggle');
+  if(theme){
+    theme.addEventListener('click',()=>{
+      const target=document.querySelector('.themebtn,[data-theme-toggle],#theme-toggle');
+      if(target) target.click();
+    });
+  }
+})();
+</script>
+<script src="{{ url_for('static', filename='js/ui.js', v='89') }}" defer></script>
+<script src="{{ url_for('static', filename='js/dashboard.js', v='91') }}" defer></script>
+{{ theme_js|safe }}
+</body></html>

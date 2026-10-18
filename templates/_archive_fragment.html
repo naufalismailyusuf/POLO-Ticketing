@@ -1,0 +1,185 @@
+<main class="wrap archive-shell">
+ {{ alerts|safe }}
+ <div class="archive-top">
+  <div>
+   <h2 class="archive-title">{{ month_label }}</h2>
+   <p class="archive-sub">{{ start_date }} → {{ end_date }} · {{ total }} ticket(s)</p>
+  </div>
+  <div class="archive-actions">
+   <a href="/admin/tickets?month={{ month }}">Current month</a>
+   <a href="/">Back to dashboard</a>
+  </div>
+ </div>
+
+ <section class="archive-grid">
+  <div class="archive-stat"><small>Total tickets</small><b>{{ total }}</b></div>
+  <div class="archive-stat"><small>Open / active</small><b>{{ open_count }}</b></div>
+  <div class="archive-stat"><small>Resolved / closed</small><b>{{ resolved_count }}</b></div>
+ </section>
+
+ <div id="archive-delete-bar" class="archive-delete-bar" hidden><span><b id="archive-selected-count">0</b> ticket selected</span><button type="button" class="archive-delete-btn" id="archive-delete-selected">Delete selected tickets</button></div>
+
+ <form class="archive-toolbar" method="get" action="/admin/tickets">
+  <input type="month" name="month" value="{{ month }}" aria-label="Ticket month">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search ticket, reporter, issue, owner..." aria-label="Search tickets">
+  <button type="submit">View Month</button>
+  {% if q %}<a href="/admin/tickets?month={{ month }}">Clear search</a>{% endif %}
+ </form>
+
+ <section class="archive-table-wrap">
+  {% if rows %}
+  <table class="archive-table">
+   <thead>
+    <tr>
+     <th><input type="checkbox" class="archive-select" id="archive-select-all" aria-label="Select all tickets"></th><th>Ticket</th><th>Case occurred</th><th>Created</th><th>Reporter</th><th>Issue</th><th>Support</th><th>Category</th><th>Priority</th><th>Status</th><th>Action</th>
+    </tr>
+   </thead>
+   <tbody>
+   {% for r in rows %}
+    {% set status_cls = 'archive-closed' if r.status in ['Closed','Done'] else ('archive-resolved' if r.status == 'Resolved' else ('archive-progress' if r.status == 'In Progress' else 'archive-open')) %}
+    <tr data-ticket-id="{{ r.id }}" data-ticket-no="{{ r.no_tiket }}">
+     <td><input type="checkbox" class="archive-select archive-ticket-select" value="{{ r.id }}" aria-label="Select {{ r.no_tiket }}"></td>
+     <td><a class="archive-ticket" href="/ticket/{{ r.id }}" target="_blank" rel="noopener noreferrer">{{ r.no_tiket }}</a></td>
+     <td>{{ r.case_tanggal or r.tanggal }} {{ r.case_jam or r.jam }}</td>
+     <td class="archive-muted">{{ r.tanggal }} {{ r.jam }}</td>
+     <td>{{ r.pelapor }}</td>
+     <td><div class="archive-issue" title="{{ r.masalah }}">{{ r.masalah }}</div></td>
+     <td>{{ r.support_id }}</td>
+     <td>{{ r.category }}</td>
+     <td>{{ r.priority }}</td>
+     <td><span class="archive-status {{ status_cls }}">{{ r.status }}</span></td>
+     <td><button type="button" class="archive-delete-btn archive-delete-one" data-ticket-id="{{ r.id }}" data-ticket-no="{{ r.no_tiket }}">Delete</button></td>
+    </tr>
+    <tr class="archive-editor-row">
+     <td colspan="11" class="archive-editor-cell">
+      <form class="archive-edit-form" method="post" action="/admin/tickets/edit/{{ r.id }}">
+       <input type="hidden" name="csrf" value="{{ csrf }}">
+       <input type="hidden" name="month" value="{{ month }}">
+       <input type="hidden" name="q" value="{{ q }}">
+       <div><span class="archive-editor-label">Support</span><select name="support_id" aria-label="Support for {{ r.no_tiket }}">
+        {% for owner in [unassigned] + support_users %}
+        <option value="{{ owner }}" {% if owner == r.support_id %}selected{% endif %}>{{ owner }}</option>
+        {% endfor %}
+       </select></div>
+       <div><span class="archive-editor-label">Category</span><select name="category" aria-label="Category for {{ r.no_tiket }}">
+        {% for item in categories %}<option value="{{ item }}" {% if item == r.category %}selected{% endif %}>{{ item }}</option>{% endfor %}
+       </select></div>
+       <div><span class="archive-editor-label">Priority</span><select name="priority" aria-label="Priority for {{ r.no_tiket }}">
+        {% for item in priorities %}<option value="{{ item }}" {% if item == r.priority %}selected{% endif %}>{{ item }}</option>{% endfor %}
+       </select></div>
+       <div><span class="archive-editor-label">Status</span><select name="status" aria-label="Status for {{ r.no_tiket }}">
+        {% for item in statuses %}<option value="{{ item }}" {% if item == r.status %}selected{% endif %}>{{ item }}</option>{% endfor %}
+       </select></div>
+       <button type="submit">Save changes</button>
+      </form>
+     </td>
+    </tr>
+   {% endfor %}
+   </tbody>
+  </table>
+  {% else %}
+   <div class="archive-empty">No tickets were created in this month with the current filter.</div>
+  {% endif %}
+ </section>
+
+
+<script>
+(function(){
+  document.querySelectorAll('input[type="file"]').forEach(function(input){
+    if(input.closest('.archive-dropzone')) return;
+    input.multiple=true;
+    var id=input.id || ('archive-file-'+Math.random().toString(36).slice(2));
+    input.id=id;
+    var label=document.createElement('label');
+    label.className='archive-dropzone'; label.setAttribute('for',id);
+    label.innerHTML='<span class="archive-drop-icon">↑</span><span>Drag &amp; drop atau klik untuk pilih file</span>';
+    input.parentNode.insertBefore(label,input); label.appendChild(input);
+    var list=document.createElement('div'); list.className='archive-selected-files'; input.parentNode.insertBefore(list,label.nextSibling);
+    input.addEventListener('change',function(){
+      list.innerHTML=''; Array.from(input.files||[]).forEach(function(file){
+        var row=document.createElement('div'); row.textContent=file.name+' · '+Math.round(file.size/1024)+' KB'; list.appendChild(row);
+      });
+    });
+  });
+})();
+</script>
+
+<div id="archive-delete-modal" class="archive-delete-modal" hidden aria-hidden="true">
+ <div class="archive-delete-card" role="dialog" aria-modal="true" aria-labelledby="archive-delete-title">
+  <h3 id="archive-delete-title">Delete ticket</h3>
+  <div class="archive-delete-warning">Tindakan ini tidak bisa dibatalkan.</div>
+  <div class="archive-delete-list" id="archive-delete-list"></div>
+  <input id="archive-delete-password" class="archive-delete-password" type="password" autocomplete="current-password" placeholder="Admin password">
+  <div id="archive-delete-error" class="archive-delete-error" role="alert"></div>
+  <div class="archive-delete-actions"><button type="button" class="archive-delete-cancel" id="archive-delete-cancel">Cancel</button><button type="button" class="archive-delete-confirm" id="archive-delete-confirm">Delete</button></div>
+ </div>
+</div>
+<div id="archive-delete-result" class="bulk-result-modal" hidden aria-hidden="true">
+ <div class="bulk-result-card"><div class="bulk-result-icon" id="archive-result-icon"></div><h3 id="archive-result-title">Berhasil</h3><div class="bulk-result-summary" id="archive-result-summary"></div><div class="bulk-result-reasons" id="archive-result-reasons"></div><div class="bulk-result-actions"><button type="button" id="archive-result-ok">OK</button></div></div>
+</div>
+<script>
+(()=>{
+ const qs=s=>document.querySelector(s), qa=s=>[...document.querySelectorAll(s)];
+ const selectAll=qs('#archive-select-all'), checks=qa('.archive-ticket-select'), bar=qs('#archive-delete-bar'), count=qs('#archive-selected-count'), delSelected=qs('#archive-delete-selected');
+ const modal=qs('#archive-delete-modal'), list=qs('#archive-delete-list'), pw=qs('#archive-delete-password'), err=qs('#archive-delete-error'), cancel=qs('#archive-delete-cancel'), confirm=qs('#archive-delete-confirm');
+ const result=qs('#archive-delete-result'), resultTitle=qs('#archive-result-title'), resultSummary=qs('#archive-result-summary'), resultReasons=qs('#archive-result-reasons'), resultIcon=qs('#archive-result-icon'), resultOk=qs('#archive-result-ok');
+ let pending=[]; let timer=null;
+ function sync(){const ids=checks.filter(x=>x.checked);count.textContent=ids.length;bar.hidden=!ids.length; if(selectAll){selectAll.checked=ids.length===checks.length&&checks.length>0;selectAll.indeterminate=ids.length>0&&ids.length<checks.length;}}
+ function openConfirm(items){pending=items;list.innerHTML=items.map(x=>`<div><b>${x.no}</b></div>`).join('');pw.value='';err.textContent='';modal.hidden=false;modal.setAttribute('aria-hidden','false');pw.focus();}
+ function closeConfirm(){modal.hidden=true;modal.setAttribute('aria-hidden','true');pending=[];}
+ function removeDeletedRows(items){
+  const successful=Array.isArray(items)?items:[];
+  const removedStatuses=[];
+  successful.forEach(item=>{
+   const id=String(item?.ticket_id ?? item?.id ?? '');
+   if(!id)return;
+   const row=qa('tr[data-ticket-id]').find(el=>String(el.dataset.ticketId)===id);
+   if(!row)return;
+   removedStatuses.push((row.querySelector('.archive-status')?.textContent||'').trim());
+   const editor=row.nextElementSibling;
+   if(editor?.classList.contains('archive-editor-row')) editor.remove();
+   row.remove();
+  });
+  const stats=qa('.archive-stat b');
+  let total=Number(stats[0]?.textContent||0);
+  let open=Number(stats[1]?.textContent||0);
+  let resolved=Number(stats[2]?.textContent||0);
+  removedStatuses.forEach(status=>{
+   total=Math.max(0,total-1);
+   if(['Resolved','Closed','Done'].includes(status)) resolved=Math.max(0,resolved-1);
+   else open=Math.max(0,open-1);
+  });
+  if(stats[0])stats[0].textContent=total;
+  if(stats[1])stats[1].textContent=open;
+  if(stats[2])stats[2].textContent=resolved;
+  sync();
+ }
+ function showResult(data,transport=false){const ok=Number(data?.succeeded||0),bad=Number(data?.failed||0);const failed=data?.failed_items||[];const isBad=transport||bad>0||!data?.ok;result.classList.toggle('is-success',!isBad);result.classList.toggle('is-failure',isBad);resultIcon.innerHTML=isBad?'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>':'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>';resultTitle.textContent=isBad?'Gagal':'Berhasil';resultSummary.textContent=transport?(data?.error||'Server error'):`${ok} berhasil, ${bad} gagal`;resultReasons.innerHTML='';failed.slice(0,12).forEach(x=>{const d=document.createElement('div');d.textContent=`${x.no_tiket||x.ticket_id}: ${x.reason||'Unknown error.'}`;resultReasons.appendChild(d)});resultReasons.hidden=!failed.length;result.hidden=false;result.setAttribute('aria-hidden','false');clearTimeout(timer);timer=setTimeout(closeResult,3000);}
+ function closeResult(){clearTimeout(timer);result.hidden=true;result.setAttribute('aria-hidden','true');}
+ async function doDelete(){if(!pending.length)return;confirm.disabled=true;err.textContent='';try{const payload={ticket_ids:pending.map(x=>Number(x.id)),password:pw.value};const r=await fetch('/api/admin/tickets/delete',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf }}','Accept':'application/json'},credentials:'same-origin',body:JSON.stringify(payload),cache:'no-store'});const d=await r.json().catch(()=>({error:`HTTP ${r.status}`}));if(!r.ok||!d.ok){err.textContent=d.error||`Delete failed (HTTP ${r.status}).`;if(r.status!==403){closeConfirm();showResult(d,true);}return}const successful=d.successful_items||[];closeConfirm();removeDeletedRows(successful);showResult(d,false);setTimeout(()=>location.reload(),1000);}catch(e){err.textContent=e.message||'Network error';showResult({ok:false,error:err.textContent,succeeded:0,failed:pending.length,failed_items:pending.map(x=>({ticket_id:x.id,no_tiket:x.no,reason:err.textContent}))},true);}finally{confirm.disabled=false;}}
+ checks.forEach(x=>x.addEventListener('change',sync));selectAll?.addEventListener('change',()=>{checks.forEach(x=>x.checked=selectAll.checked);sync()});delSelected?.addEventListener('click',()=>openConfirm(checks.filter(x=>x.checked).map(x=>({id:x.value,no:x.closest('tr')?.dataset.ticketNo||x.value}))));qa('.archive-delete-one').forEach(b=>b.addEventListener('click',()=>openConfirm([{id:b.dataset.ticketId,no:b.dataset.ticketNo}])));cancel?.addEventListener('click',closeConfirm);confirm?.addEventListener('click',doDelete);pw?.addEventListener('keydown',e=>{if(e.key==='Enter')doDelete()});resultOk?.addEventListener('click',closeResult);result?.addEventListener('click',e=>{if(e.target===result)closeResult()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modal.hidden)closeConfirm();else if(!result.hidden)closeResult();}});sync();
+ qa('.archive-edit-form').forEach(form=>form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const saveButton=form.querySelector('button[type="submit"]');
+  if(saveButton) saveButton.disabled=true;
+  try{
+   const r=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'X-Requested-With':'XMLHttpRequest','Accept':'text/html'},credentials:'same-origin',cache:'no-store',redirect:'follow'});
+   const finalPath=new URL(r.url,location.href).pathname;
+   if(!r.ok || !r.redirected || !finalPath.startsWith('/admin/tickets')){
+    const message=`Save failed (HTTP ${r.status}).`;
+    showResult({ok:false,error:message,succeeded:0,failed:1,failed_items:[{ticket_id:'Ticket',reason:message}]},true);
+    return;
+   }
+   showResult({ok:true,succeeded:1,failed:0},false);
+   setTimeout(()=>location.reload(),1000);
+  }catch(err){
+   const message=err?.message||'Network error while saving ticket.';
+   showResult({ok:false,error:message,succeeded:0,failed:1,failed_items:[{ticket_id:'Ticket',reason:message}]},true);
+  }finally{
+   if(saveButton) saveButton.disabled=false;
+  }
+ }));
+})();
+</script>
+<script src="{{ url_for('static', filename='js/ui.js', v='90') }}" defer></script>
+</main>

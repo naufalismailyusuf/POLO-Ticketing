@@ -1,0 +1,60 @@
+/* Revisi 69 — Guide reading first, resources on demand, restrained actions.
+   Override-only: existing Guide API, QNAP/MP4 handlers and editor remain unchanged. */
+.gd-detail-page #gd-view{gap:18px}
+.gd-detail-page .gd-doc-titlebar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:14px 24px;
+}
+.gd-detail-page .gd-doc-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+.gd-detail-page .gd-doc-actions .gd-button{min-height:36px;padding:8px 13px}
+.gd-detail-page .gd-doc-actions .gd-more-button{min-width:36px;width:36px;padding:6px}
+.gd-detail-page .gd-doc-meta{align-items:center;gap:10px 16px}
+.gd-detail-page .gd-doc-meta .gd-pill{margin:0;font-size:10px}
+.gd-detail-page .gd-document-head{padding:clamp(22px,2.6vw,34px)}
+.gd-detail-page .gm-document-view{padding:clamp(24px,3vw,42px);min-height:220px}
+.gd-detail-page .gm-render{max-width:100%;line-height:1.85}
+/* A generous, neutral writing surface for new Documentation guides. */
+.gd-detail-page #gd-editor .gm-markdown-input{
+  min-height:420px;
+  background:var(--surface,#fff);
+  box-shadow:0 2px 12px rgba(15,23,42,.035);
+}
+/* Optional resources stay accessible but do not occupy the reading area. */
+.gd-detail-page .gd-resources{padding:0;overflow:visible;box-shadow:0 2px 9px rgba(15,23,42,.035);animation:none}
+.gd-detail-page .gd-resources-toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  list-style:none;cursor:pointer;padding:18px 24px;min-height:68px;
+}
+.gd-detail-page .gd-resources-toggle::-webkit-details-marker{display:none}
+.gd-detail-page .gd-resources-label{display:flex;flex-direction:column;gap:4px;min-width:0}
+.gd-detail-page .gd-resources-label strong{font-size:14px;font-weight:650;color:var(--text,#1b293b)}
+.gd-detail-page .gd-resources-label small{font-size:11px;font-weight:400;color:var(--muted,#66768b)}
+.gd-detail-page .gd-resources-chevron{
+  display:grid;place-items:center;flex:none;width:29px;height:29px;
+  border-radius:8px;border:1px solid var(--border,#dde4ec);
+  color:var(--muted,#66768b);font-size:20px;line-height:1;
+  transition:transform .18s ease;
+}
+.gd-detail-page .gd-resources[open] .gd-resources-chevron{transform:rotate(180deg)}
+.gd-detail-page .gd-resources-toggle:hover{background:var(--surface-2,#f7f9fb);border-radius:16px}
+.gd-detail-page .gd-resources-toggle:focus-visible{outline:2px solid var(--accent,#37679d);outline-offset:3px;border-radius:16px}
+.gd-detail-page .gd-resources-body{padding:0 24px 20px;display:grid;gap:20px}
+.gd-detail-page .gd-resources-body > .gd-panel{
+  border:0;border-top:1px solid var(--border,#e2e8ef);
+  border-radius:0;background:transparent;box-shadow:none;
+  padding:22px 0 0;animation:none;margin:0;
+}
+.gd-detail-page .gd-resources-body .gd-section-head{margin-bottom:14px}
+.gd-detail-page .gd-resources-body .gd-section-head h2{font-size:16px}
+.gd-detail-page .gd-resources-body .gd-section-head .gd-kicker{display:none}
+.gd-detail-page .gd-resources-body .gd-section-head p{font-size:11px}
+@media(max-width:780px){
+ .gd-detail-page .gd-doc-titlebar{grid-template-columns:1fr;align-items:start}
+ .gd-detail-page .gd-doc-actions{justify-content:flex-start}
+ .gd-detail-page .gd-doc-actions .gd-button{min-height:36px}
+ .gd-detail-page .gd-resources-toggle{padding:14px 17px;min-height:58px}
+ .gd-detail-page .gd-resources-body{padding:0 17px 17px}
+}
+@media(prefers-reduced-motion:reduce){.gd-detail-page .gd-resources-chevron{transition:none}}

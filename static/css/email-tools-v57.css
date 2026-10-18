@@ -1,0 +1,50 @@
+/* Revisi 57: quiet, functional Email Tools */
+.em-shell{width:min(1180px,calc(100% - 48px));margin:44px auto 80px;display:grid;gap:22px;color:#172337}
+.em-heading{display:flex;justify-content:space-between;align-items:end;gap:20px}
+.em-heading h1{font-size:30px;line-height:1.22;margin:8px 0 4px;font-weight:650;letter-spacing:-.03em}
+.em-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:#70809b;margin:0}
+.em-desc,.em-muted,.em-footer-note{color:#78859a;font-size:13px;line-height:1.6;margin:4px 0 0}
+.em-panel{padding:26px 28px;border-radius:17px;background:#fff;border:1px solid #dfe5ed;box-shadow:0 6px 18px rgba(18,32,54,.04),0 18px 38px rgba(18,32,54,.055)}
+.em-section-heading{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:20px}
+.em-section-heading h2{font-size:17px;font-weight:650;letter-spacing:-.015em;margin:0}.em-count{font-size:12px;color:#69778a;margin-left:7px;font-weight:500}
+.em-button{font:inherit;font-size:13px;font-weight:600;min-height:38px;border:1px solid #d1d9e5;border-radius:9px;background:#fff;color:#26344a;cursor:pointer;padding:0 16px;white-space:nowrap}
+.em-button:hover{background:#f4f7fa}.em-button:disabled{opacity:.5;cursor:not-allowed}.em-primary{background:#202c3e;border-color:#202c3e;color:white}.em-primary:hover{background:#33445c;color:white}
+.em-quiet{border:0;background:transparent;color:#64748b;cursor:pointer}.em-notice{border-radius:9px;padding:12px 15px;background:#ecf5f0;color:#17633d;font-size:13px}.em-notice.em-error{background:#fff0ef;color:#a33232}
+.em-create-grid{display:grid;grid-template-columns:1fr 180px;gap:20px}.em-create-grid .em-password-label{grid-column:1/-1;max-width:580px}
+.em-panel label{font-size:13px;color:#566277;display:block;font-weight:600}.em-panel label input{box-sizing:border-box;display:block;width:100%;margin:8px 0 0;border:1px solid #d3dce8;background:#fff;color:#1b2739;border-radius:9px;padding:12px 13px;font:inherit;outline:none}
+.em-panel label input:focus,.em-filter input:focus{border-color:#6b89b4;box-shadow:0 0 0 3px rgba(91,128,185,.1)}.em-panel label small{display:block;font-size:11px;color:#748197;margin-top:5px;font-weight:400}
+.em-input-with-suffix{display:flex;align-items:center}.em-input-with-suffix input{border-radius:9px 0 0 9px!important}.em-input-with-suffix>span{padding:0 12px;background:#f3f5f8;border:1px solid #d3dce8;border-left:none;border-radius:0 9px 9px 0;font-size:13px;height:44px;display:grid;place-items:center;margin-top:8px;font-weight:500;white-space:nowrap}
+.em-form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:24px}.em-filter{margin-bottom:18px}.em-filter input{font:inherit;width:min(330px,100%);padding:11px 13px;border:1px solid #d3dce8;background:#fff;border-radius:9px;color:#253247;outline:none}
+.em-table-wrap{overflow-x:auto}.em-table{width:100%;border-collapse:collapse;min-width:650px;text-align:left}.em-table th{font-size:11px;font-weight:600;letter-spacing:.04em;color:#8591a3;padding:13px 12px;border-bottom:1px solid #e5e9f0}.em-table td{padding:16px 12px;border-bottom:1px solid #edf0f3;font-size:13px;color:#48566d}.em-table tbody tr:last-child td{border-bottom:none}.em-table td strong{font-weight:600;color:#243147}.em-table .em-empty{text-align:center;padding:35px;color:#8490a1}
+.em-small{min-height:32px;padding:0 11px;font-size:12px}.em-actions{display:flex;gap:7px;justify-content:flex-end}.em-table th:last-child{text-align:right}.em-storage-used{margin-bottom:7px}.em-meter{height:4px;width:100px;border-radius:20px;background:#e8edf2;overflow:hidden}.em-meter i{height:100%;display:block;background:#679a84;border-radius:20px}.em-warning{display:block;margin-top:4px;color:#a35b29}
+.em-manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.em-manage-grid form{display:flex;align-items:end;gap:10px}.em-manage-grid label{flex:1}.em-footer-note{margin:0 4px}
+html[data-theme="dark"] .em-shell{color:#e2e8f0}html[data-theme="dark"] .em-panel{background:#182335;border-color:#354157;box-shadow:0 15px 35px rgba(0,0,0,.23)}html[data-theme="dark"] .em-panel label input,html[data-theme="dark"] .em-filter input,html[data-theme="dark"] .em-button{background:#172235;border-color:#4b5970;color:#e2e8f0}html[data-theme="dark"] .em-primary{background:#405674;color:#fff}html[data-theme="dark"] .em-table td strong{color:#eef2f6}html[data-theme="dark"] .em-table td{color:#b2bdce;border-color:#324052}html[data-theme="dark"] .em-table th{border-color:#324052}html[data-theme="dark"] .em-input-with-suffix>span{background:#223147;border-color:#4b5970}
+@media(max-width:760px){.em-shell{width:calc(100% - 28px);margin:25px auto 55px}.em-heading{align-items:center}.em-heading h1{font-size:25px}.em-panel{padding:18px 15px;border-radius:13px}.em-create-grid,.em-manage-grid{grid-template-columns:1fr}.em-manage-grid form{flex-wrap:wrap}.em-manage-grid form button{width:100%}.em-table{min-width:610px}.em-desc{max-width:240px}}
+/* Keep the file-manager-style table scroll inside the panel, not the viewport. */
+.em-shell{grid-template-columns:minmax(0,1fr)}
+.em-panel,.em-heading,.em-section-heading,.em-table-wrap{min-width:0;max-width:100%}
+@media(max-width:760px){.em-table-wrap{overflow-x:auto;overscroll-behavior-inline:contain}.em-heading>div{min-width:0}}
+@media(max-width:760px){
+  .em-table{min-width:0;display:block;width:100%}
+  .em-table thead{display:none}
+  .em-table tbody{display:block}
+  .em-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 16px;padding:18px 0;border-bottom:1px solid #e9edf1}
+  .em-table td{border:0;padding:0;min-width:0}
+  .em-table td:first-child,.em-table td:last-child{grid-column:1/-1}
+  .em-table td:nth-child(2)::before,.em-table td:nth-child(3)::before{display:block;font-size:10px;font-weight:600;color:#92a0b0;margin-bottom:6px;letter-spacing:.02em}
+  .em-table td:nth-child(2)::before{content:'Storage used'}
+  .em-table td:nth-child(3)::before{content:'Quota'}
+  .em-actions{justify-content:flex-start}
+  .em-table td.em-empty{grid-column:1/-1}
+}
+
+/* R62: connection state, reliable loading and minimal spacing */
+.em-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.em-connection{display:inline-flex;align-items:center;gap:8px;font:500 12px/1.3 inherit;color:#5d6b7e;white-space:nowrap}
+.em-connection::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#b7c2cf}
+.em-connection.is-ready::before{background:#19946f}
+.em-connection.is-offline::before{background:#d99835}
+.em-notice[hidden],.em-create[hidden],.em-manage[hidden]{display:none!important}
+.em-table-wrap .em-empty{line-height:1.6}
+html[data-theme="dark"] .em-connection{color:#aab8cc}
+@media(max-width:760px){.em-heading{align-items:flex-start;flex-wrap:wrap}.em-heading-actions{width:100%;justify-content:space-between}.em-heading-actions .em-button{margin-left:auto}}

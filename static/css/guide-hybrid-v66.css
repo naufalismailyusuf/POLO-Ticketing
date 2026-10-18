@@ -1,0 +1,110 @@
+/* Revisi 66 – Hybrid Guide editor and safe Markdown reader */
+.gm-document-view {padding:clamp(24px,3vw,44px)}
+.gm-render {font-size:15px;line-height:1.82;color:var(--text,#182434);overflow-wrap:anywhere}
+.gm-render > :first-child {margin-top:0}
+.gm-render > :last-child {margin-bottom:0}
+.gm-render h1,.gm-render h2,.gm-render h3,.gm-render h4,.gm-render h5,.gm-render h6 {line-height:1.35;color:var(--text,#162335);letter-spacing:-.02em;margin:1.7em 0 .65em;font-weight:650}
+.gm-render h1 {font-size:1.7em}.gm-render h2{font-size:1.4em;border-bottom:1px solid var(--border,#e1e6ed);padding-bottom:.35em}.gm-render h3{font-size:1.16em}
+.gm-render p,.gm-render ul,.gm-render ol,.gm-render blockquote {margin:0 0 1.05em}
+.gm-render ul,.gm-render ol{padding-left:1.7em}.gm-render li{margin:.25em 0}.gm-render li::marker{color:var(--muted,#758093)}
+.gm-render a{color:var(--accent,#38639b);text-decoration:underline;text-underline-offset:3px}
+.gm-render code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;border-radius:4px;padding:.12em .33em;background:rgba(98,111,134,.09)}
+.gm-render .gm-code{border:1px solid var(--border,#dce2ea);border-radius:10px;overflow:hidden;margin:20px 0;background:var(--surface,#fff)}
+.gm-code-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 15px;border-bottom:1px solid var(--border,#dce2ea);font-size:12px;color:var(--muted,#66768b)}
+.gm-code-toolbar button{appearance:none;cursor:pointer;background:transparent;border:1px solid var(--border,#dce2ea);color:var(--text,#162335);padding:5px 11px;border-radius:7px;font:inherit}
+.gm-code-toolbar button:hover{background:rgba(98,111,134,.08)}
+.gm-render .gm-code pre{margin:0;padding:18px;overflow:auto;white-space:pre;line-height:1.6;font-size:13px}
+.gm-render .gm-code code{padding:0;background:none;border-radius:0;white-space:pre}
+.gm-render blockquote{border-left:3px solid #9aabbc;padding:4px 0 4px 18px;color:var(--muted,#66768b)}
+.gm-render hr{border:0;border-top:1px solid var(--border,#dde3eb);margin:26px 0}
+.gm-table-wrap{max-width:100%;overflow-x:auto;margin:16px 0 22px;border-radius:9px;border:1px solid var(--border,#dce2ea)}
+.gm-render table{width:100%;border-collapse:collapse;min-width:390px;font-size:14px}
+.gm-render th,.gm-render td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--border,#e3e8ee);vertical-align:top}
+.gm-render tr:last-child td{border-bottom:0}.gm-render th{font-weight:650;background:rgba(93,112,142,.055)}
+.gm-check{color:var(--accent,#38639b);margin-right:8px}
+/* Revisi 67 — Compact format selector for Guide editor.
+   Preserve the original radio input names/values and mode JS. */
+.gm-mode-section{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px 20px;
+  margin:0;
+  padding:2px 0 0;
+}
+.gm-mode-heading{display:flex;align-items:center;gap:8px;margin:0}
+.gm-mode-heading strong{font-size:13px;font-weight:650;color:var(--text,#182434)}
+.gm-mode-heading>span{display:none}
+.gm-mode-options{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  width:max-content;
+  max-width:100%;
+  padding:3px;
+  border:1px solid var(--border,#dce2eb);
+  border-radius:10px;
+  background:var(--surface-2,#f3f5f8);
+}
+.gm-mode-option{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:35px;
+  gap:0;
+  padding:0 15px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:var(--muted,#66758a);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.gm-mode-option:has(input:checked){
+  background:var(--surface,#fff);
+  border-color:var(--border,#dce2eb);
+  color:var(--text,#182434);
+  box-shadow:0 1px 3px rgba(15,23,42,.08);
+}
+.gm-mode-option:hover:not(:has(input:checked)){color:var(--text,#182434);background:rgba(120,136,158,.07)}
+.gm-mode-option:has(input:focus-visible){outline:2px solid var(--accent,#35669e);outline-offset:2px}
+.gm-mode-option input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  overflow:hidden;
+  clip-path:inset(50%);
+  margin:0;
+  padding:0;
+  pointer-events:none;
+}
+.gm-mode-option span{display:block}
+.gm-mode-option strong{font-size:12px;font-weight:650;line-height:1.2}
+/* Keep additional help available for assistive technology, not in the UI. */
+.gm-mode-option small{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+.gm-editor-doc {margin:0 0 10px}
+.gm-editor-doc .gd-section-head{flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.gm-editor-tools{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.gm-editor-tools .gd-button{font-size:12px;padding:8px 11px}
+.gm-markdown-input{width:100%;box-sizing:border-box;min-height:325px;padding:20px;border:1px solid var(--border,#dce2ec);border-radius:12px;color:var(--text,#162335);background:var(--surface,#fff);resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;line-height:1.7;tab-size:2}
+.gm-markdown-input:focus{outline:2px solid rgba(63,107,164,.25);outline-offset:1px}
+.gm-preview{margin-top:16px;padding:24px;border:1px solid var(--border,#dce2ec);border-radius:12px;background:var(--surface,#fff)}
+.gm-help{font-size:12px;color:var(--muted,#6b7889);margin:11px 0 0}
+.gm-editor-doc[hidden],.gm-workflow-editor[hidden],.gm-document-view[hidden]{display:none!important}
+@media(max-width:720px){.gm-mode-option{padding:0 12px}.gm-document-view{padding:18px}.gm-editor-tools{width:100%}.gm-preview{padding:18px}.gm-markdown-input{min-height:260px;padding:14px}}
+@media(prefers-reduced-motion:reduce){.gm-mode-option{transition:none}}
+
+@media(max-width:420px){.gm-mode-section{gap:10px}.gm-mode-options{width:100%}.gm-mode-option{flex:1;padding:0 8px}.gm-mode-option strong{font-size:11.5px}}

@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ ticket.no_tiket }} · POLO INDONESIA</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico', v='91') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png', v='91') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css', v='91') }}">
+{{ theme_head|safe }}
+<style>
+:root{--ticket-max:1280px}
+html,body{min-height:100%;zoom:1!important}
+body{margin:0;font-family:"IBM Plex Sans","Segoe UI",Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text)}
+.ticket-page{width:min(var(--ticket-max),calc(100% - 32px));margin:24px auto 52px}
+.ticket-page *{font-size:inherit}
+.ticket-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.ticket-brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:18px;font-weight:800;letter-spacing:.03em}
+.ticket-brand-mark{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#0b0f1a;color:#fff;font-size:12px;font-weight:800}
+.ticket-nav{display:flex;gap:8px;align-items:center}
+.ticket-nav a,.ticket-nav button{font:inherit}
+.ticket-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 13px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);text-decoration:none;cursor:pointer;font-size:12px;font-weight:800}
+.ticket-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.ticket-btn:hover{filter:brightness(.985)}
+.ticket-nav .themebtn{width:40px;height:40px;padding:0;border-radius:10px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);box-shadow:0 2px 8px rgba(15,23,42,.08);display:inline-flex;align-items:center;justify-content:center}
+.ticket-nav .themebtn:hover{background:var(--surface-2);color:var(--text);border-color:var(--border-strong);transform:none;filter:none}
+.ticket-nav .themebtn svg{width:18px;height:18px}
+
+.ticket-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 8px 28px rgba(15,23,42,.06)}
+.ticket-kicker{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.ticket-no{font-size:13px;font-weight:800;color:var(--primary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ticket-pill{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:800;background:var(--surface-2);color:var(--text-soft)}
+.ticket-pill.status-open,.ticket-pill.status-in-progress,.ticket-pill.status-waiting-for-user{background:var(--warning-soft);color:var(--warning-text);border-color:color-mix(in srgb,var(--warning) 28%,var(--border))}
+.ticket-pill.status-resolved,.ticket-pill.status-closed,.ticket-pill.status-done{background:var(--success-soft);color:var(--success-text);border-color:color-mix(in srgb,var(--success) 28%,var(--border))}
+.ticket-title{margin:0;font-size:28px;line-height:1.28;letter-spacing:-.02em;font-weight:700}
+.ticket-subtitle{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.ticket-side{min-width:190px;display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.ticket-side-label{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.ticket-side-value{font-size:16px;font-weight:800}
+.ticket-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(320px,1fr);gap:16px;margin-top:16px;align-items:start}
+.ticket-panel{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px}
+.ticket-panel h2{margin:0;font-size:18px;font-weight:700}
+.ticket-panel-desc{margin:6px 0 16px;color:var(--muted);font-size:12px;line-height:1.55}
+.ticket-meta{display:grid;grid-template-columns:1fr;gap:0}
+.ticket-meta-item{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,1.3fr);gap:14px;align-items:start;padding:12px 0;border-bottom:1px solid var(--border)}
+.ticket-meta-item:last-child{border-bottom:0}
+.ticket-meta-item span{color:var(--muted);font-size:12px;font-weight:800}
+.ticket-meta-item b{font-size:14px;font-weight:650;overflow-wrap:anywhere;text-align:right}
+.ticket-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.ticket-actions .ticket-btn,.ticket-actions .ticket-wa{min-height:40px;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:800}
+.ticket-wa{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 12px;border-radius:9px;background:#dcf5ea;color:#047857;border:1px solid #a8ddc6;text-decoration:none;font-size:12px;font-weight:800}
+.ticket-right-sticky{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
+.ticket-thread-section{min-width:0}
+.comment-thread{display:flex;flex-direction:column;gap:10px;max-height:560px;overflow:auto;padding:0 6px 0 0;scrollbar-gutter:stable}
+.comment-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.comment-card:last-child{border-bottom:0}
+.comment-avatar{width:36px;height:36px;border-radius:10px;background:var(--primary-soft);color:var(--primary-soft-text);display:grid;place-items:center;font-size:12px;font-weight:800}
+.comment-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.comment-head-main{display:flex;align-items:center;gap:10px;min-width:0}.comment-head-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
+.comment-user{font-size:14px;font-weight:800}.comment-time{font-size:12px;color:var(--muted)}
+.comment-text{margin-top:7px;font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.comment-evidence{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.comment-evidence a{text-decoration:none;display:block}.comment-evidence img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
+.comment-file-name{margin-top:4px;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comment-file-generic{display:flex;align-items:center;justify-content:center;min-height:96px;border:1px dashed var(--border);border-radius:9px;background:var(--surface-2);color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.08em}
+.comment-file-size{margin-top:2px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comment-folder-link{display:inline-flex;align-items:center;gap:5px;margin-top:8px;color:var(--primary);font-size:11px;font-weight:800;text-decoration:none}
+.comment-folder-link:hover{text-decoration:underline}
+.ticket-comment-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:8px}
+.ticket-comment-delete{display:inline-flex;align-items:center;justify-content:center;width:max-content;min-width:0;padding:4px 8px;border:1px solid rgba(180,35,24,.24);border-radius:6px;background:transparent;color:#b42318;cursor:pointer;font:inherit;font-size:10px;font-weight:650;line-height:1.1;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.ticket-comment-delete:hover{background:rgba(180,35,24,.07);border-color:rgba(180,35,24,.42);color:#8f1d14}
+.ticket-comment-delete:disabled{opacity:.55;cursor:wait}
+@media(max-width:640px){.ticket-comment-actions{justify-content:flex-start}.ticket-comment-delete{font-size:9px;padding:3px 6px;border-radius:5px}}
+.comment-storage-row{display:grid;grid-template-columns:minmax(0,280px) 1fr;gap:10px;align-items:end;margin-top:12px}
+.comment-storage-row select{min-height:40px}.comment-storage-row #storage_section{display:none!important}
+.ticket-folder-picker{position:relative;width:100%;max-width:280px}
+.ticket-folder-trigger{width:100%;min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);cursor:pointer;font:inherit;font-size:13px;font-weight:700;text-align:left}
+.ticket-folder-trigger:hover,.ticket-folder-picker.open .ticket-folder-trigger{border-color:var(--primary)}
+.ticket-folder-trigger:disabled{opacity:.6;cursor:not-allowed}
+.ticket-folder-trigger-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ticket-folder-chevron{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s ease;flex:0 0 auto}
+.ticket-folder-picker.open .ticket-folder-chevron{transform:rotate(225deg) translateY(-1px)}
+.ticket-folder-menu{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 5px);display:none;max-height:240px;overflow:auto;padding:5px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:0 10px 28px rgba(15,23,42,.12)}
+.ticket-folder-picker.open .ticket-folder-menu{display:grid;gap:2px}
+.ticket-folder-option{width:100%;border:0;border-radius:7px;background:transparent;color:var(--text);padding:9px 10px;text-align:left;cursor:pointer;font:inherit;font-size:12px;font-weight:650}
+.ticket-folder-option:hover,.ticket-folder-option.selected{background:var(--primary-soft);color:var(--text)}
+.ticket-attachment-delete{display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:100%;min-width:0;margin:4px 0 0;padding:3px 7px;border:1px solid rgba(180,35,24,.28);border-radius:6px;background:transparent;color:#b42318;cursor:pointer;font:inherit;font-size:10px;font-weight:650;line-height:1.1;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.ticket-attachment-delete:hover{background:rgba(180,35,24,.07);border-color:rgba(180,35,24,.45);color:#8f1d14}
+.ticket-attachment-delete:disabled{opacity:.55;cursor:wait}
+@media(max-width:640px){.ticket-attachment-delete{font-size:9px;padding:3px 6px;border-radius:5px}}
+.comment-storage-help{font-size:11px;color:var(--muted);line-height:1.4;padding-bottom:2px}
+@media(max-width:640px){.comment-storage-row{grid-template-columns:1fr}}
+
+.progress-form-wrap{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.comment-form{padding:0}
+.comment-form label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:var(--text-soft)}
+.comment-form textarea,.comment-form select{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);padding:11px;font:inherit;font-size:14px}
+.comment-form textarea{min-height:120px;resize:vertical;line-height:1.55}
+.comment-form-grid{display:grid;grid-template-columns:minmax(0,280px);gap:10px;margin-top:12px;align-items:end}
+.comment-form-grid select{min-height:40px}
+.comment-form-actions{display:flex;flex-direction:column;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.comment-evidence-upload{display:flex;flex-direction:column;gap:8px}
+/* REVISI-3: center the Add progress update evidence dropzone in both axes. */
+.comment-form label.ticket-dropzone{display:flex;align-items:center;justify-content:center;gap:8px;min-height:96px;height:96px;padding:0;margin:0;border:1.5px dashed var(--border-strong);border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;font-weight:800;text-align:center;transition:.18s ease;box-sizing:border-box;user-select:none}
+.ticket-dropzone:hover,.ticket-dropzone:focus-within{background:var(--primary-soft);border-color:var(--primary);transform:translateY(-1px)}
+.ticket-dropzone > *{margin:0;position:static;line-height:1.2}.ticket-dropzone input{display:none}.ticket-drop-icon{font-size:18px}
+.ticket-selected-files{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4;min-height:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comment-form-note{margin-top:2px;font-size:12px;line-height:1.4;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comment-submit-row{display:flex;justify-content:flex-end;margin-top:0}
+.comment-submit-row .ticket-btn{min-width:132px;min-height:40px}
+.comment-empty{padding:18px 12px;border:1px dashed var(--border);border-radius:11px;color:var(--muted);text-align:center;font-size:12px;background:var(--surface-2)}
+
+.ticket-detail-actions{padding-top:16px;border-top:1px solid var(--border)}
+.ticket-detail-list{display:grid;grid-template-columns:1fr;gap:0}
+.ticket-detail-row{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.2fr);gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ticket-detail-row:last-child{border-bottom:0}
+.ticket-detail-row span{font-size:12px;color:var(--muted);font-weight:800}.ticket-detail-row b{font-size:14px;font-weight:650;overflow-wrap:anywhere;text-align:right}
+.ticket-detail-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.ticket-detail-buttons .ticket-btn,.ticket-detail-buttons .ticket-wa{min-height:40px}
+
+.admin-tools{border-top:1px solid var(--border);margin-top:16px;padding-top:16px}
+.admin-tools summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-size:13px;font-weight:800;padding:2px 0}
+.admin-tools summary::-webkit-details-marker{display:none}
+.admin-tools summary::after{content:"⌄";font-size:16px;color:var(--muted);transition:transform .18s ease}
+.admin-tools[open] summary::after{transform:rotate(180deg)}
+.admin-tools-body{margin-top:14px}
+.admin-time-form{margin-top:10px}.admin-time-form label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:var(--text-soft)}
+.admin-time-form input{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);padding:11px;font:inherit;font-size:13px}
+.admin-time-help{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.45}
+.admin-age-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.admin-age-grid input{min-width:0}
+.admin-age-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.admin-age-actions .ticket-btn{min-height:40px}
+.admin-time-note{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.45}
+.reassign-history{border-top:1px solid var(--border);margin-top:16px;padding-top:16px}
+.reassign-history summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-size:13px;font-weight:800}
+.reassign-history summary::-webkit-details-marker{display:none}
+.reassign-history summary::after{content:"⌄";font-size:16px;color:var(--muted);transition:transform .18s ease}
+.reassign-history[open] summary::after{transform:rotate(180deg)}
+.reassign-history-body{margin-top:10px;padding:10px 0;color:var(--text-soft);font-size:14px;line-height:1.5}
+.legacy-action{border-top:1px solid var(--border);margin-top:16px;padding-top:16px}
+.legacy-action-title{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}.legacy-action-text{font-size:14px;line-height:1.55;white-space:pre-wrap}
+.flash-wrap{margin-bottom:14px}.alert{margin-bottom:8px;font-size:13px}
+
+@media(max-width:900px){
+ .ticket-grid{grid-template-columns:1fr}
+ .ticket-right-sticky{position:static}
+ .ticket-side{min-width:0}
+ .ticket-hero{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+ .ticket-page{width:min(100% - 20px,var(--ticket-max));margin-top:14px}
+ .ticket-topbar{align-items:flex-start}
+ .ticket-nav{flex-wrap:wrap}
+ .ticket-title{font-size:22px}
+ .ticket-meta-item,.ticket-detail-row{grid-template-columns:1fr;gap:5px}
+ .ticket-meta-item b,.ticket-detail-row b{text-align:left}
+ .comment-evidence{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .comment-submit-row{justify-content:stretch}
+ .comment-submit-row .ticket-btn{width:100%}
+ .ticket-detail-buttons{display:grid;grid-template-columns:1fr}
+ .ticket-detail-buttons .ticket-btn,.ticket-detail-buttons .ticket-wa{width:100%}
+ .admin-age-grid{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+
+<style>
+/* Detail ticket readability/layout */
+.ticket-panel-desc,.ticket-subtitle,.ticket-detail-row span,.comment-form label,.comment-form-note,.ticket-selected-files,.comment-file-name,.comment-time,.admin-time-form label,.admin-time-help,.admin-time-note,.legacy-action-title{font-size:12px!important}
+.ticket-detail-row b,.comment-text,.comment-user,.comment-file-generic,.reassign-history-body,.legacy-action-text{font-size:14px!important}
+.ticket-detail-row{background:transparent!important;border-radius:0!important}
+.ticket-detail-buttons{gap:8px}
+@media(max-width:900px){.ticket-right-sticky{position:static}.comment-thread{max-height:none}}
+</style>
+
+</head>
+<body>
+<div class="ticket-page">
+  <div class="ticket-topbar">
+    <a class="ticket-brand" href="/">
+      <span class="ticket-brand-mark">PI</span>
+      <span>POLO INDONESIA</span>
+    </a>
+    <div class="ticket-nav">
+      {{ theme_btn|safe }}
+      <a class="ticket-btn" href="/">Back to Dashboard</a>
+    </div>
+  </div>
+
+  {{ alerts|safe }}
+
+  <section class="ticket-hero">
+    <div>
+      <div class="ticket-kicker">
+        <span class="ticket-no">{{ ticket.no_tiket }}</span>
+        <span class="ticket-pill status-{{ ticket.status|lower|replace(' ','-')|replace('_','-') }}">{{ ticket.status }}</span>
+        <span class="ticket-pill">{{ ticket.priority }}</span>
+        <span class="ticket-pill">{{ ticket.category }}</span>
+        <span class="ticket-pill">{{ ticket.sla_label }}</span>
+      </div>
+      <h1 class="ticket-title">{{ ticket.masalah }}</h1>
+      <p class="ticket-subtitle">Case occurred {{ ticket.case_tanggal or ticket.tanggal }} at {{ ticket.case_jam or ticket.jam }} · Recorded {{ ticket.tanggal }} at {{ ticket.jam }} · Reporter {{ ticket.pelapor }} · Assigned to {{ ticket.support_id }}</p>
+    </div>
+    <div class="ticket-side">
+      <span class="ticket-side-label">Progress Updates</span>
+      <span class="ticket-side-value">{{ comment_meta.count }} total</span>
+      {% if ticket.whatsapp %}
+      <a class="ticket-wa" href="https://wa.me/{{ ticket.whatsapp }}" target="_blank" rel="noopener noreferrer">WhatsApp Reporter</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="ticket-grid">
+    <section class="ticket-panel ticket-thread-section">
+      <h2>Progress &amp; Evidence</h2>
+      <p class="ticket-panel-desc">All progress updates and evidence stay attached to this ticket.</p>
+
+      <div class="comment-thread">
+        {% for c in comments %}
+        <div class="comment-card">
+          <div class="comment-avatar">{{ c.display[0] }}</div>
+          <div>
+            <div class="comment-head">
+              <div class="comment-head-main">
+                <span class="comment-user">{{ c.display }}</span>
+                <span class="comment-time">{{ c.created_at }}</span>
+              </div>
+              {% if can_delete_ticket_attachments and c.attachments %}
+              <div class="comment-head-actions">
+                <button type="button" class="ticket-comment-delete" data-comment-id="{{ c.id }}" data-file-count="{{ c.attachments|length }}">Delete comment &amp; files</button>
+              </div>
+              {% endif %}
+            </div>
+            <div class="comment-text">{{ c.comment }}</div>
+            {% if c.attachments %}
+            <div class="comment-evidence">
+              {% for a in c.attachments %}
+              {% set attachment_ext = (a.original_name.rsplit('.', 1)[-1]|lower) if '.' in a.original_name else '' %}
+              {% set attachment_url = ('/comment-file-id/' ~ a.id) if a.qnap_path else ('/comment-file/' ~ a.filename) %}
+              <a href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer" title="{{ a.original_name }}">
+                {% if attachment_ext in ['jpg','jpeg','png','gif','webp'] %}
+                <img src="{{ attachment_url }}" alt="Evidence {{ a.original_name }}" loading="lazy">
+                {% else %}
+                <div class="comment-file-generic">{{ attachment_ext|upper or 'FILE' }}</div>
+                {% endif %}
+                <div class="comment-file-name">{{ a.original_name }}</div>
+                {% if a.size_bytes %}<div class="comment-file-size">{{ (a.size_bytes / 1024 / 1024)|round(2) }} MB</div>{% endif %}
+              </a>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% if c.file_folder_id %}
+            <a class="comment-folder-link" href="/files?folder={{ c.file_folder_id }}" target="_blank" rel="noopener noreferrer">Open folder in File Center →</a>
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+        <div class="comment-empty">No progress update yet. Add the first troubleshooting note below.</div>
+        {% endfor %}
+      </div>
+
+      {% if can_comment %}
+      <div class="progress-form-wrap">
+        <form class="comment-form" method="post" action="/ticket/{{ ticket.id }}/comment" enctype="multipart/form-data">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <label for="comment">Add progress update</label>
+          <textarea id="comment" name="comment" maxlength="4000" placeholder="Add troubleshooting progress..."></textarea>
+
+          {% if can_change_status %}
+          <div class="comment-form-grid">
+            <div>
+              <label for="status">Ticket status</label>
+              <select id="status" name="status">
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if s == ticket.status %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          {% else %}
+          <input type="hidden" name="status" value="{{ ticket.status }}">
+          {% endif %}
+
+          <div class="comment-form-actions">
+            <div class="comment-evidence-upload">
+              <label for="storage_section">Folder penyimpanan</label>
+              <div class="comment-storage-row">
+                <!-- ==================== PPG EDIT ZONE: TICKET FOLDER DROPDOWN ==================== -->
+                <div class="ticket-folder-picker" id="ticket-folder-picker">
+                  <button type="button" class="ticket-folder-trigger" id="ticket-folder-trigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="ticket-folder-trigger-label" id="ticket-folder-label">Pilih folder ticket</span>
+                    <span class="ticket-folder-chevron" aria-hidden="true"></span>
+                  </button>
+                  <div class="ticket-folder-menu" id="ticket-folder-menu" role="listbox">
+                    {% for folder in ticket_folders %}
+                    <button type="button" class="ticket-folder-option" role="option" data-value="{{ folder.path }}" data-label="{{ folder.name }}">{{ folder.name }}</button>
+                    {% endfor %}
+                  </div>
+                  <select id="storage_section" name="storage_folder_path" hidden>
+                    <option value="" selected disabled>Pilih folder ticket</option>
+                    {% for folder in ticket_folders %}
+                    <option value="{{ folder.path }}">{{ folder.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- ================== END PPG EDIT ZONE: TICKET FOLDER DROPDOWN ================== -->
+                <button type="button" class="ticket-btn" id="create-ticket-folder">+ Buat Folder</button>
+                <div class="comment-storage-help">Buat folder sendiri di dalam folder ticket. Nama folder bebas sesuai kebutuhan evidence, progress, testing, atau completion.</div>
+              </div>
+
+              <label for="attachments" style="margin-top:12px">Evidence / Files (optional)</label>
+              <label class="ticket-dropzone" for="attachments">
+                <span class="ticket-drop-icon">↑</span>
+                <span>Drag &amp; drop atau klik untuk pilih file</span>
+                <input id="attachments" type="file" name="attachments" multiple accept="*/*">
+              </label>
+              <div id="attachment-list" class="ticket-selected-files"></div>
+              <div id="attachment-queue" class="ticket-upload-queue" hidden></div>
+              <input id="uploaded-attachment-ids" type="hidden" name="uploaded_attachment_ids" value="[]">
+              <div class="comment-form-note">Up to 4 files per update · maximum 1 GB each · JPG, PNG, ZIP, PDF, DOCX, XLSX, LOG, and other files supported. Upload starts immediately after file selection.</div>
+            </div>
+            <div class="comment-submit-row">
+              <button id="post-update-btn" class="ticket-btn primary" type="submit">Post Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      {% elif ticket.status in ['Resolved','Closed','Done'] %}
+      <div class="progress-form-wrap">
+        <div class="comment-empty">This ticket is resolved/closed. Progress updates are disabled.</div>
+      </div>
+      {% endif %}
+    </section>
+
+    <aside class="ticket-right-sticky">
+      <section class="ticket-panel">
+        <h2>Ticket Details</h2>
+        <p class="ticket-panel-desc">Essential information for this ticket.</p>
+        <div class="ticket-detail-list">
+          <div class="ticket-detail-row"><span>Ticket</span><b>{{ ticket.no_tiket }}</b></div>
+          <div class="ticket-detail-row"><span>Status</span><b>{{ ticket.status }}</b></div>
+          <div class="ticket-detail-row"><span>Recorded</span><b>{{ ticket.tanggal }} {{ ticket.jam }}</b></div>
+          {% if ticket.dibuat_oleh %}<div class="ticket-detail-row"><span>Created by</span><b>{{ ticket.dibuat_oleh }}</b></div>{% endif %}
+          <div class="ticket-detail-row"><span>Progress updates</span><b>{{ comment_meta.count }}</b></div>
+          {% if ticket.whatsapp %}<div class="ticket-detail-row"><span>WhatsApp</span><b>{{ ticket.whatsapp }}</b></div>{% endif %}
+          <div class="ticket-detail-row"><span>Initial evidence</span><b>{{ 'Available' if ticket.foto else 'Not available' }}</b></div>
+          <div class="ticket-detail-row"><span>Completion evidence</span><b>{{ 'Available' if ticket.completion_foto else 'Not available' }}</b></div>
+        </div>
+
+        <div class="ticket-detail-buttons">
+          {% if can_claim %}<form method="post" action="/claim/{{ ticket.id }}" style="margin:0"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ticket-btn primary" type="submit">Take Ticket</button></form>{% endif %}
+          {% if ticket.whatsapp %}<a class="ticket-wa" href="https://wa.me/{{ ticket.whatsapp }}" target="_blank" rel="noopener noreferrer">Contact Reporter</a>{% endif %}
+          {% if ticket.foto %}<a class="ticket-btn" href="/foto/{{ ticket.foto }}" target="_blank" rel="noopener noreferrer">Initial Evidence</a>{% endif %}
+          {% if ticket.completion_foto %}<a class="ticket-btn" href="/foto/{{ ticket.completion_foto }}" target="_blank" rel="noopener noreferrer">Completion Evidence</a>{% endif %}
+          {% if ticket_file_folder_id %}<a class="ticket-btn" href="/files?folder={{ ticket_file_folder_id }}" target="_blank" rel="noopener noreferrer">Open Ticket Folder</a>{% endif %}
+        </div>
+
+        {% if is_admin %}
+        <details class="admin-tools">
+          <summary>Admin tools</summary>
+          <div class="admin-tools-body">
+            <form class="admin-time-form" method="post" action="/admin/edit/{{ ticket.id }}/case-time" id="admin-case-time-form">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <label for="admin-case-at">Case occurred date &amp; time</label>
+              <input id="admin-case-at" type="datetime-local" name="case_at" value="{{ (ticket.case_tanggal or ticket.tanggal) }}T{{ (ticket.case_jam or ticket.jam) }}" required>
+              <div class="admin-time-help">The ticket number will not change. This value controls the ticket age and SLA.</div>
+
+              <div class="admin-time-help" style="margin-top:12px">Quick set age from now</div>
+              <div class="admin-age-grid">
+                <div><label for="age-days">Days</label><input id="age-days" type="number" min="0" step="1" value="0"></div>
+                <div><label for="age-hours">Hours</label><input id="age-hours" type="number" min="0" max="23" step="1" value="0"></div>
+                <div><label for="age-minutes">Minutes</label><input id="age-minutes" type="number" min="0" max="59" step="1" value="0"></div>
+              </div>
+              <div class="admin-age-actions">
+                <button class="ticket-btn" type="button" id="apply-age">Apply age</button>
+                <button class="ticket-btn primary" type="submit">Save Case Time</button>
+              </div>
+              <div class="admin-time-note">Example: 2 days + 5 hours sets the case occurred time to 2 days 5 hours before the current local time.</div>
+            </form>
+          </div>
+        </details>
+        {% endif %}
+
+        {% if ticket.reassigned_from %}
+        <details class="reassign-history">
+          <summary>Riwayat reassign (1)</summary>
+          <div class="reassign-history-body">Previous assignee: <b>{{ ticket.reassigned_from }}</b></div>
+        </details>
+        {% endif %}
+
+        {% if ticket.tindakan %}
+        <div class="legacy-action">
+          <div class="legacy-action-title">Latest legacy action</div>
+          <div class="legacy-action-text">{{ ticket.tindakan }}</div>
+        </div>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const field = document.getElementById('admin-case-at');
+  const apply = document.getElementById('apply-age');
+  if (!field || !apply) return;
+  apply.addEventListener('click', function(){
+    const read = id => Math.max(0, parseInt(document.getElementById(id)?.value || '0', 10) || 0);
+    const days = read('age-days');
+    const hours = Math.min(23, read('age-hours'));
+    const minutes = Math.min(59, read('age-minutes'));
+    const now = new Date();
+    const target = new Date(now.getTime() - (((days * 24 + hours) * 60 + minutes) * 60 * 1000));
+    const pad = n => String(n).padStart(2, '0');
+    field.value = target.getFullYear() + '-' + pad(target.getMonth() + 1) + '-' + pad(target.getDate()) + 'T' + pad(target.getHours()) + ':' + pad(target.getMinutes());
+  });
+})();
+</script>
+{{ theme_js|safe }}
+<style>
+.ticket-upload-queue{margin-top:10px;display:grid;gap:8px;text-align:left}
+.ticket-upload-item{border:1px solid rgba(0,0,0,.09);border-radius:9px;padding:9px 10px;background:rgba(0,0,0,.018)}
+.ticket-upload-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}
+.ticket-upload-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ticket-upload-status{white-space:nowrap;color:#687078}
+.ticket-upload-bar{height:5px;border-radius:99px;background:#e8eaec;overflow:hidden;margin-top:7px}
+.ticket-upload-progress{height:100%;width:0;background:#111;transition:width .12s linear}
+.ticket-upload-meta{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-size:11px;color:#7a8086}
+.ticket-upload-retry{border:0;background:none;padding:0;color:#111;text-decoration:underline;cursor:pointer;font:inherit}
+</style>
+<script>
+(function(){
+  const csrf={{ csrf|tojson }};
+
+  // ==================== PPG EDIT ZONE: TICKET ATTACHMENT DELETE UI ====================
+  document.querySelectorAll('.ticket-attachment-delete').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.attachmentId;
+      if(!id) return;
+      if(!window.confirm('Delete this file from the ticket and QNAP?')) return;
+      btn.disabled=true;
+      try{
+        const res=await fetch(`/ticket/{{ ticket.id }}/attachment-delete/${encodeURIComponent(id)}`,{
+          method:'POST',
+          headers:{'X-CSRF-Token':csrf,'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+          body:new URLSearchParams({csrf})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.ok) throw new Error(data.error||'File gagal dihapus.');
+        window.location.reload();
+      }catch(err){
+        alert(err.message);
+        btn.disabled=false;
+      }
+    });
+  });
+  // ================== END PPG EDIT ZONE: TICKET ATTACHMENT DELETE UI ==================
+
+  // ==================== PPG EDIT ZONE: TICKET COMMENT DELETE UI ====================
+  document.querySelectorAll('.ticket-comment-delete').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.commentId;
+      const fileCount=parseInt(btn.dataset.fileCount||'0',10)||0;
+      if(!id) return;
+      const message=fileCount>0
+        ? `Delete this comment and permanently delete ${fileCount} attached file${fileCount===1?'':'s'} from QNAP?`
+        : 'Delete this comment?';
+      if(!window.confirm(message)) return;
+      btn.disabled=true;
+      try{
+        const res=await fetch(`/ticket/{{ ticket.id }}/comment-delete/${encodeURIComponent(id)}`,{
+          method:'POST',
+          headers:{'X-CSRF-Token':csrf,'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+          body:new URLSearchParams({csrf})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.ok) throw new Error(data.error||'Comment gagal dihapus.');
+        window.location.reload();
+      }catch(err){
+        alert(err.message);
+        btn.disabled=false;
+      }
+    });
+  });
+  // ================== END PPG EDIT ZONE: TICKET COMMENT DELETE UI ==================
+
+  const form=document.querySelector('.comment-form');
+  const input=document.getElementById('attachments');
+  const list=document.getElementById('attachment-list');
+  const queueEl=document.getElementById('attachment-queue');
+  const idsEl=document.getElementById('uploaded-attachment-ids');
+  const sectionEl=document.getElementById('storage_section');
+  const submit=document.getElementById('post-update-btn');
+  if(!form||!input||!list||!queueEl||!idsEl||!sectionEl||!submit) return;
+
+  const prepareUrl={{ url_for('ticket_attachment_prepare', tid=ticket.id)|tojson }};
+  const uploadUrl={{ url_for('ticket_attachment_upload', tid=ticket.id)|tojson }};
+  const folderUrl={{ url_for('ticket_attachment_folders', tid=ticket.id)|tojson }};
+  const maxFiles=4;
+  const maxSize=1024*1024*1024;
+  const concurrency=2;
+  let queue=[];
+  let active=0;
+  let folder=null;
+  let uploadedIds=[];
+  let preparing=null;
+
+  input.removeAttribute('accept');
+
+  const folderPicker=document.getElementById('ticket-folder-picker');
+  const folderTrigger=document.getElementById('ticket-folder-trigger');
+  const folderLabel=document.getElementById('ticket-folder-label');
+  const folderMenu=document.getElementById('ticket-folder-menu');
+  const folderOptions=Array.from(document.querySelectorAll('.ticket-folder-option'));
+  if(folderPicker&&folderTrigger&&folderLabel&&folderMenu){
+    folderTrigger.addEventListener('click',()=>{
+      if(folderTrigger.disabled) return;
+      const open=!folderPicker.classList.contains('open');
+      folderPicker.classList.toggle('open',open);
+      folderTrigger.setAttribute('aria-expanded',open?'true':'false');
+    });
+    folderOptions.forEach(option=>option.addEventListener('click',()=>{
+      sectionEl.value=option.dataset.value||'';
+      folderLabel.textContent=option.dataset.label||'Pilih folder ticket';
+      folderOptions.forEach(x=>x.classList.toggle('selected',x===option));
+      folderPicker.classList.remove('open');
+      folderTrigger.setAttribute('aria-expanded','false');
+      folder=null;
+      render();
+    }));
+    document.addEventListener('click',event=>{
+      if(!folderPicker.contains(event.target)){
+        folderPicker.classList.remove('open');
+        folderTrigger.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+
+
+
+  const createFolderBtn=document.getElementById('create-ticket-folder');
+  if(createFolderBtn){
+    createFolderBtn.addEventListener('click',async()=>{
+      const name=window.prompt('Nama folder baru di dalam ticket:');
+      if(name===null) return;
+      const trimmed=name.trim();
+      if(!trimmed) return;
+      createFolderBtn.disabled=true;
+      try{
+        const res=await fetch(folderUrl,{method:'POST',headers:{'X-CSRF-Token':csrf,'Content-Type':'application/json'},body:JSON.stringify({csrf,name:trimmed})});
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.ok) throw new Error(data.error||'Folder gagal dibuat.');
+        window.location.reload();
+      }catch(err){
+        alert(err.message);
+        createFolderBtn.disabled=false;
+      }
+    });
+  }
+
+  function formatSize(bytes){
+    if(bytes<1024) return bytes+' B';
+    const units=['KB','MB','GB'];
+    let n=bytes/1024, i=0;
+    while(n>=1024 && i<units.length-1){n/=1024;i++;}
+    return n.toFixed(n>=100?0:2)+' '+units[i];
+  }
+  function speed(bytesPerSec){ return bytesPerSec>0 ? formatSize(bytesPerSec)+'/s' : '—'; }
+  function esc(value){
+    return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[ch]));
+  }
+  function render(){
+    queueEl.hidden=queue.length===0;
+    queueEl.innerHTML=queue.map((item,index)=>{
+      const pct=item.file.size ? Math.min(100,Math.round(item.loaded/item.file.size*100)) : 0;
+      const retry=item.status==='failed' ? `<button type="button" class="ticket-upload-retry" data-retry="${index}">Retry</button>` : '';
+      const meta=item.status==='uploading' ? `${pct}% · ${speed(item.rate)}` : `${formatSize(item.loaded||0)} / ${formatSize(item.file.size)}`;
+      return `<div class="ticket-upload-item">
+        <div class="ticket-upload-head"><span class="ticket-upload-name" title="${esc(item.file.name)}">${esc(item.file.name)}</span><span class="ticket-upload-status">${esc(item.statusLabel)} ${retry}</span></div>
+        <div class="ticket-upload-bar"><div class="ticket-upload-progress" style="width:${pct}%"></div></div>
+        <div class="ticket-upload-meta"><span>${meta}</span><span>${item.error?esc(item.error):''}</span></div>
+      </div>`;
+    }).join('');
+    queueEl.querySelectorAll('[data-retry]').forEach(btn=>btn.addEventListener('click',()=>{
+      const item=queue[Number(btn.dataset.retry)];
+      if(!item) return;
+      item.status='waiting'; item.statusLabel='Waiting'; item.error=''; item.loaded=0; item.rate=0;
+      render(); pump();
+    }));
+    const pending=queue.some(x=>['waiting','preparing','uploading','failed'].includes(x.status));
+    const hasFailure=queue.some(x=>x.status==='failed');
+    submit.disabled=pending || hasFailure || active>0;
+    const folderLocked=queue.some(x=>['uploaded','uploading','waiting','preparing'].includes(x.status));
+    sectionEl.disabled=folderLocked;
+    if(folderTrigger) folderTrigger.disabled=folderLocked;
+    if(folderLocked&&folderPicker){
+      folderPicker.classList.remove('open');
+      folderTrigger?.setAttribute('aria-expanded','false');
+    }
+    idsEl.value=JSON.stringify(uploadedIds);
+    const done=queue.filter(x=>x.status==='uploaded').length;
+    list.textContent=done ? `${done} file${done>1?'s':''} uploaded · siap diposting` : '';
+  }
+  function addFiles(files){
+    const incoming=Array.from(files||[]);
+    const currentCount=queue.length;
+    if(currentCount+incoming.length>maxFiles){
+      alert(`Maksimal ${maxFiles} file per update.`);
+      return;
+    }
+    for(const file of incoming){
+      if(file.size>maxSize){
+        queue.push({file,status:'failed',statusLabel:'Failed',error:'File lebih dari 1 GB',loaded:0,rate:0});
+        continue;
+      }
+      const duplicate=queue.some(x=>x.file.name===file.name&&x.file.size===file.size&&x.file.lastModified===file.lastModified);
+      if(!duplicate) queue.push({file,status:'waiting',statusLabel:'Waiting',error:'',loaded:0,rate:0});
+    }
+    input.value='';
+    render();
+    pump();
+  }
+  input.addEventListener('change',()=>addFiles(input.files));
+
+  async function ensureFolder(){
+    if(folder) return folder;
+    if(preparing) return preparing;
+    if(!sectionEl.value) throw new Error('Pilih folder ticket terlebih dahulu.');
+    preparing=(async()=>{
+      const body=new URLSearchParams({csrf,folder_path:sectionEl.value});
+      const res=await fetch(prepareUrl,{method:'POST',headers:{'X-CSRF-Token':csrf,'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok||!data.ok) throw new Error(data.error||'Folder upload tidak dapat disiapkan.');
+      folder=data;
+      return data;
+    })().finally(()=>{preparing=null;});
+    return preparing;
+  }
+
+  function uploadItem(item){
+    return new Promise(async(resolve)=>{
+      item.status='preparing'; item.statusLabel='Preparing'; render();
+      try{ await ensureFolder(); }catch(err){
+        item.status='failed'; item.statusLabel='Failed'; item.error=err.message; render(); resolve(); return;
+      }
+      item.status='uploading'; item.statusLabel='Uploading'; item.loaded=0; item.started=performance.now(); item.rate=0; render();
+      const xhr=new XMLHttpRequest();
+      xhr.open('POST',uploadUrl,true);
+      xhr.setRequestHeader('X-CSRF-Token',csrf);
+      xhr.setRequestHeader('X-File-Name',encodeURIComponent(item.file.name));
+      xhr.setRequestHeader('X-File-Size',String(item.file.size));
+      xhr.setRequestHeader('X-Target-Path',folder.folder_path);
+      xhr.upload.onprogress=function(ev){
+        if(!ev.lengthComputable) return;
+        item.loaded=ev.loaded;
+        const elapsed=Math.max((performance.now()-item.started)/1000,.001);
+        item.rate=ev.loaded/elapsed;
+        render();
+      };
+      xhr.onload=function(){
+        let data={}; try{data=JSON.parse(xhr.responseText||'{}')}catch(e){}
+        if(xhr.status>=200&&xhr.status<300&&data.ok&&data.file&&data.file.id){
+          item.loaded=item.file.size; item.status='uploaded'; item.statusLabel='Uploaded'; item.error=''; item.rate=0;
+          uploadedIds.push(Number(data.file.id));
+        }else{
+          item.status='failed'; item.statusLabel='Failed'; item.error=data.error||`HTTP ${xhr.status}`;
+        }
+        active=Math.max(0,active-1); render(); resolve(); pump();
+      };
+      xhr.onerror=function(){
+        item.status='failed'; item.statusLabel='Failed'; item.error='Connection error';
+        active=Math.max(0,active-1); render(); resolve(); pump();
+      };
+      xhr.onabort=function(){
+        item.status='failed'; item.statusLabel='Failed'; item.error='Upload cancelled';
+        active=Math.max(0,active-1); render(); resolve(); pump();
+      };
+      xhr.send(item.file);
+    });
+  }
+  function pump(){
+    while(active<concurrency){
+      const next=queue.find(x=>x.status==='waiting');
+      if(!next) break;
+      active++; uploadItem(next);
+    }
+    render();
+  }
+
+  form.addEventListener('submit',function(ev){
+    const pending=queue.some(x=>['waiting','preparing','uploading'].includes(x.status));
+    const failed=queue.some(x=>x.status==='failed');
+    if(pending||active>0){ev.preventDefault();alert('Tunggu sampai semua upload selesai sebelum Post Update.');return;}
+    if(failed){ev.preventDefault();alert('Ada file yang gagal di-upload. Tekan Retry terlebih dahulu.');return;}
+    input.value='';
+  });
+
+  render();
+})();
+</script>
+<script src="{{ url_for('static', filename='js/ui.js', v='91') }}" defer></script>
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('updated') !== '1') return;
+  localStorage.setItem('polo_ticket_data_version', String(Date.now()));
+  params.delete('updated');
+  const query = params.toString();
+  const cleanUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+  window.history.replaceState({}, document.title, cleanUrl);
+})();
+</script>
+</body>
+</html>

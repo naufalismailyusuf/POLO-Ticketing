@@ -1,0 +1,16 @@
+/* Revisi 49: Skala global desktop 75% dengan browser zoom 100%. */
+@media screen and (min-width: 1024px) {
+  html { zoom: 0.75; }
+}
+@media print {
+  html { zoom: 1 !important; }
+}
+
+/* Revisi 53: restrained, consistent directional arrows across the application. */
+.ui-inline-arrow {
+  display:inline-flex;align-items:center;justify-content:center;
+  vertical-align:-0.1em;margin-inline:0.42em;
+  font:700 1.12em/1 Arial,Helvetica,sans-serif;
+  color:var(--text,#334155);white-space:nowrap;
+}
+.ui-icon-arrow {font-family:Arial,Helvetica,sans-serif;font-weight:700;}

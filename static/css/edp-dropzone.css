@@ -1,0 +1,37 @@
+/* EDP upload drop zone: shared by New Ticket, Open Ticket, Project, Guide, and File Center. */
+.edp-upload-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.edp-upload-field-title{font-size:inherit;font-weight:600;color:var(--text,#1f2937)}
+.edp-upload-hint{font-size:11px;color:var(--muted,#64748b)}
+.edp-dropzone{position:relative;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:11px;min-height:92px;width:100%;padding:16px 18px;border:1.5px dashed var(--border-strong,#aebdd0);border-radius:12px;background:var(--surface-2,#f8fafc);color:var(--text,#253246);text-align:left;cursor:pointer;user-select:none;transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease;min-width:0;max-width:100%}
+.edp-dropzone svg{display:block;width:24px;height:24px;flex:0 0 24px;fill:none;stroke:var(--info,#4b81bb);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.edp-dropzone-content{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%;overflow:hidden}
+.edp-dropzone-content strong{font-size:12px;line-height:1.45;font-weight:650;overflow-wrap:anywhere}
+.edp-dropzone-content small{font-size:11px;font-weight:400;line-height:1.45;color:var(--muted,#738094);overflow:hidden;text-overflow:ellipsis;overflow-wrap:anywhere}
+.edp-dropzone:hover,.edp-dropzone.is-dragover,.edp-dropzone:focus-within{background:color-mix(in srgb,var(--surface-2,#f8fafc) 90%,#5c95db);border-color:#5b8fc7;box-shadow:0 0 0 3px rgba(70,121,185,.08)}
+.edp-dropzone.is-dragover{border-style:solid;box-shadow:0 0 0 4px rgba(70,121,185,.13)}
+.edp-dropzone.has-files{border-color:#5f9d8c;background:color-mix(in srgb,var(--surface-2,#f8fafc) 92%,#5fc0aa)}
+.edp-dropzone.is-invalid{border-color:#c35c67}
+.edp-dropzone.is-invalid [data-edp-drop-status]{color:#bc4b58}
+.edp-dropzone--compact{min-height:63px;padding:11px 14px;gap:10px;border-radius:10px}
+.edp-dropzone--compact svg{width:20px;height:20px;flex-basis:20px}
+.edp-file-native{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:0!important;border:0!important;opacity:0!important;overflow:hidden!important;clip-path:inset(50%)!important;pointer-events:none!important}
+.edp-dropzone:has(.edp-file-native:focus-visible){outline:2px solid #508bc8;outline-offset:2px}
+.edp-dropzone:has(.edp-file-native:disabled),.edp-ticket-dropzone.is-disabled{opacity:.58;cursor:not-allowed;box-shadow:none}
+.edp-upload-field.is-required .edp-upload-hint{color:var(--text,#334155)}
+/* Layout integrations: respect existing card widths and do not grow scroll containers. */
+#new-ticket-evidence-field{min-width:0}
+#staff-evidence-field .edp-dropzone{margin-top:5px}
+.wf-comment-attach-group{flex:1 1 250px;min-width:0}
+.wf-edp-attach{width:min(330px,100%);min-height:58px;padding:8px 12px}
+.wf-edp-attach .edp-dropzone-content strong{font-size:11px}
+.gd-edp-gallery{margin:14px 0 12px;min-height:91px}
+.gd-step-media-heading{flex-wrap:wrap}
+.gd-edp-step{width:auto;max-width:100%;min-height:52px;flex:1 1 170px}
+.gd-edp-step .edp-dropzone-content strong{font-size:11px}
+.fc-edp-dropzone{margin:12px 0 14px;min-height:67px}
+/* Ticket evidence already had a drop handler; harmonize its appearance without changing its disabled state. */
+.ticket-dropzone.edp-ticket-dropzone{border-style:dashed;border-width:1.5px;border-radius:12px;min-height:80px}
+@media(max-width:700px){.edp-dropzone{min-height:85px;padding:13px 12px}.edp-dropzone--compact{min-height:61px}.wf-edp-attach{width:100%}.gd-edp-step{width:100%}.fc-edp-dropzone{margin:10px 0}}
+@media(prefers-reduced-motion:reduce){.edp-dropzone{transition:none}}
+/* Dashboard form labels are columns by default; file-picker labels are intentionally horizontal. */
+.ticket-form label.edp-dropzone{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:11px;color:var(--text,#253246);font-weight:400;font-size:12px}

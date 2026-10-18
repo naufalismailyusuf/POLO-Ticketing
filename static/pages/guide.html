@@ -1,0 +1,55 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guide · POLO Indonesia</title><link rel="icon" href="/static/favicon.ico"><script>try{document.documentElement.dataset.theme=localStorage.getItem('polo-theme')||localStorage.getItem('theme')||'light'}catch(e){}</script><link rel="stylesheet" href="/static/css/dashboard.css?v=revisi-15"><link rel="stylesheet" href="/static/css/ui-density.css?v=revisi-15"><link rel="stylesheet" href="/static/css/admin-nav-dropdown.css?v=16"><link rel="stylesheet" href="/static/css/guide.css?v=revisi-17"><link rel="stylesheet" href="/static/css/guide-list-v56.css?v=revisi-56"><script src="/static/js/admin-nav-dropdown.js?v=r60" defer></script><script src="/static/js/mobile-nav-v64.js?v=r64" defer></script><script src="/static/js/guide.js?v=r66" defer></script><link rel="stylesheet" href="/static/css/page-entrance-v63.css?v=r64"><link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+</head><body><header class="app-header">
+ <div class="header-inner">
+  <a class="brand" href="/">POLO INDONESIA</a>
+  <nav class="main-nav" aria-label="Navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a class="active" href="/guide">Guide</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+  <div class="header-actions">
+   <details class="profile-dropdown"><summary aria-label="Account menu"><span class="profile-avatar">◉</span><span class="profile-name" id="user-label"></span><span class="profile-chevron">▾</span></summary><div class="profile-menu"><div class="profile-heading"><strong id="profile-display">Account</strong><small id="user-role"></small></div><button type="button" class="profile-action" id="theme-toggle">◐ &nbsp; Toggle Dark / Light Mode</button><a class="profile-action" href="/password">Change Password</a><form class="logout-form" action="/logout" method="post"><input type="hidden" name="csrf" class="csrf-field" id="logout-csrf"><button class="profile-action profile-signout" type="submit">Sign out</button></form></div></details>
+   <button class="icon-button mobile-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu">☰</button>
+  </div>
+ </div>
+ <nav class="mobile-nav" id="mobile-nav" hidden aria-label="Mobile navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a class="active" href="/guide">Guide</a><details class="support-only admin-nav-dropdown mail-tools-dropdown" hidden><summary aria-label="Tools menu">Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/tools/email">Email Accounts</a></div></details><details class="admin-only admin-nav-dropdown" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+</header><main class="gd-page gd-index-v56">
+  <section class="gd-hero" aria-labelledby="gd-page-title">
+    <div class="gd-hero-copy">
+      <span class="gd-kicker">KNOWLEDGE BASE</span>
+      <h1 id="gd-page-title">Guides &amp; procedures</h1>
+      <p>Practical references and documented workflows for the team.</p>
+    </div>
+    <a href="/guide/new" class="gd-button gd-primary" id="gd-new">+ Create guide</a>
+  </section>
+
+  <section class="gd-guide-library" aria-labelledby="gd-library-title">
+    <div class="gd-library-header">
+      <div class="gd-library-heading">
+        <h2 id="gd-library-title">Browse guides</h2>
+        <p class="gd-library-meta">
+          <span><strong id="gd-total">0</strong> <span id="gd-guide-label">guides</span> available</span>
+          <span id="gd-draft-count" hidden><span aria-hidden="true">·</span> <strong id="gd-drafts">0</strong> <span id="gd-draft-label">drafts</span></span>
+          <span id="gd-published" hidden>0</span>
+        </p>
+      </div>
+      <div class="gd-filters" role="search" aria-label="Filter guides">
+        <label class="gd-search-wrap">
+          <span class="gd-visually-hidden">Search guides</span>
+          <input type="search" id="gd-search" placeholder="Search guides..." autocomplete="off">
+        </label>
+        <label class="gd-category-wrap">
+          <span class="gd-visually-hidden">Guide category</span>
+          <select id="gd-category">
+            <option value="">All categories</option>
+            <option>Network</option>
+            <option>System</option>
+            <option>Deployment</option>
+            <option>Software</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="gd-card-grid" id="gd-list" aria-label="Guide list">
+      <p class="gd-muted">Loading guides...</p>
+    </div>
+  </section>
+  <p id="gd-notice" class="gd-notice" role="status" aria-live="polite"></p>
+</main></body></html>

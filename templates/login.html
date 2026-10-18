@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POLO INDONESIA</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico', v='90') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png', v='90') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#10213d;
+  --navy-deep:#0b182d;
+  --cream:#f5f1e8;
+  --ivory:#fbfaf6;
+  --gold:#b69a63;
+  --gold-dark:#927a4b;
+  --ink:#172238;
+  --muted:#74777d;
+  --line:#d9d2c4;
+  --error:#a8483a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;}
+body{
+  min-height:100svh;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:Inter,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.login-page{
+  min-height:100svh;
+  display:grid;
+  grid-template-columns:minmax(360px,42%) 1fr;
+}
+.login-brand-panel{
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:56px;
+  background:var(--navy);
+  position:relative;
+  overflow:hidden;
+}
+.login-brand-panel::after{
+  content:"";
+  position:absolute;
+  width:1px;
+  top:11%;bottom:11%;right:0;
+  background:rgba(182,154,99,.38);
+}
+.brand-wrap{
+  width:min(100%,420px);
+  text-align:center;
+  transform:translateY(-8px);
+}
+.brand-kicker{
+  margin:0 0 15px;
+  color:#d2c5a9;
+  font:500 13px/1.2 Inter,Arial,sans-serif;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+}
+.brand-name{
+  margin:0;
+  color:#f7f3e9;
+  font:600 clamp(58px,6.2vw,92px)/.78 "Cormorant Garamond",Georgia,serif;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+}
+.brand-rule{
+  width:88px;
+  height:1px;
+  margin:30px auto 24px;
+  background:var(--gold);
+}
+.brand-company{
+  margin:0;
+  color:#d8d5cf;
+  font:400 12px/1.6 Inter,Arial,sans-serif;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+.brand-caption{
+  margin:13px 0 0;
+  color:#aeb5c0;
+  font:400 12px/1.6 Inter,Arial,sans-serif;
+  letter-spacing:.04em;
+}
+.login-form-panel{
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px clamp(28px,7vw,110px);
+  background:var(--ivory);
+}
+.login-form-wrap{width:min(100%,390px)}
+.form-heading{
+  margin:0;
+  color:var(--navy);
+  font:600 38px/1.05 "Cormorant Garamond",Georgia,serif;
+  letter-spacing:.015em;
+}
+.form-subheading{
+  margin:9px 0 34px;
+  color:var(--muted);
+  font:400 13px/1.6 Inter,Arial,sans-serif;
+}
+.login-card{margin:0;padding:0;background:transparent;border:0;box-shadow:none}
+.login-field{position:relative;margin:0 0 25px}
+.login-field input{
+  display:block;
+  width:100%;
+  height:58px;
+  padding:20px 44px 5px 0;
+  border:0;
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  outline:none;
+  background:transparent;
+  color:var(--ink);
+  font:500 15px/1.2 Inter,Arial,sans-serif;
+  transition:border-color .18s ease;
+}
+.login-field input:focus{border-bottom-color:var(--gold)}
+.login-field label{
+  position:absolute;
+  left:0;
+  top:21px;
+  pointer-events:none;
+  color:#777a80;
+  font:400 14px/1 Inter,Arial,sans-serif;
+  transition:top .16s ease,font-size .16s ease,color .16s ease;
+}
+.login-field input:focus+label,
+.login-field input[data-filled="true"]+label{
+  top:3px;
+  color:var(--gold-dark);
+  font-size:10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.login-input-icon{display:none}
+.login-password-toggle{
+  position:absolute;
+  right:0;
+  bottom:11px;
+  width:30px;height:30px;
+  padding:5px;
+  border:0;
+  background:transparent;
+  color:#8a8d91;
+}
+.login-password-toggle svg{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.login-password-toggle .eye-off{display:none}
+.login-password-toggle.is-visible .eye-open{display:none}
+.login-password-toggle.is-visible .eye-off{display:block}
+.login-password-toggle:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+.login-error-slot{
+  min-height:18px;
+  margin:-2px 0 14px;
+  color:var(--error);
+  font-size:12px;
+  line-height:1.5;
+}
+.login-error-slot:not(.is-visible){visibility:hidden}
+.login-submit{
+  position:relative;
+  width:100%;
+  height:52px;
+  border:1px solid var(--gold);
+  border-radius:0;
+  background:var(--gold);
+  color:#fffdf7;
+  font:600 12px/1 Inter,Arial,sans-serif;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  transition:background .16s ease,border-color .16s ease,transform .08s ease;
+}
+.login-submit:hover{background:var(--gold-dark);border-color:var(--gold-dark)}
+.login-submit:active{transform:translateY(1px)}
+.login-submit:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+.login-submit:disabled{cursor:wait;opacity:.82}
+.login-spinner{
+  display:none;
+  position:absolute;
+  right:18px;
+  top:50%;
+  width:14px;height:14px;
+  margin-top:-7px;
+  border:1px solid rgba(255,255,255,.45);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+.login-submit.is-submitting .login-spinner{display:block}
+.login-submit.is-submitting .login-submit-label{opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-footer{
+  margin:26px 0 0;
+  color:#8a8b8d;
+  text-align:center;
+  font:400 10px/1.6 Inter,Arial,sans-serif;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+@media(max-width:760px){
+  .login-page{display:flex;flex-direction:column;min-height:100svh}
+  .login-brand-panel{min-height:36svh;padding:42px 28px}
+  .login-brand-panel::after{display:none}
+  .brand-wrap{transform:none}
+  .brand-name{font-size:64px}
+  .brand-rule{margin:22px auto 18px}
+  .login-form-panel{min-height:64svh;padding:44px 28px 52px;align-items:flex-start}
+  .login-form-wrap{margin-top:0}
+  .form-heading{font-size:34px}
+}
+@media(max-width:420px){
+  .login-brand-panel{min-height:32svh;padding:34px 20px}
+  .brand-name{font-size:53px}
+  .brand-company{font-size:10px;letter-spacing:.16em}
+  .login-form-panel{min-height:68svh;padding:36px 22px 42px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="login-page">
+  <section class="login-brand-panel" aria-label="Company brand">
+    <div class="brand-wrap">
+      <p class="brand-kicker">Est. 1990</p>
+      <h1 class="brand-name">POLO</h1>
+      <div class="brand-rule" aria-hidden="true"></div>
+      <p class="brand-company">PT. PrimaJaya Pantes Garment</p>
+      <p class="brand-caption">Indonesia</p>
+    </div>
+  </section>
+
+  <section class="login-form-panel" aria-label="Login form">
+    <div class="login-form-wrap">
+      <h2 class="form-heading">Welcome back</h2>
+      <p class="form-subheading">Sign in to access POLO Indonesia.</p>
+
+      <form method="post" class="login-card{% if login_error %} has-login-error{% endif %}" novalidate>
+        <div class="login-field">
+          <input id="login-username" type="text" name="username" autocomplete="username" placeholder=" " autofocus required>
+          <label for="login-username">Username</label>
+        </div>
+
+        <div class="login-field">
+          <input id="login-password" type="password" name="password" autocomplete="current-password" placeholder=" " required>
+          <label for="login-password">Password</label>
+          <button type="button" class="login-password-toggle" id="login-password-toggle" aria-label="Show password" title="Show password">
+            <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5.5 9.5-5.5 9.5 5.5 9.5 5.5-3.5 5.5-9.5 5.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 6.7C11.05 6.57 11.52 6.5 12 6.5c6 0 9.5 5.5 9.5 5.5a17.7 17.7 0 0 1-4.26 4.18M6.15 6.95C3.72 8.43 2.5 12 2.5 12s3.5 5.5 9.5 5.5c1.13 0 2.18-.2 3.13-.55"/></svg>
+          </button>
+        </div>
+
+        <div class="login-error-slot{% if login_error %} is-visible{% endif %}" role="alert" aria-live="polite">
+          {% if login_error %}<span>{{ login_error }}</span>{% endif %}
+        </div>
+
+        <button class="login-submit" type="submit">
+          <span class="login-submit-label">Login</span>
+          <span class="login-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <p class="login-footer">Authorized access only</p>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+  const input=document.getElementById('login-password');
+  const toggle=document.getElementById('login-password-toggle');
+  const form=document.querySelector('.login-form-panel form');
+  const submit=document.querySelector('.login-submit');
+
+  if(input&&toggle){
+    toggle.addEventListener('click',function(){
+      const show=input.type==='password';
+      input.type=show?'text':'password';
+      toggle.setAttribute('aria-label',show?'Hide password':'Show password');
+      toggle.setAttribute('title',show?'Hide password':'Show password');
+      toggle.classList.toggle('is-visible',show);
+    });
+  }
+
+  document.querySelectorAll('.login-field input').forEach(function(el){
+    const sync=()=>{ if(el.value) el.setAttribute('data-filled','true'); else el.removeAttribute('data-filled'); };
+    sync();
+    el.addEventListener('input',sync);
+    el.addEventListener('change',sync);
+  });
+
+  if(form){
+    form.addEventListener('submit',function(){
+      if(!submit) return;
+      submit.classList.add('is-submitting');
+      submit.disabled=true;
+    });
+  }
+})();
+</script>
+</body>
+</html>

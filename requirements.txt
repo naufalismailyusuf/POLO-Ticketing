@@ -1,0 +1,6 @@
+Flask
+waitress
+python-dotenv
+watchdog
+# tzdata is useful for consistent ZoneInfo data on Windows
+tzdata

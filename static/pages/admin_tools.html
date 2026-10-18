@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Admin Tools · POLO</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico?v=polo-20261010">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('polo-theme')||localStorage.getItem('theme')||'light'}catch(e){}</script>
+<link rel="stylesheet" href="/static/css/dashboard.css?v=admin-tools-27">
+<link rel="stylesheet" href="/static/css/ui-density.css?v=admin-tools-27">
+<link rel="stylesheet" href="/static/css/workspace.css?v=admin-tools-27"><link rel="stylesheet" href="/static/css/divisions.css?v=r43">
+<script src="/static/js/ui-controls.js?v=admin-tools-27" defer></script>
+<script src="/static/js/workspace.js?v=admin-tools-27" defer></script>
+<script src="/static/js/admin-tools.js?v=r43" defer></script>
+<link rel="stylesheet" href="/static/css/admin-nav-dropdown.css?v=16">
+<link rel="stylesheet" href="/static/css/site-scale.css?v=r53">
+</head>
+<body class="workspace-page admin-tools-page">
+<header class="app-header">
+ <div class="header-inner">
+  <a class="brand" href="/">POLO INDONESIA</a>
+  <nav class="main-nav" aria-label="Navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a href="/guide">Guide</a><details class="admin-only admin-nav-dropdown active" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+  <div class="header-actions">
+   <details class="profile-dropdown"><summary aria-label="Account menu"><span class="profile-avatar">◉</span><span class="profile-name" id="user-label"></span><span class="profile-chevron">▾</span></summary><div class="profile-menu"><div class="profile-heading"><strong id="profile-display">Account</strong><small id="user-role"></small></div><button type="button" class="profile-action" id="theme-toggle">◐ &nbsp; Toggle Dark / Light Mode</button><a class="profile-action" href="/password">Change Password</a><form class="logout-form" action="/logout" method="post"><input type="hidden" name="csrf" class="csrf-field" id="logout-csrf"><button class="profile-action profile-signout" type="submit">Sign out</button></form></div></details>
+   <button class="icon-button mobile-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu">☰</button>
+  </div>
+ </div>
+ <nav class="mobile-nav" id="mobile-nav" hidden aria-label="Mobile navigation"><a href="/">Dashboard</a><a href="/files">File Center</a><a href="/our-project">Project</a><a href="/guide">Guide</a><details class="admin-only admin-nav-dropdown active" hidden><summary aria-label="Admin Tools menu">Admin Tools <span class="admin-chevron" aria-hidden="true">▾</span></summary><div class="admin-nav-menu"><a href="/admin/tools">Admin Tools</a><a href="/admin/tickets">Archive</a><a href="https://srv180.niagahoster.com:2083/frontend/jupiter/email_accounts/index.html#/list" target="_blank" rel="noopener noreferrer">Thunderbird</a><a href="/admin/support-users">Manage Support</a></div></details></nav>
+</header>
+<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+<main class="workspace-shell admin-tools-shell">
+ <div class="workspace-heading"><h1>Admin Tools</h1><span class="range-label">Ticket settings</span></div>
+ <section class="workspace-card admin-tool-card">
+  <div class="card-head"><h2>Require Evidence</h2><span id="tools-state" class="count-pill">Loading</span></div>
+  <div id="support-settings" class="support-settings" aria-live="polite"></div>
+ </section>
+ <section class="workspace-card admin-tool-card division-admin-card" aria-labelledby="division-admin-heading">
+  <div class="card-head"><h2 id="division-admin-heading">Manage Divisions</h2><span class="count-pill">Departments</span></div>
+  <form id="division-add-form" class="division-add-form"><label for="division-name-new">New Division</label><div class="division-add-controls"><input id="division-name-new" name="name" maxlength="60" placeholder="Division name" required><button class="button primary" type="submit">Add division</button></div></form>
+  <p class="division-admin-hint">Deactivated divisions are hidden from new tickets but remain visible in ticket history.</p>
+  <div id="division-settings" class="division-settings" aria-live="polite"></div>
+ </section>
+</main>
+<script src="/static/js/admin-nav-dropdown.js?v=revisi-16" defer></script>
+</body>
+</html>

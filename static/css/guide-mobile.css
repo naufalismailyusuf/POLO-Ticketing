@@ -1,0 +1,192 @@
+/* Ticketing Revisi 32 — mobile-only Guide reader/editor improvements.
+ * Desktop styles remain entirely unchanged. No hidden global horizontal overflow.
+ */
+@media screen and (max-width: 700px) {
+  /* Explicitly allow the nested CSS grids to shrink to a phone viewport. */
+  .gd-page,
+  .gd-page #gd-view,
+  .gd-page #pg-content,
+  .gd-page .gd-panel,
+  .gd-page .gd-step-list,
+  .gd-page .gd-detail-step,
+  .gd-page .gd-detail-step-content,
+  .gd-page .gd-flow-scroll,
+  .gd-page .gd-flow,
+  .gd-page .gd-section-head,
+  .gd-page .gd-gallery-panel,
+  .gd-page .gd-video-layout,
+  .gd-page .gd-video-feature,
+  .gd-page .gd-document-list {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .gd-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: calc(100% - 24px);
+    max-width: 100%;
+    padding: 18px 0 36px;
+    gap: 14px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .gd-page #gd-view,
+  .gd-page #pg-content {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .gd-page .gd-panel {
+    width: 100%;
+    padding: 16px;
+    border-radius: 15px;
+  }
+  .gd-page .gd-section-head { margin-bottom: 14px; gap: 7px; }
+  .gd-page .gd-section-head h2 { font-size: 17px; }
+  .gd-page .gd-kicker { letter-spacing: .10em; font-size: 10px; }
+  .gd-page .gd-document-head h1,
+  .gd-page .pg-intro #pg-title { font-size: clamp(22px, 6vw, 29px); line-height: 1.25; }
+  .gd-page .gd-preline,
+  .gd-page .gd-detail-step-content p,
+  .gd-page .pg-description { overflow-wrap: anywhere; word-break: normal; }
+  .gd-page .gd-detail-step-content p,
+  .gd-page .pg-description { font-size: 14px; line-height: 1.7; }
+
+  /* Compact numbered workflow. Connectors are a continuous short vertical line. */
+  .gd-page .gd-flow-scroll { overflow-x: visible; overflow-y: visible; padding: 0; }
+  .gd-page .gd-flow {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+  .gd-page .gd-flow-node {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: 50px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 7px 4px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    box-shadow: none;
+  }
+  .gd-page .gd-flow-node:first-child { border: 0; }
+  .gd-page .gd-flow-node:hover,
+  .gd-page .gd-flow-node:focus-visible { background: var(--surface-2); transform: none; }
+  .gd-page .gd-flow-number { flex: 0 0 31px; width: 31px; height: 31px; border-radius: 10px; font-size: 12px; }
+  .gd-page .gd-flow-title { flex: 1; min-width: 0; font-size: 14px; line-height: 1.5; }
+  .gd-page .gd-flow-connector {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 13px;
+    height: 13px;
+    min-height: 13px;
+    align-self: stretch;
+    margin: 0;
+  }
+  .gd-page .gd-flow-connector svg { display: none; }
+  .gd-page .gd-flow-connector::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: -7px;
+    bottom: -7px;
+    width: 2px;
+    border-radius: 3px;
+    background: var(--border-strong);
+  }
+
+  /* Step text and media must never set the width of their parent grid track. */
+  .gd-page .gd-detail-step { gap: 10px; padding: 4px 0 22px; width: 100%; }
+  .gd-page .gd-detail-step-number { width: 31px; height: 31px; font-size: 11px; }
+  .gd-page .gd-detail-step:not(:last-child)::before { left: 15px; top: 39px; }
+  .gd-page .gd-detail-step-content { flex: 1 1 0; width: 0; padding-top: 5px; }
+  .gd-page .gd-detail-step-content h3 { font-size: 15px; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .gd-page .gd-command { max-width: 100%; padding: 44px 11px 12px; }
+  .gd-page .gd-command pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+
+  /* Touch-friendly, horizontally swipeable screenshots, contained inside each step. */
+  .gd-page .gd-step-images {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 13px;
+    padding: 0 1px 11px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .gd-page .gd-step-image {
+    box-sizing: border-box;
+    flex: 0 0 88%;
+    width: 88%;
+    max-width: 88%;
+    min-width: 0;
+    scroll-snap-align: start;
+    padding: 7px;
+    gap: 8px;
+  }
+  .gd-page .gd-step-image:only-child { flex-basis: 100%; width: 100%; max-width: 100%; }
+  .gd-page .gd-step-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    min-height: 115px;
+    aspect-ratio: 16 / 10;
+    object-fit: contain;
+    background: var(--surface-2);
+    border-radius: 8px;
+  }
+  .gd-page .gd-image-caption { font-size: 11px; overflow-wrap: anywhere; }
+
+  /* Main topology image, thumbnails and video stay within the card width. */
+  .gd-page .gd-gallery-thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .gd-page .gd-gallery-thumbs > *,
+  .gd-page .gd-gallery-thumbs img { min-width: 0; max-width: 100%; }
+  .gd-page .gd-gallery-large img,
+  .gd-page .pg-gallery-main img { height: auto; max-height: 245px; aspect-ratio: 16 / 10; object-fit: contain; }
+  .gd-page .gd-video-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 13px; }
+  .gd-page .gd-video-feature video { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; }
+  .gd-page .gd-video-playlist { max-height: 250px; }
+  .gd-page .gd-video-title { font-size: 14px; }
+  .gd-page .gd-document-item,
+  .gd-page .gd-document-name { max-width: 100%; min-width: 0; }
+  .gd-page .gd-document-actions { flex-wrap: wrap; }
+  .gd-page .gd-document-actions .gd-button { max-width: 100%; }
+  /* Internal editing and Guide actions also fit without changing desktop. */
+  .gd-page .gd-doc-titlebar { max-width: 100%; }
+  .gd-page .gd-doc-actions { max-width: 100%; flex-wrap: wrap; }
+  .gd-page .gd-edit-step,
+  .gd-page .gd-edit-steps,
+  .gd-page .gd-editor form { min-width: 0; max-width: 100%; }
+  .gd-page .gd-edit-gallery,
+  .gd-page .gd-edit-step-media { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media screen and (max-width: 390px) {
+  .gd-page .gd-panel { padding: 14px; }
+  .gd-page .gd-gallery-thumbs { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .gd-page .gd-edit-gallery,
+  .gd-page .gd-edit-step-media { grid-template-columns: minmax(0, 1fr); }
+}

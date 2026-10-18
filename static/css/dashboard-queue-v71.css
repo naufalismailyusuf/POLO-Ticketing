@@ -1,0 +1,135 @@
+/* Revisi 71 — Compact Ticket Queue.
+   Low visual density, visible status + people + SLA, no data filtering.
+   Scoped to the dashboard queue and its View All modal. */
+:is(.queue-card, .modal-content) .queue-item,
+:is(.queue-card, .modal-content) .queue-main {
+  display:block; width:100%; min-width:0; text-decoration:none; color:inherit;
+}
+:is(.queue-card, .modal-content) .queue-summary {
+  display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0;
+}
+:is(.queue-card, .modal-content) .queue-identity {
+  display:flex; align-items:center; gap:7px; min-width:0; overflow:hidden; white-space:nowrap;
+}
+:is(.queue-card, .modal-content) .ticket-no {
+  flex:none; color:var(--muted); font-size:10.5px!important;
+  font-weight:600; letter-spacing:.01em;
+}
+:is(.queue-card, .modal-content) .queue-category {
+  min-width:0; color:var(--muted); font-size:10.5px; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+:is(.queue-card, .modal-content) .queue-category::before {
+  content:'·'; padding-right:7px; color:var(--muted); opacity:.65;
+}
+:is(.queue-card, .modal-content) .queue-priority {
+  flex:none; color:var(--danger); font-size:10.5px;
+  font-weight:600; white-space:nowrap;
+}
+:is(.queue-card, .modal-content) .queue-priority::before {
+  content:'·'; padding-right:7px; color:var(--muted); font-weight:400;
+}
+:is(.queue-card, .modal-content) .queue-status {
+  flex:none; display:inline-flex; align-items:center; gap:5px;
+  padding:0; border:0; background:none; border-radius:0;
+  font-size:10.5px; line-height:1.35; font-weight:600;
+  color:var(--muted); white-space:nowrap;
+}
+:is(.queue-card, .modal-content) .queue-status::before {
+  content:''; width:6px; height:6px; flex:none;
+  border-radius:50%; background:var(--muted);
+}
+:is(.queue-card, .modal-content) .queue-status.status-open::before{background:var(--open,#d2a245)}
+:is(.queue-card, .modal-content) .queue-status.status-in-progress::before{background:var(--info,#6994cf)}
+:is(.queue-card, .modal-content) .queue-status.status-waiting-for-user::before{background:var(--open,#d2a245)}
+:is(.queue-card, .modal-content) .queue-status.status-resolved::before,
+:is(.queue-card, .modal-content) .queue-status.status-closed::before,
+:is(.queue-card, .modal-content) .queue-status.status-done::before{background:var(--success)}
+:is(.queue-card, .modal-content) .queue-title {
+  display:block!important; min-width:0; max-width:100%;
+  margin:4px 0 0!important; padding:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap!important;
+  overflow-wrap:normal; font-size:13px!important; line-height:1.45!important;
+  font-weight:650!important;
+}
+:is(.queue-card, .modal-content) .queue-context {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px 12px; min-width:0; margin-top:4px;
+}
+:is(.queue-card, .modal-content) .queue-people {
+  display:flex; align-items:center; gap:8px 15px; min-width:0; flex:1 1 auto;
+}
+:is(.queue-card, .modal-content) .queue-person {
+  display:inline-flex; align-items:baseline; gap:4px; min-width:0;
+  max-width:48%; font-size:10.5px; line-height:1.45;
+}
+:is(.queue-card, .modal-content) .queue-detail-label,
+:is(.queue-card, .modal-content) .queue-sla-label {
+  color:var(--muted); font-weight:400; flex:none;
+}
+:is(.queue-card, .modal-content) .queue-detail-value {
+  display:block; min-width:0; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; color:var(--text); font-weight:600;
+}
+:is(.queue-card, .modal-content) .queue-sla {
+  flex:none; display:inline-flex; align-items:baseline; gap:5px;
+  font-size:10.5px; line-height:1.45; white-space:nowrap;
+}
+:is(.queue-card, .modal-content) .queue-sla-value {color:var(--muted);font-weight:600}
+:is(.queue-card, .modal-content) .queue-sla-danger .queue-sla-value{color:var(--danger)}
+:is(.queue-card, .modal-content) .queue-sla-warn .queue-sla-value{color:var(--warning)}
+/* Override legacy queue paddings; target ~75px per desktop row. */
+.queue-card .queue-list .queue-row-wrap {padding:9px 0!important; gap:4px 8px!important}
+.modal-content .queue-row-wrap {padding:11px 0!important; gap:4px 8px!important}
+:is(.queue-card, .modal-content) .queue-row-wrap:has(>.queue-check){grid-template-columns:15px minmax(0,1fr)}
+:is(.queue-card, .modal-content) .queue-check{align-items:start;padding-top:1px}
+.queue-card .queue-claim button{padding:3px 8px!important;font-size:10.5px!important}
+:is(.queue-card, .modal-content) .queue-item:hover .queue-title{color:var(--text)}
+:is(.queue-card, .modal-content) .queue-row-wrap:hover .queue-item .queue-title{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+/* Smaller screens: retain readable labels, permit names and SLA to wrap cleanly. */
+@media (max-width:1100px){
+  :is(.queue-card, .modal-content) .queue-context{align-items:flex-start;flex-wrap:wrap;gap:4px 10px}
+  :is(.queue-card, .modal-content) .queue-people{width:100%;flex:1 1 100%}
+  :is(.queue-card, .modal-content) .queue-person{max-width:48%}
+  :is(.queue-card, .modal-content) .queue-sla{margin-left:auto}
+}
+@media (max-width:700px){
+  :is(.queue-card, .modal-content) .queue-summary{gap:6px}
+  :is(.queue-card, .modal-content) .queue-identity{gap:5px}
+  :is(.queue-card, .modal-content) .ticket-no{font-size:10px!important}
+  :is(.queue-card, .modal-content) .queue-category,
+  :is(.queue-card, .modal-content) .queue-priority,
+  :is(.queue-card, .modal-content) .queue-status{font-size:10px}
+  :is(.queue-card, .modal-content) .queue-title{
+    font-size:12.5px!important; white-space:normal!important;
+    display:-webkit-box!important; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow-wrap:anywhere;
+  }
+  :is(.queue-card, .modal-content) .queue-people{gap:5px 8px}
+  :is(.queue-card, .modal-content) .queue-person:first-child{max-width:72%}
+  :is(.queue-card, .modal-content) .queue-person:last-child{max-width:34%}
+  :is(.queue-card, .modal-content) .queue-person,
+  :is(.queue-card, .modal-content) .queue-sla{font-size:10px}
+  .queue-card .queue-list .queue-row-wrap{padding:10px 0!important}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.queue-card, .modal-content) .queue-item{transition:none!important}
+}
+
+/* Revisi 72: remove legacy R42 equal-height stretching.
+   Queue fits its content at small counts; the 520px cap keeps many
+   tickets scrollable without a visible scrollbar. New Ticket is unchanged. */
+@media (min-width:901px) {
+  .dashboard-layout > .queue-card {
+    align-self:start !important;
+    height:auto !important;
+    max-height:520px !important;
+  }
+  .dashboard-layout > .queue-card .queue-list {
+    flex:0 1 auto !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow-y:auto !important;
+  }
+}
+.queue-card .queue-scroll-hint[hidden] { display:none !important; }

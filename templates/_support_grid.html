@@ -1,0 +1,55 @@
+<div class="support-grid" id="support-grid">
+ {% for p in support_users %}
+  <article class="support-card" style="--c:{{ support_colors[p] }}" data-owner="{{ p|e }}">
+   <div class="support-card-head">
+    <div class="support-person">
+     <div class="av">{{ p[0] }}</div>
+     <div class="support-person-copy">
+      <h3>{{ p }}</h3>
+      <div class="support-summary">
+       <span><b data-count="total">{{ stat[p].total }}</b> Total</span>
+       <span><b data-count="open">{{ stat[p].open }}</b> Open</span>
+       <span><b data-count="resolved">{{ stat[p].done }}</b> Resolved</span>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <div class="support-card-body">
+    <div class="support-ticket-list" data-owner-list>
+     {% set active_rows = per[p]|rejectattr('status','in',completed_statuses)|list %}
+     {% for r in active_rows %}
+      {% set meta = comment_meta.get(r.id, {'count':0, 'latest':None}) %}
+      <button type="button" class="support-ticket-row" data-ticket-id="{{ r.id }}" data-status="{{ r.status }}" data-completed="0">
+       <span class="support-ticket-main">
+        <span class="support-ticket-line1"><span class="support-ticket-id">{{ r.no_tiket }}</span><span class="support-ticket-title">{{ r.masalah }}</span></span>
+        <span class="support-ticket-line2"><span>{{ r.category }}</span><span>{{ r.priority }}</span><span>{{ meta.count }} updates</span><span>{{ r.case_tanggal or r.tanggal }} {{ r.case_jam or r.jam }}</span></span>
+       </span>
+       <span class="status-badge status-{{ r.status|replace(' ','-')|replace('_','-') }}">{{ r.status }}</span>
+      </button>
+     {% endfor %}
+
+     {% set closed_rows = per[p]|selectattr('status','in',completed_statuses)|list %}
+     {% if closed_rows %}
+      <details class="support-resolved-fold">
+       <summary>Resolved / Closed history <span>{{ closed_rows|length }}</span></summary>
+       <div class="support-closed-list">
+        {% for r in closed_rows %}
+         {% set meta = comment_meta.get(r.id, {'count':0, 'latest':None}) %}
+         <button type="button" class="support-ticket-row is-completed" data-ticket-id="{{ r.id }}" data-status="{{ r.status }}" data-completed="1">
+          <span class="support-ticket-main">
+           <span class="support-ticket-line1"><span class="support-ticket-id">{{ r.no_tiket }}</span><span class="support-ticket-title">{{ r.masalah }}</span></span>
+           <span class="support-ticket-line2"><span>{{ r.category }}</span><span>{{ r.priority }}</span><span>{{ meta.count }} updates</span><span>{{ r.case_tanggal or r.tanggal }} {{ r.case_jam or r.jam }}</span></span>
+          </span>
+          <span class="status-badge status-{{ r.status|replace(' ','-')|replace('_','-') }}">{{ r.status }}</span>
+         </button>
+        {% endfor %}
+       </div>
+      </details>
+     {% endif %}
+     <div class="support-empty" data-empty-state hidden>No tickets</div>
+    </div>
+   </div>
+  </article>
+ {% endfor %}
+ </div>

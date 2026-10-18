@@ -1,0 +1,1 @@
+(async()=>{try{const response=await fetch('/api/session',{credentials:'same-origin'});if(!response.ok)return;const session=await response.json();window.renderWorkspaceUser?.(session.user);window.renderSessionMessages?.(session);document.querySelectorAll('.csrf-field').forEach(input=>input.value=session.csrf||'')}catch(_){}})();

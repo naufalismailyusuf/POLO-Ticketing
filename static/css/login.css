@@ -1,0 +1,53 @@
+.login-page,.login-page *{box-sizing:border-box}
+:root body.login-page{display:grid;place-items:center;min-height:111.1112svh;margin:0;padding:32px 20px;background-color:#F6F7F8;background-image:radial-gradient(ellipse at 50% 40%,#FFFFFF 0%,#ECEFF3 75%);color:#202833;font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif}
+.login-panel{width:100%;max-width:400px;padding:34px 32px 32px;border:1px solid #D9DEE4;border-radius:15px;background:#FFFFFF;box-shadow:0 2px 5px rgba(38,49,61,.04),0 14px 35px rgba(38,49,61,.1),0 32px 65px rgba(38,49,61,.05);animation:login-enter 350ms cubic-bezier(.2,.7,.3,1)}
+.login-brand{margin:0 0 30px;text-align:center}.login-brand h1{margin:0;font:600 43px/1.15 Georgia,"Times New Roman",serif;letter-spacing:.085em;color:#202833}.login-brand::after{content:"";display:block;width:30px;height:1px;margin:19px auto 0;background:#B78B2E}
+#login-form{display:flex;flex-direction:column;gap:19px;margin:0}.login-field{display:flex;flex-direction:column;gap:8px}.login-field label{font-size:13px;font-weight:500;line-height:1.4;color:#6D7783}
+:root body.login-page .login-field input{width:100%;height:44px;padding:0 12px;border:1px solid #D9DEE4;border-radius:8px;background:#FFFFFF;color:#202833;font-size:15px;outline:none;transition:border-color 160ms ease,box-shadow 160ms ease,background-color 160ms ease}
+:root body.login-page .login-field input:hover{border-color:#B8C1CC}:root body.login-page .login-field input:focus{border-color:#4B5563;box-shadow:none}
+:root body.login-page .login-submit{width:100%;height:44px;margin-top:5px;padding:0 15px;border:1px solid #202833;border-radius:8px;background:#202833;color:#F6F7F8;font-family:inherit;font-size:14px;font-weight:600;line-height:1.3;cursor:pointer;box-shadow:0 3px 7px rgba(38,49,61,.14);transition:background-color 160ms ease,box-shadow 160ms ease,transform 160ms ease,opacity 160ms ease}
+:root body.login-page .login-submit:hover{background:#172234;border-color:#172234;opacity:1;box-shadow:0 5px 12px rgba(38,49,61,.18)}:root body.login-page .login-submit:active{transform:translateY(1px);box-shadow:0 1px 3px rgba(38,49,61,.12)}
+:root body.login-page .login-submit:focus-visible{outline:2px solid #4B5563;outline-offset:3px}.login-error{padding:10px 12px;border:1px solid #E7C9C4;border-radius:7px;background:#F8E3E3;color:#A44949;font-size:13px;line-height:1.45;overflow-wrap:anywhere}[hidden]{display:none!important}
+:root[data-theme="dark"] body.login-page{background-color:#0c1321;background-image:radial-gradient(ellipse at 50% 40%,#1b283c 0%,#0c1321 75%);color:#e6ecf5}
+:root[data-theme="dark"] .login-panel{background:#151e2e;border-color:#344054;box-shadow:0 2px 5px rgba(0,0,0,.14),0 14px 35px rgba(0,0,0,.26),0 32px 65px rgba(0,0,0,.15)}:root[data-theme="dark"] .login-brand h1{color:#e6ecf5}:root[data-theme="dark"] .login-field label{color:#a9b4c5}
+:root[data-theme="dark"] body.login-page .login-field input{background:#1b2739;border-color:#3a485d;color:#e6ecf5}:root[data-theme="dark"] body.login-page .login-field input:hover{border-color:#6a778d}:root[data-theme="dark"] body.login-page .login-field input:focus{border-color:#CBD5E1;box-shadow:none}
+:root[data-theme="dark"] body.login-page .login-submit{background:#e5eaf2;border-color:#e5eaf2;color:#172238}:root[data-theme="dark"] body.login-page .login-submit:hover{background:#fff;border-color:#fff}:root[data-theme="dark"] .login-error{background:#38232a;border-color:#65404a;color:#eaa0a8}
+@media(max-width:480px){:root body.login-page{padding:24px 16px}.login-panel{padding:30px 25px 27px;border-radius:13px}.login-brand{margin-bottom:27px}.login-brand h1{font-size:39px}}
+@keyframes login-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.login-panel{animation:none}:root body.login-page .login-field input,:root body.login-page .login-submit{transition:none}:root body.login-page .login-submit:active{transform:none}}
+
+/* Navy, ivory and muted gold */
+:root[data-theme="dark"]{color-scheme:dark;background:#10151D}
+:root[data-theme="dark"] body.login-page{background-color:#10151D;background-image:radial-gradient(ellipse at 50% 40%,#202A36 0%,#10151D 78%);color:#EEF2F5}
+:root[data-theme="dark"] .login-panel{background:#18202B;border-color:#354150;box-shadow:0 3px 8px rgba(0,0,0,.22),0 20px 45px rgba(0,0,0,.32),0 40px 90px rgba(0,0,0,.22)}
+:root[data-theme="dark"] .login-brand h1{color:#c6ae75}:root[data-theme="dark"] .login-brand::after{background:#9d8656}:root[data-theme="dark"] .login-field label{color:#b4bdca}
+:root[data-theme="dark"] body.login-page .login-field input{background:#102035;border-color:#38465b;color:#eee8da}:root[data-theme="dark"] body.login-page .login-field input:hover{border-color:#69758a}:root[data-theme="dark"] body.login-page .login-field input:focus{border-color:#CBD5E1;box-shadow:none}
+:root[data-theme="dark"] body.login-page .login-submit{background:#c6ae75;border-color:#c6ae75;color:#102035;box-shadow:0 4px 10px rgba(0,0,0,.18)}:root[data-theme="dark"] body.login-page .login-submit:hover{background:#d7c18d;border-color:#d7c18d;box-shadow:0 6px 15px rgba(0,0,0,.22)}
+
+:root[data-theme="dark"] .login-brand h1{color:#b7a47c}:root[data-theme="dark"] .login-brand::after{background:#887c62}
+:root[data-theme="dark"] body.login-page .login-submit{background:#c0cdc3;border-color:#c0cdc3;color:#20302c}:root[data-theme="dark"] body.login-page .login-submit:hover{background:#d2dcd3;border-color:#d2dcd3}
+:root[data-theme="dark"] body.login-page .login-field input:focus{border-color:#CBD5E1;box-shadow:none}
+
+:root[data-theme="dark"] .login-brand h1{color:#B78B2E}:root[data-theme="dark"] .login-brand::after{background:#B78B2E}
+:root[data-theme="dark"] body.login-page .login-submit{background:#E7EBEF;border-color:#E7EBEF;color:#172234}:root[data-theme="dark"] body.login-page .login-submit:hover{background:#F7FAFC;border-color:#F7FAFC}
+
+/* Crisp neutral login refinements. */
+:root body.login-page{background-color:#F7F9FC!important;background-image:radial-gradient(ellipse at 50% 38%,#FFFFFF 0%,#EEF2F6 78%)!important;color:#1F2937!important}
+.login-panel{background:#FFFFFF!important;border-color:#DDE3EA!important;box-shadow:0 2px 5px rgba(31,41,55,.04),0 14px 35px rgba(31,41,55,.1),0 32px 65px rgba(31,41,55,.05)!important}
+.login-brand h1{color:#B78B2E!important}.login-brand::after{background:#B78B2E!important}
+.login-field label{color:#6B7280!important}
+:root body.login-page .login-field input{background:#FFFFFF!important;border-color:#DDE3EA!important;color:#1F2937!important}
+:root body.login-page .login-field input:hover{border-color:#B7C1CC!important}
+:root body.login-page .login-field input:focus{border-color:#4B5563!important;box-shadow:none!important}
+:root body.login-page .login-submit{background:#1F2937!important;border-color:#1F2937!important;color:#F8FAFC!important}
+:root body.login-page .login-submit:hover{background:#111827!important;border-color:#111827!important}
+:root body.login-page .login-submit:focus-visible{outline-color:#4B5563!important}
+:root[data-theme="dark"] body.login-page{background-color:#0D1118!important;background-image:radial-gradient(ellipse at 50% 38%,#18202B 0%,#0D1118 78%)!important;color:#F1F5F9!important}
+:root[data-theme="dark"] .login-panel{background:#151D29!important;border-color:#2D3848!important}
+:root[data-theme="dark"] body.login-page .login-field input{background:#111827!important;border-color:#354150!important;color:#F1F5F9!important}
+:root[data-theme="dark"] body.login-page .login-field input:focus{border-color:#CBD5E1!important;box-shadow:none!important}
+
+body.login-page,body.login-page input,body.login-page button{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif!important}
+:root body.login-page .login-field input:focus,:root body.login-page .login-field input:focus-visible,:root body.login-page .login-submit:focus,:root body.login-page .login-submit:focus-visible,:root[data-theme="dark"] body.login-page .login-field input:focus,:root[data-theme="dark"] body.login-page .login-field input:focus-visible{outline:1px solid var(--focus-ring,#4B5563)!important;outline-offset:2px!important;border-color:var(--focus-ring,#4B5563)!important;box-shadow:none!important}
+:root[data-theme="dark"] body.login-page .login-submit{background:#E8EDF3!important;border-color:#E8EDF3!important;color:#111827!important}
+:root[data-theme="dark"] body.login-page .login-submit:hover{background:#FFFFFF!important;border-color:#FFFFFF!important}
