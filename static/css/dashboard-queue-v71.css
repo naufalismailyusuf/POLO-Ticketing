@@ -253,3 +253,52 @@
   .queue-card .queue-list .queue-row-wrap{transition:none!important;}
   .queue-card .queue-list .queue-row-wrap:hover{transform:none!important;}
 }
+
+/* R77 — Fix card interior gutters and checkbox/status/SLA alignment.
+   Grid content stays within each elevated ticket card, not at its border. */
+.queue-card .queue-list .queue-row-wrap {
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:16px 24px!important;
+  column-gap:12px!important;
+  overflow:visible;
+}
+.queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
+  grid-template-columns:18px minmax(0,1fr)!important;
+}
+.queue-card .queue-list .queue-row-wrap .queue-check {
+  grid-column:1;
+  align-self:start!important;
+  justify-self:center!important;
+  padding-top:1px!important;
+}
+.queue-card .queue-list .queue-row-wrap .queue-item {
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding-right:10px!important;
+  box-sizing:border-box!important;
+}
+.queue-card .queue-list .queue-row-wrap:has(>.queue-check) .queue-item {
+  grid-column:2;
+}
+.queue-card .queue-list .queue-summary,
+.queue-card .queue-list .queue-context {
+  width:100%;
+  min-width:0;
+}
+.queue-card .queue-list .queue-status,
+.queue-card .queue-list .queue-sla {
+  flex-shrink:0;
+  margin-left:auto;
+}
+.queue-card .queue-list .queue-claim{min-width:0;}
+@media(max-width:900px){
+  .queue-card .queue-list .queue-row-wrap{padding:15px 18px!important;}
+  .queue-card .queue-list .queue-row-wrap .queue-item{padding-right:4px!important;}
+}
+@media(max-width:420px){
+  .queue-card .queue-list .queue-row-wrap{padding:13px 14px!important;column-gap:9px!important;}
+  .queue-card .queue-list .queue-row-wrap .queue-item{padding-right:0!important;}
+}
