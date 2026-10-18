@@ -1,0 +1,151 @@
+/* R83 — Workspace UI polish; scoped to the unified /workspace page. */
+.ws-page .ws-controls .ws-search {
+  position:relative;display:flex;align-items:center;min-width:0;
+}
+.ws-page .ws-controls .ws-search > svg {
+  position:absolute;top:50%;left:16px;z-index:1;
+  width:17px;height:17px;transform:translateY(-50%);
+  pointer-events:none;flex:none;
+}
+:root body .ws-page .ws-controls .ws-search > input[type="search"] {
+  display:block;width:100%!important;min-width:0!important;
+  height:44px!important;min-height:44px!important;
+  padding:0 16px 0 46px!important;
+  border:1px solid var(--border)!important;
+  border-radius:10px!important;
+  background:var(--surface)!important;color:var(--text);
+  box-sizing:border-box;
+}
+.ws-page .ws-controls .ws-search > input::placeholder {
+  color:var(--muted);opacity:1;
+}
+:root body .ws-page .ws-controls .ws-search > input[type="search"]:focus-visible {
+  border-color:var(--border-strong)!important;
+  outline:2px solid var(--focus,rgba(75,85,99,.2))!important;
+  outline-offset:2px;
+}
+
+/* Section headings: one aligned title/action row on desktop. */
+.ws-page .ws-project-board .board-title,
+.ws-page #ws-guide-panel .ws-guide-heading {
+  display:flex!important;justify-content:space-between!important;
+  align-items:center!important;flex-wrap:nowrap!important;
+  gap:18px!important;width:100%;min-width:0;
+  padding:0 0 15px!important;
+  background:transparent!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+.ws-page .ws-project-board .project-rows {padding:0!important;margin:0!important;}
+.ws-page .ws-project-board .board-heading,
+.ws-page #ws-guide-panel .ws-guide-heading > div:first-child {min-width:0;}
+.ws-page .ws-project-board .board-heading h2,
+.ws-page #ws-guide-panel .ws-guide-heading h2 {margin:0!important;}
+.ws-page .ws-heading-actions {
+  display:flex!important;align-items:center!important;
+  justify-content:flex-end;flex-wrap:nowrap!important;
+  flex:0 0 auto;align-self:center;gap:12px!important;
+  margin-left:auto;min-width:0;
+}
+
+/* Native select for both filters: consistent chevron and right inset. */
+.ws-page .ws-heading-actions .ws-filter-label {
+  position:relative;display:inline-flex;align-items:center;
+  min-width:0;flex:0 1 auto;
+}
+:root body .ws-page .ws-heading-actions .ws-filter-label > select {
+  -webkit-appearance:none!important;appearance:none!important;
+  display:block;box-sizing:border-box;
+  height:38px!important;min-height:38px!important;
+  min-width:152px;width:auto;max-width:205px;
+  padding:0 38px 0 13px!important;
+  border:1px solid var(--border)!important;
+  border-radius:9px!important;background:var(--surface)!important;
+  color:var(--text);line-height:normal;font-size:12px;cursor:pointer;
+}
+.ws-page .ws-heading-actions .ws-filter-label::after {
+  content:"";position:absolute;right:16px;top:calc(50% - 3px);
+  width:7px;height:7px;transform:rotate(45deg);
+  border-right:1.5px solid var(--muted);
+  border-bottom:1.5px solid var(--muted);
+  pointer-events:none;
+}
+:root body .ws-page .ws-heading-actions .ws-filter-label > select:hover {
+  border-color:var(--border-strong)!important;
+}
+:root body .ws-page .ws-heading-actions .ws-filter-label > select:focus-visible {
+  border-color:var(--border-strong)!important;
+  outline:2px solid var(--focus,rgba(75,85,99,.2))!important;
+  outline-offset:2px;
+}
+.ws-page .ws-heading-actions .ws-view-all {
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:none;height:38px;min-height:38px;padding:0 10px;
+  line-height:1;white-space:nowrap;margin:0;
+}
+
+/* Project action menu is anchored to the card top-right, not vertically centered. */
+.ws-page .project-rows .project-row {
+  position:relative!important;display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.ws-page .project-rows .project-row > .project-row-main {
+  grid-column:1;width:100%;box-sizing:border-box;
+  padding-right:39px!important;
+}
+.ws-page .project-rows .project-row > .project-row-actions {
+  position:absolute!important;top:12px!important;right:13px!important;
+  align-self:auto!important;justify-self:auto!important;z-index:4;
+}
+.ws-page .project-rows .project-row .project-actions-trigger {
+  display:grid;place-items:center;width:34px;height:34px;
+  border:1px solid transparent;border-radius:8px;
+  background:transparent;color:var(--muted);
+  font-size:21px;line-height:1;
+  transition:background-color .16s ease,color .16s ease,border-color .16s ease;
+}
+.ws-page .project-rows .project-row .project-actions-trigger:hover,
+.ws-page .project-rows .project-row .project-actions-trigger:focus-visible,
+.ws-page .project-rows .project-row .project-row-actions[open] > .project-actions-trigger {
+  background:var(--surface-2);color:var(--text);
+  border-color:var(--border);
+}
+
+/* Documentation type and category occupy the exact same top baseline. */
+.ws-page #ws-guide-list .ws-guide-card-top {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,auto);
+  align-items:start!important;justify-content:stretch!important;
+  gap:8px;min-height:17px;
+}
+.ws-page #ws-guide-list .ws-guide-card-type,
+.ws-page #ws-guide-list .ws-guide-card-category {
+  display:block;margin:0;padding:0;line-height:17px!important;
+  white-space:nowrap;text-overflow:ellipsis;overflow:hidden;
+  align-self:start;
+}
+.ws-page #ws-guide-list .ws-guide-card-category {text-align:right;}
+
+@media(max-width:760px) {
+  .ws-page .ws-project-board .board-title,
+  .ws-page #ws-guide-panel .ws-guide-heading {
+    align-items:flex-start!important;flex-wrap:wrap!important;gap:12px!important;
+  }
+  .ws-page .ws-heading-actions {
+    justify-content:space-between!important;
+    width:100%!important;margin:0;gap:10px!important;
+  }
+  :root body .ws-page .ws-heading-actions .ws-filter-label > select {
+    min-width:143px;max-width:min(205px,65vw);
+  }
+  .ws-page .project-rows .project-row > .project-row-actions {
+    top:9px!important;right:9px!important;
+  }
+  .ws-page .project-rows .project-row > .project-row-main {
+    padding-right:38px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ws-page .project-rows .project-row .project-actions-trigger {
+    transition:none!important;
+  }
+}
