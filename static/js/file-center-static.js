@@ -9,8 +9,10 @@
 async function fcLoadCapacity(force=false){
   const summary=$('#fc-capacity-summary'),bar=$('#fc-capacity-bar'),fill=$('#fc-capacity-fill');
   if(!summary||!bar||!fill)return;
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),12000);
   try{
-    const response=await get('/api/files/capacity'+(force?'?refresh=1':''));
+    const response=await get('/api/files/capacity'+(force?'?refresh=1':''),{signal:controller.signal});
     if(!response.ok)throw Error(response.error||'Capacity unavailable');
     const total=Number(response.total_bytes),free=Number(response.free_bytes),used=Number(response.used_bytes);
     if(!Number.isFinite(total)||total<=0||!Number.isFinite(free)||free<0||free>total||!Number.isFinite(used))throw Error('Invalid capacity');
@@ -29,16 +31,51 @@ async function fcLoadCapacity(force=false){
     $('#fc-capacity-total').textContent='Total: —';
     fill.style.width='0%';fill.classList.remove('fc-capacity-high');
     bar.removeAttribute('aria-valuenow');
-  }
+  }finally{clearTimeout(timer)}
 }
 function csrf(){return session.csrf}function report(e){window.fileCenterToast?.(e.message,'err')}function siblingNames(row){return $$('.fc-row').filter(x=>x!==row).map(x=>x.dataset.name.toLowerCase())}
 async function askRename(button){const row=button.closest('.fc-row');const current=button.dataset.name;const name=await AppDialog.input('New name',{title:'Rename item',value:current,validate:value=>value.toLowerCase()!==current.toLowerCase()&&siblingNames(row).includes(value.toLowerCase())?'An item with this name already exists.':''});if(!name||name===current)return;const u=button.dataset.rename==='folder'?`/api/files/rename-folder/${button.dataset.id}`:`/api/files/rename/${button.dataset.id}`;await post(u,{name});await load()}
 function render(d){path=d.path||'';$('#qnap-status').classList.toggle('is-ok',true);$('#qnap-status-title').textContent='Connected';$('#qnap-status').title='QNAP connected';$('#file-breadcrumbs').innerHTML='<a href="/files">Files</a>'+path.split('/').filter(Boolean).map((part,i,parts)=>'<span aria-hidden="true">/</span><a href="/files?path='+encodeURIComponent(parts.slice(0,i+1).join('/'))+'">'+esc(part)+'</a>').join('');$('#fc-list-count').textContent=`${d.folders.length} folders · ${d.files.length} files`;const folderIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5.5A1.5 1.5 0 0 1 4.5 4h5l2 3h8A1.5 1.5 0 0 1 21 8.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5Z"/></svg>';function item(f,kind){const folder=kind==='folder',name=folder?f.name:f.original_name,id=Number(f.id),itemPath=path?path+'/'+name:name;const actions=`<details class="item-menu"><summary aria-label="Actions for ${esc(name)}">⋯</summary><div class="item-menu-panel">${folder?'':`<a class="menu-download" href="/files/download/${id}">Download</a>`}${isAdmin?`<button type="button" data-rename="${kind}" data-id="${id}" data-name="${esc(name)}">Rename</button><button type="button" ${folder?'data-delete-folder':'data-delete-file'}="${id}" class="danger">Delete</button>`:''}</div></details>`;return `<div class="fc-row ${kind}-row" data-kind="${kind}" data-item-id="${id}" data-name="${esc(name)}" data-path="${esc(itemPath)}">${isAdmin?`<input type="checkbox" class="fc-select" aria-label="Select ${esc(name)}">`:'<span class="fc-selection-space"></span>'}<a class="fc-item-main" href="${folder?'/files?path='+encodeURIComponent(itemPath):'/files/download/'+id}"><span class="fc-item-icon ${folder?'folder':''}">${folder?folderIcon:esc(f.kind?.slice(0,5)||'FILE')}</span><span class="fc-item-text"><b>${esc(name)}</b><small>${esc(folder?(f.created_by||'QNAP'):(f.uploaded_display||f.mime_type||''))}</small></span></a><span class="fc-meta fc-size">${folder?'Folder':esc(f.size_label)}</span><span class="fc-meta fc-date">${esc(f.created_at||'—')}</span><div class="fc-actions">${folder?'':`<a class="file-download" href="/files/download/${id}">Download</a>`}${(isAdmin||!folder)?actions:''}</div></div>`}$('#fc-list-body').innerHTML=[...d.folders.map(f=>item(f,'folder')),...d.files.map(f=>item(f,'file'))].join('')||'<div class="fc-empty">No files or folders.</div>';bindRows()}
 function bindRows(){$$('[data-delete-folder]').forEach(b=>b.onclick=async()=>{if(!await AppDialog.ask('Delete folder?',{title:'Delete folder',okText:'Delete'}))return;await deleteRow(b)});$$('[data-delete-file]').forEach(b=>b.onclick=async()=>{if(!await AppDialog.ask('Delete file?',{title:'Delete file',okText:'Delete'}))return;await deleteRow(b)});$$('[data-rename]').forEach(b=>b.onclick=()=>askRename(b));$$('[data-rename],[data-delete-file],[data-delete-folder]').forEach(button=>{const handler=button.onclick;button.onclick=()=>Promise.resolve(handler()).catch(report)})}
 async function post(u,body={}){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-Token':csrf()},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw Error(d.error||d.message||'Request failed: HTTP '+r.status);return d}
-async function load(forceRefresh=false){try{const url='/api/files/list?path='+encodeURIComponent(path)+(forceRefresh?'&refresh=1':'');const d=await get(url);render(d);$('#fc-select-all').checked=false;updateMass();$('#file-search').dispatchEvent(new Event('input'))}catch(e){$('#qnap-status').classList.remove('is-ok');$('#qnap-status-title').textContent='Refresh failed';$('#qnap-status').title=e.message;throw e}}
+// A blocked Windows SMB lookup must not keep the browser on "Checking…" forever.
+let fcListRequest=null;
+async function load(forceRefresh=false){
+  if(fcListRequest)return fcListRequest;
+  const job=(async()=>{
+    const state=$('#qnap-status'),title=$('#qnap-status-title'),refresh=$('#qnap-refresh');
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    state.classList.remove('is-ok');
+    title.textContent='Checking…';
+    state.title='Checking QNAP SMB folder…';
+    refresh.disabled=true;
+    try{
+      const url='/api/files/list?path='+encodeURIComponent(path)+(forceRefresh?'&refresh=1':'');
+      const d=await get(url,{signal:controller.signal});
+      render(d);
+      $('#fc-select-all').checked=false;
+      updateMass();
+      $('#file-search').dispatchEvent(new Event('input'));
+    }catch(e){
+      const timedOut=e.name==='AbortError';
+      const error=timedOut
+        ? new Error('File Center did not respond within 15 seconds. The QNAP SMB operation may still be running on the server. Wait, then click Refresh.')
+        : e;
+      state.classList.remove('is-ok');
+      title.textContent=timedOut?'Timed out':'Connection failed';
+      state.title=error.message;
+      throw error;
+    }finally{
+      clearTimeout(timeout);
+      refresh.disabled=false;
+    }
+  })();
+  fcListRequest=job;
+  try{return await job}finally{fcListRequest=null}
+}
 async function deleteRow(button){await post('/api/files/mass-delete',{paths:[button.closest('.fc-row').dataset.path]});await load()}
-(async()=>{try{session=await get('/api/session');window.renderSessionMessages?.(session);$$('.csrf-field').forEach(x=>x.value=session.csrf);window.renderWorkspaceUser?.(session.user);isAdmin=session.user.role==='admin';$$('.admin-only').forEach(x=>x.hidden=!isAdmin);$('#fc-paste-here').hidden=!(isAdmin&&clipboard);const u=new URL(location.href);path=u.searchParams.get('path')||'';await load();void fcLoadCapacity();fcShowResumeHint()}catch(e){report(e);if(e.message.includes('401'))location='/login?next=/files'}})();
+(async()=>{try{session=await get('/api/session');window.renderSessionMessages?.(session);$$('.csrf-field').forEach(x=>x.value=session.csrf);window.renderWorkspaceUser?.(session.user);isAdmin=session.user.role==='admin';$$('.admin-only').forEach(x=>x.hidden=!isAdmin);$('#fc-paste-here').hidden=!(isAdmin&&clipboard);const u=new URL(location.href);path=u.searchParams.get('path')||'';fcShowResumeHint();void fcLoadCapacity();await load()}catch(e){report(e);if(e.message.includes('401'))location='/login?next=/files'}})();
 // Revisi 22 — simplified File Center toolbar; upload input IDs and handlers remain unchanged.
 const fcNewFolderToggle=$('#fc-new-folder-toggle'),fcNewFolderPanel=$('#new-folder-form'),fcNewMenu=$('#fc-new-menu');
 function fcSetFolderPanel(show){
