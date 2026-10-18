@@ -302,3 +302,54 @@
   .queue-card .queue-list .queue-row-wrap{padding:13px 14px!important;column-gap:9px!important;}
   .queue-card .queue-list .queue-row-wrap .queue-item{padding-right:0!important;}
 }
+
+/* R78 — Stable checkbox alignment in elevated ticket cards.
+   Position the admin checkbox within the card, separately from the ticket
+   content grid. Avoid competing grid-column rules from R41-R77. */
+.queue-card .queue-list .queue-row-wrap {
+  position:relative!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  padding:16px 24px!important;
+}
+.queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
+  grid-template-columns:minmax(0,1fr)!important;
+  padding-left:56px!important;
+}
+.queue-card .queue-list .queue-row-wrap>.queue-check {
+  position:absolute!important;
+  left:20px!important;
+  top:19px!important;
+  width:18px!important;
+  height:18px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  justify-self:auto!important;
+  padding:0!important;
+  margin:0!important;
+  grid-column:auto!important;
+}
+.queue-card .queue-list .queue-row-wrap>.queue-check input {
+  margin:0!important;
+}
+.queue-card .queue-list .queue-row-wrap>.queue-item {
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:0!important;
+}
+.queue-card .queue-list .queue-row-wrap>.queue-claim {
+  grid-column:1!important;
+}
+@media(max-width:700px) {
+  .queue-card .queue-list .queue-row-wrap {
+    padding:13px 15px!important;
+  }
+  .queue-card .queue-list .queue-row-wrap:has(>.queue-check) {
+    padding-left:47px!important;
+  }
+  .queue-card .queue-list .queue-row-wrap>.queue-check {
+    left:16px!important;
+    top:16px!important;
+  }
+}
