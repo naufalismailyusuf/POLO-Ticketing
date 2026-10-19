@@ -36,9 +36,12 @@
   async function verifySession() {
     if (redirecting || verifying) return;
     verifying = true;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch('/api/session/security', {
         method: 'GET', credentials: 'same-origin', cache: 'no-store',
+        signal: controller.signal,
         headers: {'Accept':'application/json'}
       });
       if (response.status === 401 || response.status === 403) { toLogin(); return; }
@@ -49,6 +52,7 @@
       // The server may be temporarily unreachable. Do not renew locally.
       if (now() >= idleDeadline || now() >= absoluteDeadline) toLogin();
     } finally {
+      clearTimeout(timer);
       verifying = false;
     }
   }
@@ -61,9 +65,12 @@
     }
     pending = true;
     lastSent = now();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch('/api/session/heartbeat', {
         method:'POST', credentials:'same-origin', cache:'no-store',
+        signal:controller.signal,
         headers:{'Accept':'application/json', 'X-CSRF-Token':csrf}
       });
       if (response.status === 401 || response.status === 403) { toLogin(); return; }
@@ -74,6 +81,7 @@
     } catch (_) {
       lastSent = 0; // Retry on the next deliberate interaction.
     } finally {
+      clearTimeout(timer);
       pending = false;
     }
   }
