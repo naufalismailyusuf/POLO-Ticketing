@@ -1,0 +1,31 @@
+name: POLO session security checks
+
+on:
+  pull_request:
+    paths:
+      - "app.py"
+      - "auth_session_policy.py"
+      - "static/js/session-activity-v85.js"
+      - "static/js/login.js"
+      - "static/pages/login.html"
+      - "tests/test_r85_session_expiry.py"
+      - ".github/workflows/check-r85.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  session-expiration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: python -m py_compile app.py auth_session_policy.py
+      - name: Session expiry tests
+        run: python -m unittest discover -s tests -p "test_r85_session_expiry.py" -v
+      - name: JavaScript syntax
+        run: |
+          node --check static/js/session-activity-v85.js
+          node --check static/js/login.js

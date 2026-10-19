@@ -36,6 +36,10 @@ from flask import (Flask, Response, abort, flash, g, get_flashed_messages, jsoni
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import ClientDisconnected, RequestEntityTooLarge
 from markupsafe import escape
+from html import escape as html_escape
+from auth_session_policy import (ABSOLUTE_TIMEOUT_SECONDS, IDLE_TIMEOUT_SECONDS,
+                                 remaining_seconds as auth_remaining_seconds,
+                                 expiry_payload as auth_expiry_payload)
 try:
     from dotenv import load_dotenv
 except Exception:
@@ -244,7 +248,9 @@ app.config.update(
     MAX_CONTENT_LENGTH=FILE_MAX_SIZE + (32 * 1024 * 1024),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    SESSION_COOKIE_SECURE=True,  # Login via https://tiket.pmj.my.id; never transmit over plain HTTP.
+    SESSION_REFRESH_EACH_REQUEST=False,  # Background polls must not refresh cookies.
+    PERMANENT_SESSION_LIFETIME=timedelta(seconds=ABSOLUTE_TIMEOUT_SECONDS),
 )
 
 
@@ -1915,6 +1921,13 @@ def load_user():
     # POLO-R65-BACKEND-PERFORMANCE: files in Flask static/ are public, skip user DB lookup
     if request.endpoint == "static":
         return
+    # Enforce both server-side clocks before fetching user data. Pre-R85
+    # sessions lack timestamps and must sign in again (fail closed).
+    if session.get("user"):
+        idle_left, absolute_left = auth_remaining_seconds(session)
+        if idle_left <= 0 or absolute_left <= 0:
+            session.clear()
+            g.auth_expired = True
     if session.get("user") == "natan":
         session["user"] = "nathan"
     if session.get("user"):
@@ -1975,6 +1988,22 @@ def headers(resp):
         markup = markup.replace('class="admin-only admin-nav-dropdown active" hidden',
                                 'class="admin-only admin-nav-dropdown active"')
         resp.set_data(markup)
+    # Every authenticated HTML page gets the same lightweight activity
+    # tracker, including dashboard, ticket details, File Center and Workspace.
+    # HTML is already served with no-store; API polling never sends heartbeat.
+    if g.user and resp.status_code == 200 and resp.mimetype == "text/html" and request.endpoint != "static":
+        resp.direct_passthrough = False
+        html = resp.get_data(as_text=True)
+        if "</body>" in html:
+            remain = auth_expiry_payload(session)
+            csrf_attr = html_escape(str(session.get("csrf", "")), quote=True)
+            tracker = (
+                '<script src="/static/js/session-activity-v85.js?v=r85" defer '
+                f'data-csrf="{csrf_attr}" '
+                f'data-idle-seconds="{remain["idle_seconds_remaining"]}" '
+                f'data-absolute-seconds="{remain["absolute_seconds_remaining"]}"></script>'
+            )
+            resp.set_data(html.replace("</body>", tracker + "</body>", 1))
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["X-Frame-Options"] = "DENY"
     # POLO-R65-BACKEND-PERFORMANCE: reduce repeat 304 requests on same-origin static assets
@@ -2045,6 +2074,23 @@ def api_session():
     return jsonify(ok=True, authenticated=True, csrf=session.get("csrf", ""), user={
         "username":g.user["username"], "display":g.user["display"], "role":g.user["role"]
     }, unread_notifications=unread, notifications=notifications, messages=get_flashed_messages(with_categories=True))
+
+@app.get("/api/session/security")
+def api_session_security():
+    """Lightweight non-renewing session verification for restored/multi-tab pages."""
+    return jsonify(ok=True, session=auth_expiry_payload(session))
+
+
+@app.post("/api/session/heartbeat")
+def api_session_heartbeat():
+    """Refresh idle activity only after a signed-in CSRF-verified human event.
+
+    before_request validates idle/absolute expiration and the CSRF token.
+    Automated dashboard GET polling cannot extend either expiry clock.
+    """
+    session["auth_last_active_at"] = time.time()
+    return jsonify(ok=True, session=auth_expiry_payload(session))
+
 
 @app.get("/api/dashboard")
 def api_dashboard():
@@ -2272,6 +2318,9 @@ def login():
                 session.clear()
                 session["user"] = row["username"]
                 session["csrf"] = secrets.token_hex(16)
+                auth_now = time.time()
+                session["auth_started_at"] = auth_now
+                session["auth_last_active_at"] = auth_now
                 session.permanent = True
                 nxt = request.args.get("next", "/open" if row["role"] == "staff" else "/")
                 if not nxt.startswith("/") or nxt.startswith("//"):
