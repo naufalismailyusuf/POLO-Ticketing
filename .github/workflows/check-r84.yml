@@ -1,0 +1,26 @@
+name: QNAP read regression checks
+
+on:
+  pull_request:
+    paths:
+      - "app.py"
+      - "static/js/file-center-static.js"
+      - "tests/test_r84_qnap_read.py"
+      - ".github/workflows/check-r84.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-read-paths:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: python -m py_compile app.py
+      - name: QNAP read path tests (no SMB or Flask startup)
+        run: python -m unittest discover -s tests -p "test_r84_qnap_read.py" -v
+      - name: File Center JavaScript syntax
+        run: node --check static/js/file-center-static.js
