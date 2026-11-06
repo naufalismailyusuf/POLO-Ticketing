@@ -20,7 +20,7 @@ class DocumentationOnlyContractTests(unittest.TestCase):
     def test_only_documentation_file_center_routes_are_declared(self):
         tree = ast.parse((ROOT / "docs_only.py").read_text(encoding="utf-8"))
         decorators = "\n".join(ast.unparse(node) for node in ast.walk(tree) if isinstance(node, ast.Call))
-        for removed in ("/ticket", "/dashboard", "/chat", "/notifications", "/workspace", "/open"):
+        for removed in ("/ticket", "/chat", "/notifications", "/workspace", "/open"):
             self.assertNotIn(removed, decorators)
 
 

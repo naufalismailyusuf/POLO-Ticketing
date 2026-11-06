@@ -1,6 +1,7 @@
 """Dokumentasi dan File Center POLO; ticketing/dashboard tidak digunakan."""
 import mimetypes, os, re, secrets, shutil, sqlite3, time
 from pathlib import Path
+from urllib.parse import urlsplit
 from flask import Flask, abort, g, jsonify, redirect, request, send_file, send_from_directory, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from auth_session_policy import ABSOLUTE_TIMEOUT_SECONDS, expiry_payload, remaining_seconds
@@ -20,7 +21,10 @@ def db():
 
 def init_db():
  with db() as c:
+  links_new=not c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='resource_links'").fetchone()
   c.executescript('''CREATE TABLE IF NOT EXISTS users(username TEXT PRIMARY KEY,display TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('admin','user')),password_hash TEXT NOT NULL); CREATE TABLE IF NOT EXISTS file_items(id INTEGER PRIMARY KEY,relative_path TEXT UNIQUE NOT NULL,original_name TEXT NOT NULL,mime_type TEXT NOT NULL,size_bytes INTEGER NOT NULL,uploaded_by TEXT NOT NULL,created_at TEXT NOT NULL);''')
+  c.execute('CREATE TABLE IF NOT EXISTS resource_links(id INTEGER PRIMARY KEY, name TEXT NOT NULL, url TEXT NOT NULL, description TEXT NOT NULL DEFAULT "")')
+  if links_new: c.execute('INSERT INTO resource_links(name,url,description) VALUES(?,?,?)',('QNAP','http://172.16.0.74:8080','Network storage'))
   if not c.execute('SELECT 1 FROM users LIMIT 1').fetchone() and LEGACY.exists():
    try:
     with sqlite3.connect(LEGACY) as old:
@@ -60,13 +64,33 @@ def auth():
   if idle>0 and absolute>0:
    with db() as c: g.user=c.execute('SELECT * FROM users WHERE username=?',(session['user'],)).fetchone()
  if not g.user:
-  return jsonify(ok=False,error='Authentication required.'),401 if request.path.startswith('/api/') else redirect(url_for('login',next=request.full_path.rstrip('?')))
+  if request.path.startswith('/api/'): return jsonify(ok=False,error='Authentication required.'),401
+  return redirect(url_for('login',next=request.full_path.rstrip('?')))
  if request.method in {'POST','PUT','PATCH','DELETE'} and not secrets.compare_digest(request.form.get('csrf','') or request.headers.get('X-CSRF-Token',''),session.get('csrf','')): abort(400)
 
 @app.after_request
 def headers(r): r.headers['X-Content-Type-Options']='nosniff'; r.headers['X-Frame-Options']='DENY'; r.headers['Cache-Control']='no-store'; return r
 @app.get('/')
-def home(): return redirect('/guide')
+def home(): return send_from_directory(STATIC,'portal_dashboard.html')
+@app.get('/links')
+def links_page(): return send_from_directory(STATIC,'links.html')
+@app.route('/api/links',methods=['GET','POST'])
+def links():
+ if request.method=='GET':
+  with db() as c: return jsonify(ok=True,links=[dict(x) for x in c.execute('SELECT id,name,url,description FROM resource_links ORDER BY id')])
+ admin(); data=request.get_json(silent=True) or {}
+ name=str(data.get('name','')).strip(); url=str(data.get('url','')).strip(); description=str(data.get('description','')).strip()
+ try: parsed=urlsplit(url); hostname=parsed.hostname
+ except ValueError: return jsonify(ok=False,error='Invalid URL.'),400
+ if not (1<=len(name)<=80 and len(url)<=2048 and len(description)<=160 and parsed.scheme in {'http','https'} and hostname and not parsed.username and not parsed.password) or re.search(r'[\s\\\x00-\x1f\x7f]',url): return jsonify(ok=False,error='Use a name and a valid HTTP or HTTPS URL without credentials.'),400
+ with db() as c:
+  cur=c.execute('INSERT INTO resource_links(name,url,description) VALUES(?,?,?)',(name,url,description))
+ return jsonify(ok=True,id=cur.lastrowid),201
+@app.delete('/api/links/<int:link_id>')
+def delete_link(link_id):
+ admin()
+ with db() as c: deleted=c.execute('DELETE FROM resource_links WHERE id=?',(link_id,)).rowcount
+ return (jsonify(ok=True) if deleted else (jsonify(ok=False,error='Link not found.'),404))
 @app.route('/login',methods=['GET','POST'])
 def login():
  if request.method=='POST':
