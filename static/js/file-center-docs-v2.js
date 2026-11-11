@@ -72,11 +72,52 @@
     if (failure) toast(failure.reason.message); else toast('');
     button.disabled = false;
   }
+  async function uploadFile(file) {
+    const panel = $('#upload-panel'), list = $('#upload-panel-list');
+    panel.hidden = false;
+    const entry = document.createElement('div');
+    entry.className = 'fc-upload-entry';
+    entry.innerHTML = `<div class="fc-upload-entry-head"><span title="${esc(file.name)}">${esc(file.name)}</span><strong>Uploading…</strong></div><div class="fc-upload-stage"><span>Uploading</span><span class="fc-upload-percent">0%</span></div><div class="fc-upload-track" role="progressbar" aria-label="Upload progress for ${esc(file.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span style="width:0%"></span></div>`;
+    list.append(entry);
+    const label = entry.querySelector('.fc-upload-entry-head strong');
+    const percent = entry.querySelector('.fc-upload-percent');
+    const track = entry.querySelector('.fc-upload-track');
+    const fill = track.querySelector('span');
+    $('#upload-panel-state').textContent = `Uploading ${file.name}`;
+    const form = new FormData(); form.append('path',path); form.append('file',file);
+    await new Promise((resolve,reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST','/api/files/upload',true);
+      xhr.setRequestHeader('X-CSRF-Token',csrf);
+      xhr.upload.onprogress = event => {
+        if (!event.lengthComputable) return;
+        const value = Math.min(100,Math.round(event.loaded/event.total*100));
+        fill.style.width = value+'%'; percent.textContent = value+'%';
+        track.setAttribute('aria-valuenow',String(value));
+      };
+      xhr.upload.onload = () => { fill.style.width = '100%'; percent.textContent = '100%'; track.setAttribute('aria-valuenow','100'); label.textContent = 'Saving to QNAP…'; $('#upload-panel-state').textContent = `Saving to QNAP: ${file.name}`; };
+      xhr.onload = () => {
+        const data = (() => { try { return JSON.parse(xhr.responseText||'{}'); } catch (_) { return {}; } })();
+        if (xhr.status >= 200 && xhr.status < 300 && data.ok !== false) {
+          fill.style.width = '100%'; percent.textContent = '100%';
+          track.setAttribute('aria-valuenow','100'); label.textContent = 'Completed';
+          $('#upload-panel-state').textContent = `Uploaded ${data.file?.name||file.name}`;
+          resolve();
+        } else {
+          const error = new Error(data.error||`Upload failed (HTTP ${xhr.status}).`);
+          if (xhr.status === 401) location.assign('/login?next='+encodeURIComponent(location.pathname+location.search));
+          entry.classList.add('is-failed'); label.textContent = 'Failed';
+          $('#upload-panel-state').textContent = `${file.name}: ${error.message}`;
+          reject(error);
+        }
+      };
+      xhr.onerror = () => { const error = Error('Network error during upload.'); entry.classList.add('is-failed'); label.textContent = 'Failed'; $('#upload-panel-state').textContent = `${file.name}: ${error.message}`; reject(error); };
+      xhr.ontimeout = () => { const error = Error('Upload timed out.'); entry.classList.add('is-failed'); label.textContent = 'Failed'; $('#upload-panel-state').textContent = `${file.name}: ${error.message}`; reject(error); };
+      xhr.send(form);
+    });
+  }
   async function upload(files) {
-    for (const file of files) {
-      const form = new FormData(); form.append('path',path); form.append('file',file);
-      await api('/api/files/upload',{method:'POST',headers:{'X-CSRF-Token':csrf},body:form});
-    }
+    for (const file of files) await uploadFile(file);
     await refresh(); toast('Upload complete.');
   }
   async function boot() {
@@ -86,6 +127,7 @@
     $('#user-role').textContent = user.role;
     document.querySelectorAll('.csrf-field').forEach(element=>element.value=csrf);
     path = new URL(location).searchParams.get('path') || '';
+    $('#upload-panel-close').onclick = () => { $('#upload-panel').hidden = true; };
     $('#file-upload-btn').onclick = () => $('#file-upload-input').click();
     $('#file-upload-input').onchange = event => upload([...event.target.files]).catch(error=>toast(error.message));
     $('#file-upload-folder-btn').onclick = () => $('#file-upload-folder-input').click();
