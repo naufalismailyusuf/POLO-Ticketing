@@ -1,0 +1,11 @@
+@media screen and (min-width:1024px){html:not(:has(link[href*="site-scale.css"])) {zoom:.75}}
+body.polo-dock-ready .app-header{display:none!important}
+body.polo-dock-ready .polo-dock .profile-dropdown{position:relative;display:block!important}
+body.polo-dock-ready .polo-dock .profile-dropdown summary{display:flex!important;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:7px;border-radius:10px;color:#263b52;cursor:pointer}
+body.polo-dock-ready .polo-dock .profile-name,body.polo-dock-ready .polo-dock .profile-chevron{display:none}
+body.polo-dock-ready .polo-dock .profile-menu{top:auto!important;bottom:calc(100% + 16px)!important;right:0!important;z-index:1010}
+body.polo-dock-ready .polo-dock-handle{margin:0!important;transform:translateX(-50%)!important;transition:opacity .3s ease!important}
+body.polo-dock-ready .polo-dock{transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .45s ease,filter .45s ease!important}
+body.polo-dock-ready .polo-dock.is-hidden{opacity:0!important;transform:translate(-50%,calc(100% + 28px)) scale(.92)!important}
+@media(max-width:650px){body.polo-dock-ready .polo-dock a{min-width:0;padding:5px 1px;font-size:9px}body.polo-dock-ready .polo-dock .profile-dropdown summary{min-height:52px}}
+@media(prefers-reduced-motion:reduce){body.polo-dock-ready .polo-dock,body.polo-dock-ready .polo-dock-handle{transition:none!important}}

@@ -10,10 +10,14 @@
     if(link.classList.contains('active'))link.setAttribute('aria-current','page');dock.append(link);
   });
   if(!dock.children.length)return;
+  const profile=document.querySelector('.app-header .profile-dropdown');
+  if(!profile)return;
+  dock.append(profile);
   const handle=document.createElement('button');handle.type='button';handle.className='polo-dock-handle';handle.setAttribute('aria-label','Tampilkan navigasi');handle.setAttribute('aria-controls',dock.id);handle.setAttribute('aria-expanded','false');handle.hidden=true;
   document.body.append(dock,handle);document.body.classList.add('polo-dock-ready');let timer;
-  function hide(){if(dock.contains(document.activeElement)||dock.matches(':hover'))return;dock.classList.add('is-hidden');dock.inert=true;dock.setAttribute('aria-hidden','true');handle.hidden=false}
+  function hide(){if(dock.contains(document.activeElement)||dock.matches(':hover')||profile?.open)return;dock.classList.add('is-hidden');dock.inert=true;dock.setAttribute('aria-hidden','true');handle.hidden=false}
   function schedule(){clearTimeout(timer);timer=setTimeout(hide,5000)}
   handle.addEventListener('click',()=>{dock.classList.remove('is-hidden');dock.inert=false;dock.removeAttribute('aria-hidden');handle.hidden=true;dock.querySelector('.active, a').focus();schedule()});
   dock.addEventListener('pointerenter',()=>clearTimeout(timer));dock.addEventListener('pointerleave',schedule);dock.addEventListener('focusin',()=>clearTimeout(timer));dock.addEventListener('focusout',schedule);dock.addEventListener('click',schedule);document.addEventListener('pointerdown',e=>{if(!dock.contains(e.target)&&e.target!==handle)schedule()});schedule();
+  profile?.addEventListener('toggle',schedule);
 })();
