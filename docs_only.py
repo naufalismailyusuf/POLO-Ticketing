@@ -177,6 +177,8 @@ def remove():
  admin(); data=request.get_json(silent=True) or {}; 
  try:
   for rel in data.get('paths',[]):
+   if not safe_parts(rel): raise ValueError('Cannot delete share root.')
+   if path(rel)==root(): raise ValueError('Cannot delete share root.')
    p=path(rel); shutil.rmtree(p) if p.is_dir() else p.unlink()
    with db() as c: c.execute('DELETE FROM file_items WHERE relative_path=? OR relative_path LIKE ?',(rel,str(rel).rstrip('/')+'/%'))
   return jsonify(ok=True)

@@ -4,7 +4,7 @@
   const $ = selector => document.querySelector(selector);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const systemFolder = name => ['@recycle','@recently-snapshot'].includes(String(name).toLowerCase());
-  let csrf = '', path = '', listing = {folders:[],files:[]};
+  let csrf = '', path = '', isAdmin = false, listing = {folders:[],files:[]};
   async function api(url, options = {}) {
     const timeout = !options.method || options.method === 'GET' ? AbortSignal.timeout(15000) : undefined;
     const response = await fetch(url, {credentials:'same-origin',cache:'no-store',signal:timeout,...options});
@@ -31,7 +31,8 @@
       const name = folder ? item.name : item.original_name;
       const href = folder ? '/files?path='+encodeURIComponent(path ? path+'/'+name : name) : '/files/download/'+item.id;
       const icon = folder ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5h7l2 3h9v12H3z"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h4"/></svg>';
-      return `<div class="fc-row"><span aria-hidden="true"></span><a class="fc-item-main" href="${href}"><span class="fc-item-icon${folder?' folder':''}">${icon}</span><span class="fc-item-text"><b>${esc(name)}</b></span></a><span class="fc-meta">${folder?'—':esc(item.size_label||bytes(item.size_bytes))}</span><span class="fc-meta">—</span><span class="fc-actions"><a class="file-download" href="${href}">${folder?'Open':'Download'}</a></span></div>`;
+      const itemPath = path ? path+'/'+name : name;
+      return `<div class="fc-row"><span aria-hidden="true"></span><a class="fc-item-main" href="${href}"><span class="fc-item-icon${folder?' folder':''}">${icon}</span><span class="fc-item-text"><b>${esc(name)}</b></span></a><span class="fc-meta">${folder?'—':esc(item.size_label||bytes(item.size_bytes))}</span><span class="fc-meta">—</span><span class="fc-actions"><a class="file-download" href="${href}">${folder?'Open':'Download'}</a>${isAdmin ? `<button type="button" data-delete-path="${esc(itemPath)}" data-delete-folder="${folder}" aria-label="Delete ${esc(name)}">Delete</button>` : ''}</span></div>`;
     }
     $('#fc-list-body').innerHTML = [...folders.map(item=>row(item,true)),...files.map(item=>row(item,false))].join('') || `<p class="fc-empty">${query?'No matching files or folders.':'Folder empty.'}</p>`;
   }
@@ -122,7 +123,7 @@
   }
   async function boot() {
     const session = await api('/api/session'); csrf = session.csrf;
-    const user = session.user;
+    const user = session.user; isAdmin = user.role === 'admin';
     for (const id of ['user-label','profile-display']) $('#'+id).textContent = user.display || user.username;
     $('#user-role').textContent = user.role;
     document.querySelectorAll('.csrf-field').forEach(element=>element.value=csrf);
@@ -144,6 +145,18 @@
       } catch(error) {toast(error.message);}
     };
     $('#file-search').addEventListener('input',render);
+    $('#fc-list-body').addEventListener('click', async event => {
+      const button = event.target.closest('[data-delete-path]');
+      if (!button || !isAdmin) return;
+      const itemPath = button.dataset.deletePath;
+      const warning = button.dataset.deleteFolder === 'true' ? ' and all its contents' : '';
+      if (!window.confirm(`Delete "${itemPath}"${warning}? This cannot be undone.`)) return;
+      button.disabled = true;
+      try {
+        await api('/api/files/mass-delete',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({paths:[itemPath]})});
+        await refresh();
+      } catch(error) { toast(error.message); button.disabled = false; }
+    });
     $('#qnap-refresh').onclick = refresh;
     const card = $('#files-card');
     card.addEventListener('dragover',event=>{event.preventDefault();card.classList.add('fc-dragging');});
