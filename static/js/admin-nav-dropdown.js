@@ -1,5 +1,8 @@
 document.addEventListener('click',function(e){document.querySelectorAll('.admin-nav-dropdown[open],.profile-dropdown[open]').forEach(function(menu){if(!menu.contains(e.target))menu.removeAttribute('open')})});document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.admin-nav-dropdown[open],.profile-dropdown[open]').forEach(function(menu){menu.removeAttribute('open');menu.querySelector('summary')?.focus()})});document.querySelectorAll('.admin-nav-dropdown,.profile-dropdown').forEach(function(menu){menu.addEventListener('toggle',function(){if(!menu.open)return;document.querySelectorAll('.admin-nav-dropdown[open],.profile-dropdown[open]').forEach(function(other){if(other!==menu)other.open=false})})});
 
+/* Glass navigation loads only after its stylesheet is available. */
+(()=>{const css=document.createElement('link');css.rel='stylesheet';css.href='/static/css/glass-dock.css?v=1';css.onload=()=>{const script=document.createElement('script');script.src='/static/js/glass-dock.js?v=1';document.body.append(script)};document.head.append(css)})();
+
 // Mirror session identity in the profile dropdown without delaying initial navigation.
 const profileLabel=document.getElementById('user-label');if(profileLabel){new MutationObserver(()=>{const heading=document.getElementById('profile-display');if(heading)heading.textContent=profileLabel.textContent||'Account'}).observe(profileLabel,{childList:true,characterData:true,subtree:true})}
 
